@@ -75,7 +75,7 @@ if [[ $REPLY =~ ^[Ss]$ ]]; then
     echo ""
     echo "📦 Instalando pacote..."
     sudo apt install -y "./$DEB_FILE"
-    
+
     echo ""
     echo "✅ Instalação concluída!"
     echo ""

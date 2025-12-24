@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/build-debian.yml/badge.svg)
 ![Release](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/release.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+![Version](https://img.shields.io/badge/version-1.0.3-green.svg)
 
 Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva.
 
@@ -37,10 +37,10 @@ Baixe o pacote .deb mais recente da [página de releases](https://github.com/Qua
 
 ```bash
 # Baixar última versão
-wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest/download/cockpit-scheduling-exec_1.0.0_all.deb
+wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest/download/cockpit-scheduling-exec_1.0.3_all.deb
 
 # Instalar
-sudo apt install ./cockpit-scheduling-exec_1.0.0_all.deb
+sudo apt install ./cockpit-scheduling-exec_1.0.3_all.deb
 ```
 
 ### Construir o Pacote Debian
