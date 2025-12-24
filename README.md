@@ -1,2 +1,273 @@
-# cockpit-scheduling-exec
+# Cockpit Scheduling Exec
 
+Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva.
+
+## 🚀 Funcionalidades
+
+- ✅ **Criar Scripts Personalizados**: Interface amigável para criar scripts shell
+- ✏️ **Editar Scripts**: Modal de edição com syntax highlighting
+- ▶️ **Executar Scripts**: Execute scripts manualmente com um clique
+- ⏰ **Agendar Execuções**: Configure agendamentos cron através de interface visual
+- 📊 **Estatísticas**: Visualize estatísticas de execução de cada script
+  - Data de criação
+  - Data de última atualização
+  - Data de última execução
+  - Total de execuções
+  - Taxa de sucesso
+  - Próxima execução agendada
+- 🗑️ **Remover Scripts**: Exclua scripts e seus agendamentos
+- 📁 **Armazenamento Organizado**: Scripts salvos em `$HOME/scripts`
+
+## 📦 Instalação
+
+### Pré-requisitos
+
+- Cockpit instalado e em execução
+- Sistema operacional Linux (Debian/Ubuntu recomendado)
+- Cron instalado
+
+### Construir o Pacote Debian
+
+1. Clone ou baixe este repositório:
+```bash
+cd cockpit-scheduling-exec
+```
+
+2. Construa o pacote .deb:
+```bash
+dpkg-deb --build . cockpit-scheduling-exec.deb
+```
+
+3. Instale o pacote:
+```bash
+sudo apt install ./cockpit-scheduling-exec.deb
+```
+
+Ou usando dpkg:
+```bash
+sudo dpkg -i cockpit-scheduling-exec.deb
+sudo apt-get install -f  # Resolve dependências se necessário
+```
+
+### Instalação Manual (sem pacote)
+
+Se preferir instalar manualmente sem construir o pacote:
+
+```bash
+# Copiar arquivos para o diretório do Cockpit
+sudo mkdir -p /usr/share/cockpit/scheduling-exec
+sudo cp -r usr/share/cockpit/scheduling-exec/* /usr/share/cockpit/scheduling-exec/
+
+# Dar permissões de execução aos scripts
+sudo chmod +x /usr/share/cockpit/scheduling-exec/scripts/*.sh
+
+# Reiniciar o Cockpit
+sudo systemctl restart cockpit
+```
+
+## 🎯 Uso
+
+### Acessar o Plugin
+
+1. Abra o Cockpit no seu navegador: `https://seu-servidor:9090`
+2. Faça login com suas credenciais
+3. No menu lateral, clique em "Scripts & Agendamentos"
+
+### Criar um Novo Script
+
+1. Clique no botão **"+ Novo Script"** no topo da página
+2. Digite o nome do script (deve terminar com `.sh`)
+3. Escreva o código do seu script no editor
+4. Clique em **"Salvar"**
+
+### Executar um Script
+
+- Na tabela de scripts, clique no botão **▶** (Play) na linha do script desejado
+- O script será executado imediatamente e você verá a saída
+
+### Agendar Execução (Cron)
+
+1. Na tabela de scripts, clique no botão **⏰** (Relógio)
+2. Configure a expressão cron:
+   - Use os campos individuais (Minuto, Hora, Dia, Mês, Dia da Semana)
+   - Ou escolha um modelo pré-definido
+3. Clique em **"Salvar Agendamento"**
+
+#### Exemplos de Expressões Cron
+
+- `* * * * *` - A cada minuto
+- `*/5 * * * *` - A cada 5 minutos
+- `0 * * * *` - A cada hora
+- `0 0 * * *` - Diariamente à meia-noite
+- `0 12 * * *` - Diariamente ao meio-dia
+- `0 0 * * 0` - Semanalmente aos domingos
+- `0 0 1 * *` - Mensalmente no dia 1
+
+### Editar um Script
+
+1. Clique no botão **✏** (Lápis) na linha do script
+2. Modifique o conteúdo
+3. Clique em **"Salvar"**
+
+### Remover um Script
+
+1. Clique no botão **🗑️** (Lixeira) na linha do script
+2. Confirme a exclusão
+3. O script e seu agendamento (se houver) serão removidos
+
+## 📂 Estrutura de Arquivos
+
+```
+cockpit-scheduling-exec/
+├── DEBIAN/
+│   └── control                      # Metadados do pacote Debian
+└── usr/share/cockpit/scheduling-exec/
+    ├── manifest.json                # Manifesto do plugin Cockpit
+    ├── index.html                   # Interface do usuário
+    ├── index.js                     # Lógica JavaScript
+    └── scripts/
+        ├── list-scripts.sh          # Lista todos os scripts
+        ├── get-script.sh            # Obtém conteúdo de um script
+        ├── save-script.sh           # Cria/atualiza script
+        ├── delete-script.sh         # Remove script
+        ├── execute-script.sh        # Executa script e atualiza stats
+        ├── get-cron.sh              # Obtém agendamento cron
+        ├── set-cron.sh              # Configura agendamento cron
+        ├── remove-cron.sh           # Remove agendamento cron
+        └── rotina.sh                # Script de exemplo
+```
+
+### Diretórios do Usuário
+
+Quando você usa o plugin, os seguintes diretórios são criados no seu home:
+
+- `$HOME/scripts/` - Scripts criados por você
+- `$HOME/.scripts-metadata/` - Metadados e logs de execução
+
+## 🔧 Metadados dos Scripts
+
+Para cada script, o sistema mantém as seguintes informações:
+
+```json
+{
+  "created_at": 1234567890,
+  "updated_at": 1234567890,
+  "last_execution": 1234567890,
+  "total_executions": 10,
+  "successful_executions": 9
+}
+```
+
+Estes dados são usados para exibir estatísticas na tabela.
+
+## 🛠️ Desenvolvimento
+
+### Tecnologias Utilizadas
+
+- **Cockpit API**: Para comunicação entre frontend e backend
+- **PatternFly**: Framework CSS para interface consistente
+- **Bash**: Scripts de backend
+- **HTML/CSS/JavaScript**: Interface do usuário
+
+### Modificar o Plugin
+
+1. Edite os arquivos em `usr/share/cockpit/scheduling-exec/`
+2. Para aplicar mudanças sem reinstalar:
+```bash
+sudo cp -r usr/share/cockpit/scheduling-exec/* /usr/share/cockpit/scheduling-exec/
+sudo systemctl restart cockpit
+```
+
+3. Recarregue a página no navegador (Ctrl+F5)
+
+## 📝 Logs
+
+Os logs de execução dos scripts agendados são salvos em:
+```
+$HOME/.scripts-metadata/<nome-do-script>.log
+```
+
+## 🔐 Segurança
+
+- Os scripts são executados com as permissões do usuário logado no Cockpit
+- Scripts são armazenados no diretório home do usuário (`$HOME/scripts`)
+- Apenas o proprietário pode executar os scripts (chmod +x)
+- Recomenda-se revisar cuidadosamente qualquer script antes de executá-lo ou agendá-lo
+
+## ⚠️ Solução de Problemas
+
+### Plugin não aparece no menu do Cockpit
+
+1. Verifique se o Cockpit está rodando:
+```bash
+sudo systemctl status cockpit
+```
+
+2. Verifique se os arquivos foram copiados corretamente:
+```bash
+ls -la /usr/share/cockpit/scheduling-exec/
+```
+
+3. Reinicie o Cockpit:
+```bash
+sudo systemctl restart cockpit
+```
+
+### Scripts não executam
+
+1. Verifique se o script tem permissão de execução:
+```bash
+ls -la ~/scripts/
+```
+
+2. Teste o script manualmente:
+```bash
+bash ~/scripts/seu-script.sh
+```
+
+3. Verifique os logs:
+```bash
+cat ~/.scripts-metadata/seu-script.sh.log
+```
+
+### Agendamento não funciona
+
+1. Verifique se o cron está rodando:
+```bash
+sudo systemctl status cron
+```
+
+2. Liste os agendamentos do usuário:
+```bash
+crontab -l
+```
+
+3. Verifique os logs do sistema:
+```bash
+sudo journalctl -u cron
+```
+
+## 📄 Licença
+
+Este projeto está sob a licença especificada no arquivo LICENSE.
+
+## 👤 Autor
+
+**Gustavo Santarosa**
+- Email: gustavo@quantumtecnology.com.br
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Sinta-se à vontade para:
+
+1. Fazer fork do projeto
+2. Criar uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abrir um Pull Request
+
+## 📚 Recursos Adicionais
+
+- [Documentação do Cockpit](https://cockpit-project.org/guide/latest/)
+- [Cron Tutorial](https://crontab.guru/)
+- [Bash Scripting Guide](https://www.gnu.org/software/bash/manual/)

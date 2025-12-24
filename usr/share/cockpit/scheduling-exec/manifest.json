@@ -1,0 +1,14 @@
+{
+  "version": 0,
+  "name": "scheduling-exec",
+  "description": "Gerenciador de Scripts Personalizados e Agendamentos",
+  "requires": {
+    "cockpit": ">=200"
+  },
+  "menu": {
+    "index": {
+      "label": "Scripts & Agendamentos",
+      "order": 50
+    }
+  }
+}

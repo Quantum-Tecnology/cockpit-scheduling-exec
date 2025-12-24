@@ -1,0 +1,23 @@
+#!/bin/bash
+# Script postinst - executado após instalação do pacote
+
+set -e
+
+# Configurar permissões corretas
+chmod +x /usr/share/cockpit/scheduling-exec/scripts/*.sh
+
+# Reiniciar cockpit se estiver rodando
+if systemctl is-active --quiet cockpit; then
+    systemctl restart cockpit || true
+fi
+
+echo ""
+echo "================================================"
+echo "  Cockpit Scheduling Exec instalado!"
+echo "================================================"
+echo ""
+echo "Acesse o Cockpit em: https://localhost:9090"
+echo "O plugin estará disponível no menu lateral."
+echo ""
+
+exit 0

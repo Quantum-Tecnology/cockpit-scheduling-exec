@@ -1,0 +1,29 @@
+# Pacote Debian gerado
+*.deb
+
+# Arquivos temporários
+*.log
+*.tmp
+*~
+
+# Diretórios de teste
+test-scripts/
+.test/
+
+# Backups
+*.bak
+*.backup
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node modules (se adicionar build tools futuramente)
+node_modules/
+package-lock.json

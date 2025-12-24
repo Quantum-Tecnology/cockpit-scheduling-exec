@@ -1,0 +1,10 @@
+#!/bin/bash
+# Script prerm - executado antes da remoção do pacote
+
+set -e
+
+# Nada crítico aqui, apenas informação
+echo "Removendo Cockpit Scheduling Exec..."
+echo "Os scripts dos usuários em ~/scripts serão preservados."
+
+exit 0
