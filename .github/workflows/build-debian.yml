@@ -36,27 +36,26 @@ jobs:
 
       - name: Build Debian package
         run: |
-          cd ..
-          dpkg-deb --build cockpit-scheduling-exec cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
+          mkdir -p build
+          dpkg-deb --build . build/cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
 
       - name: Verify package
         run: |
-          cd ..
-          dpkg-deb --info cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
-          dpkg-deb --contents cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
+          dpkg-deb --info build/cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
+          dpkg-deb --contents build/cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
 
       - name: Upload Debian package as artifact
         uses: actions/upload-artifact@v4
         with:
           name: cockpit-scheduling-exec-deb
-          path: ../cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
+          path: build/cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
           retention-days: 90
 
       - name: Create Release (on tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: ../cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
+          files: build/cockpit-scheduling-exec_${{ steps.get_version.outputs.version }}_all.deb
           draft: false
           prerelease: false
         env:

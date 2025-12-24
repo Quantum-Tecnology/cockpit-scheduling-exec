@@ -1,5 +1,10 @@
 # Pacote Debian gerado
 *.deb
+*.deb.sha256
+*.deb.md5
+
+# Build directory
+build/
 
 # Arquivos temporários
 *.log
