@@ -5,6 +5,34 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.0.4] - 2025-01-XX
+
+### Alterado
+- **Interface completamente redesenhada seguindo padrões PatternFly e Cockpit**
+- Migração para componentes PatternFly modernos:
+  - Cards e seções com espaçamento adequado
+  - Tabela com grid responsivo e classes semânticas
+  - Modais com cabeçalho, corpo e rodapé estruturados
+  - Botões com ícones FontAwesome
+  - Badges para estatísticas
+  - Alertas com ícones e formatação adequada
+- Melhor hierarquia visual e organização de conteúdo
+- Estado vazio com ícone e mensagem clara
+- Formulários com labels e helpers text seguindo padrão
+- Melhor responsividade mobile
+- Paleta de cores consistente com Cockpit
+- Espaçamentos usando variáveis CSS do PatternFly
+
+### Corrigido
+- Remoção de requisito de versão mínima do Cockpit no manifest.json que causava falha de detecção
+
+## [1.0.3] - 2025-12-24
+
+### Adicionado
+- CI/CD com GitHub Actions para build e release automático
+- Workflow para build automático de .deb no push para main
+- Workflow para release automático em tags
+
 ## [1.0.0] - 2025-12-24
 
 ### Adicionado

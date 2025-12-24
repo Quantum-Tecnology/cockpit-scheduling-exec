@@ -6,7 +6,8 @@ let currentEditingScript = null;
 // Função para mostrar mensagens de erro
 function showError(message) {
   const errorDiv = document.getElementById("error-message");
-  errorDiv.textContent = message;
+  const errorText = document.getElementById("error-text");
+  errorText.textContent = message;
   errorDiv.style.display = "block";
   setTimeout(() => {
     errorDiv.style.display = "none";
@@ -55,13 +56,26 @@ function renderScripts(scripts) {
   tbody.innerHTML = "";
 
   if (scripts.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="8" style="text-align: center; padding: 40px;">Nenhum script encontrado. Crie seu primeiro script!</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          <div class="pf-c-empty-state pf-m-sm">
+            <div class="pf-c-empty-state__content">
+              <i class="fas fa-file-code pf-c-empty-state__icon" aria-hidden="true"></i>
+              <h2 class="pf-c-title pf-m-lg">Nenhum script encontrado</h2>
+              <div class="pf-c-empty-state__body">
+                Crie seu primeiro script personalizado para começar!
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>`;
     return;
   }
 
   scripts.forEach((script) => {
     const row = document.createElement("tr");
+    row.setAttribute("role", "row");
 
     const successRate =
       script.total_executions > 0
@@ -72,37 +86,59 @@ function renderScripts(scripts) {
         : "-";
 
     row.innerHTML = `
-            <td><strong>${script.name}</strong></td>
-            <td>${getNextCronExecution(script.cron_expression)}</td>
-            <td>${formatDate(script.last_execution)}</td>
-            <td>${formatDate(script.created_at)}</td>
-            <td>${formatDate(script.updated_at)}</td>
-            <td>${script.total_executions}</td>
-            <td>
-                ${script.successful_executions}
-                ${
-                  script.total_executions > 0
-                    ? `<span class="badge badge-success">${successRate}%</span>`
-                    : ""
-                }
-            </td>
-            <td>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="executeScript('${
-                      script.name
-                    }')" title="Executar agora">▶</button>
-                    <button class="btn btn-secondary" onclick="editScript('${
-                      script.name
-                    }')" title="Editar">✏</button>
-                    <button class="btn btn-warning" onclick="openCronModal('${
-                      script.name
-                    }')" title="Agendar">⏰</button>
-                    <button class="btn btn-danger" onclick="deleteScript('${
-                      script.name
-                    }')" title="Excluir">🗑</button>
-                </div>
-            </td>
-        `;
+      <td role="cell" data-label="Nome do Script">
+        <strong>${script.name}</strong>
+      </td>
+      <td role="cell" data-label="Próxima Execução">
+        ${getNextCronExecution(script.cron_expression)}
+      </td>
+      <td role="cell" data-label="Última Execução">
+        ${formatDate(script.last_execution)}
+      </td>
+      <td role="cell" data-label="Criado Em">
+        ${formatDate(script.created_at)}
+      </td>
+      <td role="cell" data-label="Atualizado Em">
+        ${formatDate(script.updated_at)}
+      </td>
+      <td role="cell" data-label="Execuções" class="pf-m-center">
+        <span class="pf-c-badge pf-m-read">${script.total_executions}</span>
+      </td>
+      <td role="cell" data-label="Sucessos" class="pf-m-center">
+        <span class="pf-c-badge pf-m-read pf-m-success">${
+          script.successful_executions
+        }</span>
+        ${
+          script.total_executions > 0
+            ? `<small style="display: block; margin-top: 4px;">${successRate}%</small>`
+            : ""
+        }
+      </td>
+      <td role="cell" data-label="Ações" class="pf-m-center">
+        <div style="display: flex; gap: 4px; justify-content: center;">
+          <button class="pf-c-button pf-m-primary pf-m-small" type="button" onclick="executeScript('${
+            script.name
+          }')" title="Executar agora">
+            <i class="fas fa-play" aria-hidden="true"></i>
+          </button>
+          <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="editScript('${
+            script.name
+          }')" title="Editar">
+            <i class="fas fa-edit" aria-hidden="true"></i>
+          </button>
+          <button class="pf-c-button pf-m-tertiary pf-m-small" type="button" onclick="openCronModal('${
+            script.name
+          }')" title="Agendar">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+          </button>
+          <button class="pf-c-button pf-m-danger pf-m-small" type="button" onclick="deleteScript('${
+            script.name
+          }')" title="Excluir">
+            <i class="fas fa-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    `;
 
     tbody.appendChild(row);
   });

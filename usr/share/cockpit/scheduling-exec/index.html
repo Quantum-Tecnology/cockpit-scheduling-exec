@@ -5,23 +5,21 @@
     <title>Scripts & Agendamentos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="../base1/cockpit.css" type="text/css" rel="stylesheet" />
-    <link
-      href="https://unpkg.com/@patternfly/patternfly@4/patternfly.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://unpkg.com/@patternfly/patternfly@4/patternfly.min.css" rel="stylesheet" />
     <script src="../base1/cockpit.js"></script>
     <script src="index.js"></script>
     <style>
       body {
-        font-family: "RedHatDisplay", "Open Sans", sans-serif;
-        padding: 20px;
+        --pf-global--BackgroundColor--100: #f0f0f0;
+        background-color: var(--pf-global--BackgroundColor--100);
+        margin: 0;
+        padding: 0;
       }
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+
+      .pf-c-page__main {
+        padding: var(--pf-global--spacer--md);
       }
+
       .modal {
         display: none;
         position: fixed;
@@ -32,316 +30,385 @@
         height: 100%;
         background-color: rgba(0, 0, 0, 0.4);
       }
+
       .modal-content {
-        background-color: #fefefe;
+        background-color: var(--pf-global--BackgroundColor--light-100);
         margin: 5% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 800px;
-        border-radius: 4px;
+        padding: 0;
+        border: none;
+        width: 90%;
+        max-width: 900px;
+        border-radius: var(--pf-global--BorderRadius--sm);
+        box-shadow: var(--pf-global--BoxShadow--lg);
       }
+
+      .pf-c-modal-box__header {
+        padding: var(--pf-global--spacer--md);
+        border-bottom: 1px solid var(--pf-global--BorderColor--100);
+      }
+
+      .pf-c-modal-box__body {
+        padding: var(--pf-global--spacer--md);
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      .pf-c-modal-box__footer {
+        padding: var(--pf-global--spacer--md);
+        border-top: 1px solid var(--pf-global--BorderColor--100);
+        display: flex;
+        gap: var(--pf-global--spacer--sm);
+        justify-content: flex-end;
+      }
+
       .close {
-        color: #aaa;
+        color: var(--pf-global--Color--200);
         float: right;
-        font-size: 28px;
+        font-size: 1.5rem;
         font-weight: bold;
         cursor: pointer;
-      }
-      .close:hover,
-      .close:focus {
-        color: #000;
-      }
-      textarea {
-        width: 100%;
-        min-height: 300px;
-        font-family: monospace;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      .form-group {
-        margin-bottom: 15px;
-      }
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-      }
-      .form-group input,
-      .form-group select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      .btn {
-        padding: 8px 16px;
+        background: none;
         border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        margin-right: 8px;
+        padding: 0;
+        line-height: 1;
       }
-      .btn-primary {
-        background-color: #0066cc;
-        color: white;
+
+      .close:hover {
+        color: var(--pf-global--Color--100);
       }
-      .btn-primary:hover {
-        background-color: #004499;
-      }
-      .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-      }
-      .btn-secondary:hover {
-        background-color: #545b62;
-      }
-      .btn-success {
-        background-color: #28a745;
-        color: white;
-      }
-      .btn-success:hover {
-        background-color: #218838;
-      }
-      .btn-warning {
-        background-color: #ffc107;
-        color: #212529;
-      }
-      .btn-warning:hover {
-        background-color: #e0a800;
-      }
-      .btn-danger {
-        background-color: #dc3545;
-        color: white;
-      }
-      .btn-danger:hover {
-        background-color: #c82333;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: white;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      }
-      th,
-      td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-      }
-      th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-      }
-      tr:hover {
-        background-color: #f5f5f5;
-      }
-      .action-buttons {
-        display: flex;
-        gap: 8px;
-      }
-      .badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-      }
-      .badge-success {
-        background-color: #d4edda;
-        color: #155724;
-      }
-      .badge-warning {
-        background-color: #fff3cd;
-        color: #856404;
-      }
+
       .cron-fields {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--pf-global--spacer--md);
       }
+
       .cron-helper {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        font-size: 12px;
+        margin-top: var(--pf-global--spacer--md);
+        padding: var(--pf-global--spacer--md);
+        background-color: var(--pf-global--BackgroundColor--light-300);
+        border-left: 3px solid var(--pf-global--info-color--100);
+        border-radius: var(--pf-global--BorderRadius--sm);
       }
-      .loading {
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--pf-global--spacer--md);
+        margin-bottom: var(--pf-global--spacer--lg);
+      }
+
+      .stat-card {
+        background: white;
+        padding: var(--pf-global--spacer--md);
+        border-radius: var(--pf-global--BorderRadius--sm);
+        box-shadow: var(--pf-global--BoxShadow--sm);
         text-align: center;
-        padding: 20px;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--pf-global--primary-color--100);
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--pf-global--Color--200);
+        margin-top: var(--pf-global--spacer--xs);
+      }
+
+      .pf-c-empty-state {
+        text-align: center;
+        padding: var(--pf-global--spacer--2xl);
+      }
+
+      .pf-c-empty-state__icon {
+        font-size: 3rem;
+        color: var(--pf-global--Color--200);
+        margin-bottom: var(--pf-global--spacer--md);
       }
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1>Gerenciador de Scripts Personalizados</h1>
-      <button class="btn btn-success" onclick="openCreateModal()">
-        + Novo Script
-      </button>
+    <div class="pf-c-page">
+      <main class="pf-c-page__main">
+
+        <!-- Cabeçalho -->
+        <section class="pf-c-page__main-section pf-m-light">
+          <div class="pf-l-split pf-m-gutter">
+            <div class="pf-l-split__item pf-m-fill">
+              <h1 class="pf-c-title pf-m-2xl">Gerenciador de Scripts Personalizados</h1>
+              <p class="pf-c-content">
+                <small>Crie, edite e agende scripts personalizados para execução automática</small>
+              </p>
+            </div>
+            <div class="pf-l-split__item">
+              <button class="pf-c-button pf-m-primary" type="button" onclick="openCreateModal()">
+                <span class="pf-c-button__icon pf-m-start">
+                  <i class="fas fa-plus" aria-hidden="true"></i>
+                </span>
+                Novo Script
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Mensagens -->
+        <section class="pf-c-page__main-section" style="padding-top: 0;">
+          <div id="loading" class="pf-c-empty-state" style="display: none">
+            <div class="pf-c-empty-state__content">
+              <div class="pf-c-spinner pf-m-xl" role="progressbar">
+                <span class="pf-c-spinner__clipper"></span>
+                <span class="pf-c-spinner__lead-ball"></span>
+                <span class="pf-c-spinner__tail-ball"></span>
+              </div>
+              <h2 class="pf-c-title pf-m-lg">Carregando scripts...</h2>
+            </div>
+          </div>
+
+          <div id="error-message" class="pf-c-alert pf-m-danger pf-m-inline" style="display: none; margin-bottom: var(--pf-global--spacer--md);">
+            <div class="pf-c-alert__icon">
+              <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+            </div>
+            <p class="pf-c-alert__title">
+              <span class="pf-screen-reader">Erro: </span>
+              <span id="error-text"></span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Tabela de Scripts -->
+        <section class="pf-c-page__main-section">
+          <div class="pf-c-card">
+            <div class="pf-c-card__body">
+              <table class="pf-c-table pf-m-compact pf-m-grid-md" role="grid" id="scripts-table">
+                <thead>
+                  <tr role="row">
+                    <th role="columnheader" scope="col">Nome do Script</th>
+                    <th role="columnheader" scope="col">Próxima Execução</th>
+                    <th role="columnheader" scope="col">Última Execução</th>
+                    <th role="columnheader" scope="col">Criado Em</th>
+                    <th role="columnheader" scope="col">Atualizado Em</th>
+                    <th role="columnheader" scope="col" class="pf-m-center">Execuções</th>
+                    <th role="columnheader" scope="col" class="pf-m-center">Sucessos</th>
+                    <th role="columnheader" scope="col" class="pf-m-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody role="rowgroup" id="scripts-body">
+                  <!-- Scripts serão carregados aqui -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
 
-    <div id="loading" class="loading" style="display: none">
-      <p>Carregando...</p>
     </div>
-
-    <div
-      id="error-message"
-      style="
-        display: none;
-        padding: 15px;
-        background-color: #f8d7da;
-        color: #721c24;
-        border-radius: 4px;
-        margin-bottom: 20px;
-      "
-    ></div>
-
-    <table id="scripts-table">
-      <thead>
-        <tr>
-          <th>Nome do Script</th>
-          <th>Próxima Execução</th>
-          <th>Última Execução</th>
-          <th>Criado Em</th>
-          <th>Atualizado Em</th>
-          <th>Total Execuções</th>
-          <th>Sucessos</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="scripts-body">
-        <!-- Scripts serão carregados aqui -->
-      </tbody>
-    </table>
 
     <!-- Modal Criar/Editar Script -->
     <div id="scriptModal" class="modal">
       <div class="modal-content">
-        <span class="close" onclick="closeScriptModal()">&times;</span>
-        <h2 id="modal-title">Novo Script</h2>
-        <form id="script-form">
-          <div class="form-group">
-            <label for="script-name">Nome do Script:</label>
-            <input
-              type="text"
-              id="script-name"
-              name="script-name"
-              required
-              placeholder="meu-script.sh"
-              pattern="[a-zA-Z0-9._-]+\.sh$"
-            />
-            <small>O nome deve terminar com .sh</small>
-          </div>
-          <div class="form-group">
-            <label for="script-content">Conteúdo do Script:</label>
-            <textarea
-              id="script-content"
-              name="script-content"
-              required
-              placeholder="#!/bin/bash&#10;&#10;echo 'Olá Mundo'"
-            ></textarea>
-          </div>
-          <div>
-            <button type="submit" class="btn btn-primary">Salvar</button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="closeScriptModal()"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl" id="modal-title">Novo Script</h2>
+          <button class="close" onclick="closeScriptModal()" aria-label="Fechar">&times;</button>
+        </div>
+
+        <div class="pf-c-modal-box__body">
+          <form id="script-form">
+            <div class="pf-c-form">
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="script-name">
+                    <span class="pf-c-form__label-text">Nome do Script</span>
+                    <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="script-name"
+                    name="script-name"
+                    required
+                    placeholder="meu-script.sh"
+                    pattern="[a-zA-Z0-9._-]+\.sh$"
+                  />
+                  <p class="pf-c-form__helper-text">
+                    <span class="pf-c-form__helper-text-icon">
+                      <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    </span>
+                    O nome deve terminar com .sh
+                  </p>
+                </div>
+              </div>
+
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="script-content">
+                    <span class="pf-c-form__label-text">Conteúdo do Script</span>
+                    <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <textarea
+                    class="pf-c-form-control"
+                    id="script-content"
+                    name="script-content"
+                    required
+                    rows="15"
+                    style="font-family: 'Red Hat Mono', 'Courier New', monospace;"
+                    placeholder="#!/bin/bash&#10;&#10;echo 'Olá Mundo'"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="pf-c-modal-box__footer">
+          <button type="button" class="pf-c-button pf-m-secondary" onclick="closeScriptModal()">
+            Cancelar
+          </button>
+          <button type="button" class="pf-c-button pf-m-primary" onclick="document.getElementById('script-form').requestSubmit()">
+            Salvar
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Modal Configurar Cron -->
     <div id="cronModal" class="modal">
       <div class="modal-content">
-        <span class="close" onclick="closeCronModal()">&times;</span>
-        <h2>Configurar Agendamento</h2>
-        <form id="cron-form">
-          <input type="hidden" id="cron-script-name" name="cron-script-name" />
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">Configurar Agendamento</h2>
+          <button class="close" onclick="closeCronModal()" aria-label="Fechar">&times;</button>
+        </div>
 
-          <div class="form-group">
-            <label>Expressão Cron:</label>
-            <div class="cron-fields">
-              <div>
-                <label>Minuto</label>
-                <input type="text" id="cron-minute" placeholder="*" value="*" />
-                <small>0-59</small>
+        <div class="pf-c-modal-box__body">
+          <form id="cron-form">
+            <input type="hidden" id="cron-script-name" name="cron-script-name" />
+
+            <div class="pf-c-form">
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label">
+                    <span class="pf-c-form__label-text">Expressão Cron</span>
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <div class="cron-fields">
+                    <div>
+                      <label class="pf-c-form__label" for="cron-minute">
+                        <span class="pf-c-form__label-text">Minuto</span>
+                      </label>
+                      <input class="pf-c-form-control" type="text" id="cron-minute" placeholder="*" value="*" />
+                      <p class="pf-c-form__helper-text">
+                        <span class="pf-c-form__helper-text-icon">
+                          <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        </span>
+                        0-59
+                      </p>
+                    </div>
+                    <div>
+                      <label class="pf-c-form__label" for="cron-hour">
+                        <span class="pf-c-form__label-text">Hora</span>
+                      </label>
+                      <input class="pf-c-form-control" type="text" id="cron-hour" placeholder="*" value="*" />
+                      <p class="pf-c-form__helper-text">
+                        <span class="pf-c-form__helper-text-icon">
+                          <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        </span>
+                        0-23
+                      </p>
+                    </div>
+                    <div>
+                      <label class="pf-c-form__label" for="cron-day">
+                        <span class="pf-c-form__label-text">Dia</span>
+                      </label>
+                      <input class="pf-c-form-control" type="text" id="cron-day" placeholder="*" value="*" />
+                      <p class="pf-c-form__helper-text">
+                        <span class="pf-c-form__helper-text-icon">
+                          <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        </span>
+                        1-31
+                      </p>
+                    </div>
+                    <div>
+                      <label class="pf-c-form__label" for="cron-month">
+                        <span class="pf-c-form__label-text">Mês</span>
+                      </label>
+                      <input class="pf-c-form-control" type="text" id="cron-month" placeholder="*" value="*" />
+                      <p class="pf-c-form__helper-text">
+                        <span class="pf-c-form__helper-text-icon">
+                          <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        </span>
+                        1-12
+                      </p>
+                    </div>
+                    <div>
+                      <label class="pf-c-form__label" for="cron-weekday">
+                        <span class="pf-c-form__label-text">Dia Semana</span>
+                      </label>
+                      <input class="pf-c-form-control" type="text" id="cron-weekday" placeholder="*" value="*" />
+                      <p class="pf-c-form__helper-text">
+                        <span class="pf-c-form__helper-text-icon">
+                          <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        </span>
+                        0-7
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="cron-helper">
+                    <strong>Exemplos de expressões cron:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                      <li><code>* * * * *</code> - A cada minuto</li>
+                      <li><code>0 * * * *</code> - A cada hora</li>
+                      <li><code>0 0 * * *</code> - Diariamente à meia-noite</li>
+                      <li><code>0 0 * * 0</code> - Semanalmente aos domingos à meia-noite</li>
+                      <li><code>0 0 1 * *</code> - Mensalmente no dia 1 à meia-noite</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label>Hora</label>
-                <input type="text" id="cron-hour" placeholder="*" value="*" />
-                <small>0-23</small>
-              </div>
-              <div>
-                <label>Dia</label>
-                <input type="text" id="cron-day" placeholder="*" value="*" />
-                <small>1-31</small>
-              </div>
-              <div>
-                <label>Mês</label>
-                <input type="text" id="cron-month" placeholder="*" value="*" />
-                <small>1-12</small>
-              </div>
-              <div>
-                <label>Dia Semana</label>
-                <input
-                  type="text"
-                  id="cron-weekday"
-                  placeholder="*"
-                  value="*"
-                />
-                <small>0-7</small>
+
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="cron-preset">
+                    <span class="pf-c-form__label-text">Ou escolha um modelo</span>
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <select class="pf-c-form-control" id="cron-preset" onchange="applyCronPreset()">
+                    <option value="">-- Selecione um modelo --</option>
+                    <option value="* * * * *">A cada minuto</option>
+                    <option value="*/5 * * * *">A cada 5 minutos</option>
+                    <option value="0 * * * *">A cada hora</option>
+                    <option value="0 0 * * *">Diariamente (meia-noite)</option>
+                    <option value="0 12 * * *">Diariamente (meio-dia)</option>
+                    <option value="0 0 * * 0">Semanalmente (domingo)</option>
+                    <option value="0 0 1 * *">Mensalmente (dia 1)</option>
+                  </select>
+                </div>
               </div>
             </div>
-            <div class="cron-helper">
-              <strong>Exemplos:</strong><br />
-              * * * * * = A cada minuto<br />
-              0 * * * * = A cada hora<br />
-              0 0 * * * = Diariamente à meia-noite<br />
-              0 0 * * 0 = Semanalmente aos domingos à meia-noite<br />
-              0 0 1 * * = Mensalmente no dia 1 à meia-noite
-            </div>
-          </div>
+          </form>
+        </div>
 
-          <div class="form-group">
-            <label for="cron-preset">Ou escolha um modelo:</label>
-            <select id="cron-preset" onchange="applyCronPreset()">
-              <option value="">-- Selecione --</option>
-              <option value="* * * * *">A cada minuto</option>
-              <option value="*/5 * * * *">A cada 5 minutos</option>
-              <option value="0 * * * *">A cada hora</option>
-              <option value="0 0 * * *">Diariamente (meia-noite)</option>
-              <option value="0 12 * * *">Diariamente (meio-dia)</option>
-              <option value="0 0 * * 0">Semanalmente (domingo)</option>
-              <option value="0 0 1 * *">Mensalmente (dia 1)</option>
-            </select>
-          </div>
-
-          <div>
-            <button type="submit" class="btn btn-primary">
-              Salvar Agendamento
-            </button>
-            <button
-              type="button"
-              class="btn btn-warning"
-              onclick="removeCron()"
-            >
-              Remover Agendamento
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="closeCronModal()"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+        <div class="pf-c-modal-box__footer">
+          <button type="button" class="pf-c-button pf-m-link" onclick="closeCronModal()">
+            Cancelar
+          </button>
+          <button type="button" class="pf-c-button pf-m-warning" onclick="removeCron()">
+            Remover Agendamento
+          </button>
+          <button type="button" class="pf-c-button pf-m-primary" onclick="document.getElementById('cron-form').requestSubmit()">
+            Salvar Agendamento
+          </button>
+        </div>
       </div>
     </div>
 
