@@ -1,5 +1,10 @@
 # Cockpit Scheduling Exec
 
+![Build Status](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/build-debian.yml/badge.svg)
+![Release](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/release.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+
 Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva.
 
 ## 🚀 Funcionalidades
@@ -26,20 +31,37 @@ Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell 
 - Sistema operacional Linux (Debian/Ubuntu recomendado)
 - Cron instalado
 
+### Download da Release (Recomendado)
+
+Baixe o pacote .deb mais recente da [página de releases](https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases):
+
+```bash
+# Baixar última versão
+wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest/download/cockpit-scheduling-exec_1.0.0_all.deb
+
+# Instalar
+sudo apt install ./cockpit-scheduling-exec_1.0.0_all.deb
+```
+
 ### Construir o Pacote Debian
 
-1. Clone ou baixe este repositório:
+Se preferir construir o pacote você mesmo:
+
+1. Clone o repositório:
 ```bash
+git clone https://github.com/QuantumTecnology/cockpit-scheduling-exec.git
 cd cockpit-scheduling-exec
 ```
 
 2. Construa o pacote .deb:
 ```bash
-dpkg-deb --build . cockpit-scheduling-exec.deb
+chmod +x build.sh
+./build.sh
 ```
 
 3. Instale o pacote:
 ```bash
+cd ..
 sudo apt install ./cockpit-scheduling-exec.deb
 ```
 
@@ -160,6 +182,42 @@ Para cada script, o sistema mantém as seguintes informações:
 
 Estes dados são usados para exibir estatísticas na tabela.
 
+## � CI/CD e Releases
+
+### Build Automático
+
+Este projeto usa GitHub Actions para build automático:
+
+- **Push/PR para main**: Constrói o pacote .deb automaticamente
+- **Tag v***: Cria release com o pacote .deb
+
+### Baixar Builds Automáticos
+
+1. Vá para [Actions](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions)
+2. Clique no workflow "Build Debian Package"
+3. Baixe o artefato `cockpit-scheduling-exec-deb`
+
+### Criar Nova Release
+
+Para maintainers:
+
+```bash
+# 1. Atualizar CHANGELOG.md
+
+# 2. Commit e push
+git add .
+git commit -m "Release: v1.0.1"
+git push
+
+# 3. Criar e enviar tag
+git tag -a v1.0.1 -m "Release version 1.0.1"
+git push origin v1.0.1
+
+# O GitHub Actions criará a release automaticamente
+```
+
+Veja [.github/README.md](.github/README.md) para mais detalhes sobre CI/CD.
+
 ## 🛠️ Desenvolvimento
 
 ### Tecnologias Utilizadas
@@ -168,6 +226,7 @@ Estes dados são usados para exibir estatísticas na tabela.
 - **PatternFly**: Framework CSS para interface consistente
 - **Bash**: Scripts de backend
 - **HTML/CSS/JavaScript**: Interface do usuário
+- **GitHub Actions**: CI/CD para builds automáticos
 
 ### Modificar o Plugin
 

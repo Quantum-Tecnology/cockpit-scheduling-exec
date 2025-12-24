@@ -38,6 +38,17 @@ Para começar imediatamente:
   - Diretrizes de código
   - Processo de pull request
   - Convenções de commit
+
+- **[CICD.md](CICD.md)** - CI/CD e Automação
+  - Como funciona o build automático
+  - Criar releases automaticamente
+  - Troubleshooting de workflows
+  - Melhores práticas
+
+- **[.github/README.md](.github/README.md)** - Workflows GitHub Actions
+  - Documentação técnica dos workflows
+  - Configuração e permissões
+  - Referências e exemplos
   - Checklist para contribuição
 
 - **[CHANGELOG.md](CHANGELOG.md)** - Histórico de versões

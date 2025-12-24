@@ -1,2 +1,29 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Shell scripts devem sempre usar LF
+*.sh text eol=lf
+
+# Documentação
+*.md text eol=lf
+
+# Scripts de build
+build.sh text eol=lf
+install-manual.sh text eol=lf
+uninstall.sh text eol=lf
+
+# Arquivos de configuração
+*.json text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+
+# Arquivos binários
+*.deb binary
+*.tar.gz binary
+*.zip binary
+
+# Linguística do GitHub - não contar certos arquivos em estatísticas
+*.md linguist-documentation
+*.sh linguist-detectable=true
+*.js linguist-detectable=true
