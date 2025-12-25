@@ -74,7 +74,7 @@ Para sugerir novas funcionalidades:
 function loadScripts() {
     showLoading(true);
     
-    cockpit.spawn(['/usr/share/cockpit/scheduling-exec/scripts/list-scripts.sh'])
+   cockpit.spawn(['/usr/share/cockpit/scheduling_exec/scripts/list-scripts.sh'])
         .then(output => {
             showLoading(false);
             const scripts = JSON.parse(output);
@@ -159,7 +159,7 @@ cockpit-scheduling-exec/
 │   ├── control
 │   ├── postinst
 │   └── prerm
-├── usr/share/cockpit/scheduling-exec/
+├── usr/share/cockpit/scheduling_exec/
 │   ├── manifest.json    # Configuração do plugin
 │   ├── index.html       # Interface do usuário
 │   ├── index.js         # Lógica JavaScript

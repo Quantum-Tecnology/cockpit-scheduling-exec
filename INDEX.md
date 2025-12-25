@@ -69,13 +69,13 @@ Para começar imediatamente:
 
 ### Frontend (Interface Web)
 
-- **usr/share/cockpit/scheduling-exec/manifest.json** - Manifesto do plugin
-- **usr/share/cockpit/scheduling-exec/index.html** - Interface do usuário
-- **usr/share/cockpit/scheduling-exec/index.js** - Lógica JavaScript
+- **usr/share/cockpit/scheduling_exec/manifest.json** - Manifesto do plugin
+- **usr/share/cockpit/scheduling_exec/index.html** - Interface do usuário
+- **usr/share/cockpit/scheduling_exec/index.js** - Lógica JavaScript
 
 ### Backend (Scripts Shell)
 
-Localização: `usr/share/cockpit/scheduling-exec/scripts/`
+Localização: `usr/share/cockpit/scheduling_exec/scripts/`
 
 **Scripts do Sistema:**
 - **list-scripts.sh** - Lista todos os scripts
@@ -105,7 +105,7 @@ Localização: `usr/share/cockpit/scheduling-exec/scripts/`
 ### Quero Criar Meu Primeiro Script
 
 1. Leia: [QUICKSTART.md](QUICKSTART.md) → Seção "Primeiro Uso"
-2. Veja exemplos em: `usr/share/cockpit/scheduling-exec/scripts/`
+2. Veja exemplos em: `usr/share/cockpit/scheduling_exec/scripts/`
 3. Consulte: [FAQ.md](FAQ.md) → Seção "Uso Básico"
 
 ### Quero Agendar um Script
@@ -132,7 +132,7 @@ Localização: `usr/share/cockpit/scheduling-exec/scripts/`
 
 **Começar aqui:**
 1. [QUICKSTART.md](QUICKSTART.md) - Instalação e primeiro uso
-2. Scripts de exemplo em `usr/share/cockpit/scheduling-exec/scripts/`
+2. Scripts de exemplo em `usr/share/cockpit/scheduling_exec/scripts/`
 3. [FAQ.md](FAQ.md) - Perguntas básicas
 
 ### Intermediário
@@ -147,7 +147,7 @@ Localização: `usr/share/cockpit/scheduling-exec/scripts/`
 **Desenvolvimento e contribuição:**
 1. [STRUCTURE.md](STRUCTURE.md) - Arquitetura completa
 2. [CONTRIBUTING.md](CONTRIBUTING.md) - Guia de contribuição
-3. Código fonte em `usr/share/cockpit/scheduling-exec/`
+3. Código fonte em `usr/share/cockpit/scheduling_exec/`
 
 ## 🔍 Busca Rápida
 
@@ -196,7 +196,7 @@ cockpit-scheduling-exec/
 │       └── prerm
 │
 ├── 🌐 Plugin Cockpit
-│   └── usr/share/cockpit/scheduling-exec/
+│   └── usr/share/cockpit/scheduling_exec/
 │       ├── manifest.json
 │       ├── index.html
 │       ├── index.js
@@ -241,7 +241,7 @@ Você está aqui → INDEX.md
 ├─ Quero desenvolver/contribuir
 │  ├─→ STRUCTURE.md (Entender arquitetura)
 │  ├─→ CONTRIBUTING.md (Como contribuir)
-│  └─→ Código fonte em usr/share/cockpit/scheduling-exec/
+│  └─→ Código fonte em usr/share/cockpit/scheduling_exec/
 │
 └─ Tenho um problema
    ├─→ FAQ.md (Soluções rápidas)
@@ -250,7 +250,7 @@ Você está aqui → INDEX.md
 
 ---
 
-**Versão**: 1.0.7  
+**Versão**: 1.0.8
 **Última Atualização**: 25/12/2025  
 **Autor**: Gustavo Santarosa
 

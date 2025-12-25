@@ -59,7 +59,7 @@ O projeto usa **GitHub Actions** para automatizar:
 
 ```bash
 # 1. Fazer mudanças no código
-vim usr/share/cockpit/scheduling-exec/index.js
+vim usr/share/cockpit/scheduling_exec/index.js
 
 # 2. Commit e push
 git add .
@@ -163,10 +163,10 @@ sudo apt install ./cockpit-scheduling-exec_1.0.1_all.deb
 1. **Erro de permissão:**
    ```bash
    # Localmente, verifique permissões
-   ls -la usr/share/cockpit/scheduling-exec/scripts/
+   ls -la usr/share/cockpit/scheduling_exec/scripts/
    
    # Corrigir se necessário
-   chmod +x usr/share/cockpit/scheduling-exec/scripts/*.sh
+   chmod +x usr/share/cockpit/scheduling_exec/scripts/*.sh
    chmod +x DEBIAN/postinst DEBIAN/prerm
    ```
 

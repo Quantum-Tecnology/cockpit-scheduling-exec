@@ -10,7 +10,7 @@ echo "================================================"
 echo ""
 
 # Verificar se é root
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
     echo "Este script precisa ser executado como root (sudo)"
     exit 1
 fi
@@ -23,18 +23,18 @@ if ! command -v cockpit-bridge &> /dev/null; then
 fi
 
 # Verificar se estamos no diretório correto
-if [ ! -d "usr/share/cockpit/scheduling-exec" ]; then
-    echo "Erro: Diretório usr/share/cockpit/scheduling-exec não encontrado"
+if [ ! -d "usr/share/cockpit/scheduling_exec" ]; then
+    echo "Erro: Diretório usr/share/cockpit/scheduling_exec não encontrado"
     echo "Execute este script no diretório raiz do projeto"
     exit 1
 fi
 
-echo "Copiando arquivos para /usr/share/cockpit/scheduling-exec/..."
-mkdir -p /usr/share/cockpit/scheduling-exec
-cp -r usr/share/cockpit/scheduling-exec/* /usr/share/cockpit/scheduling-exec/
+echo "Copiando arquivos para /usr/share/cockpit/scheduling_exec/..."
+mkdir -p /usr/share/cockpit/scheduling_exec
+cp -r usr/share/cockpit/scheduling_exec/* /usr/share/cockpit/scheduling_exec/
 
 echo "Configurando permissões..."
-chmod +x /usr/share/cockpit/scheduling-exec/scripts/*.sh
+chmod +x /usr/share/cockpit/scheduling_exec/scripts/*.sh
 
 echo "Reiniciando Cockpit..."
 systemctl restart cockpit

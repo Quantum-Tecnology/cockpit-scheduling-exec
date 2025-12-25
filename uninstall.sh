@@ -9,7 +9,7 @@ echo "================================================"
 echo ""
 
 # Verificar se é root
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
     echo "Este script precisa ser executado como root (sudo)"
     exit 1
 fi
@@ -23,6 +23,7 @@ fi
 
 echo "Removendo arquivos..."
 rm -rf /usr/share/cockpit/scheduling-exec
+rm -rf /usr/share/cockpit/scheduling_exec
 
 echo "Reiniciando Cockpit..."
 systemctl restart cockpit

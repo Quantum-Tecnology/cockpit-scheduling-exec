@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/build-debian.yml/badge.svg)
 ![Release](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/release.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.7-green.svg)
+![Version](https://img.shields.io/badge/version-1.0.8-green.svg)
 
 Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva.
 
@@ -37,10 +37,10 @@ Baixe o pacote .deb mais recente da [página de releases](https://github.com/Qua
 
 ```bash
 # Baixar última versão
-wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest/download/cockpit-scheduling-exec_1.0.7_all.deb
+wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest/download/cockpit-scheduling-exec_1.0.8_all.deb
 
 # Instalar
-sudo apt install ./cockpit-scheduling-exec_1.0.7_all.deb
+sudo apt install ./cockpit-scheduling-exec_1.0.8_all.deb
 ```
 
 ### Instalação via APT (repositório oficial)
@@ -106,11 +106,11 @@ Se preferir instalar manualmente sem construir o pacote:
 
 ```bash
 # Copiar arquivos para o diretório do Cockpit
-sudo mkdir -p /usr/share/cockpit/scheduling-exec
-sudo cp -r usr/share/cockpit/scheduling-exec/* /usr/share/cockpit/scheduling-exec/
+sudo mkdir -p /usr/share/cockpit/scheduling_exec
+sudo cp -r usr/share/cockpit/scheduling_exec/* /usr/share/cockpit/scheduling_exec/
 
 # Dar permissões de execução aos scripts
-sudo chmod +x /usr/share/cockpit/scheduling-exec/scripts/*.sh
+sudo chmod +x /usr/share/cockpit/scheduling_exec/scripts/*.sh
 
 # Reiniciar o Cockpit
 sudo systemctl restart cockpit
@@ -172,7 +172,7 @@ sudo systemctl restart cockpit
 cockpit-scheduling-exec/
 ├── DEBIAN/
 │   └── control                      # Metadados do pacote Debian
-└── usr/share/cockpit/scheduling-exec/
+└── usr/share/cockpit/scheduling_exec/
     ├── manifest.json                # Manifesto do plugin Cockpit
     ├── index.html                   # Interface do usuário
     ├── index.js                     # Lógica JavaScript
@@ -235,12 +235,12 @@ Para maintainers:
 
 # 2. Commit e push
 git add .
-git commit -m "Release: v1.0.7"
+git commit -m "Release: v1.0.8"
 git push
 
 # 3. Criar e enviar tag
-git tag -a v1.0.7 -m "Release version 1.0.7"
-git push origin v1.0.7
+git tag -a v1.0.8 -m "Release version 1.0.8"
+git push origin v1.0.8
 
 # O GitHub Actions criará a release automaticamente
 ```
@@ -259,10 +259,10 @@ Veja [.github/README.md](.github/README.md) para mais detalhes sobre CI/CD.
 
 ### Modificar o Plugin
 
-1. Edite os arquivos em `usr/share/cockpit/scheduling-exec/`
+1. Edite os arquivos em `usr/share/cockpit/scheduling_exec/`
 2. Para aplicar mudanças sem reinstalar:
 ```bash
-sudo cp -r usr/share/cockpit/scheduling-exec/* /usr/share/cockpit/scheduling-exec/
+sudo cp -r usr/share/cockpit/scheduling_exec/* /usr/share/cockpit/scheduling_exec/
 sudo systemctl restart cockpit
 ```
 
@@ -304,13 +304,13 @@ sudo systemctl status cockpit
 
 2. **Verifique se os arquivos foram instalados:**
 ```bash
-ls -la /usr/share/cockpit/scheduling-exec/
+ls -la /usr/share/cockpit/scheduling_exec/
 ```
 Devem existir: `manifest.json`, `index.html`, `index.js` e pasta `scripts/`
 
 3. **Verifique o conteúdo do manifest.json:**
 ```bash
-cat /usr/share/cockpit/scheduling-exec/manifest.json
+cat /usr/share/cockpit/scheduling_exec/manifest.json
 ```
 Deve conter o campo `"menu"` com a entrada `"index"`.
 
@@ -329,7 +329,7 @@ sudo systemctl restart cockpit
 7. **Se ainda não funcionar, reinstale:**
 ```bash
 sudo apt remove cockpit-scheduling-exec
-sudo apt install ./cockpit-scheduling-exec_1.0.7_all.deb
+sudo apt install ./cockpit-scheduling-exec_1.0.8_all.deb
 sudo systemctl restart cockpit
 ```
 

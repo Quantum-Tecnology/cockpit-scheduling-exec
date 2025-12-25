@@ -53,11 +53,17 @@ fi
 # 3. Verificar se o diretório do plugin existe
 echo ""
 echo "3. Verificando arquivos do plugin..."
-if [ -d "/usr/share/cockpit/scheduling-exec" ]; then
+if [ -d "/usr/share/cockpit/scheduling_exec" ]; then
     check 0 "Diretório do plugin existe"
 else
     check 1 "Diretório do plugin NÃO existe"
-    echo "   Deveria estar em: /usr/share/cockpit/scheduling-exec"
+
+    if [ -d "/usr/share/cockpit/scheduling-exec" ]; then
+        warn "Encontrado diretório antigo: /usr/share/cockpit/scheduling-exec"
+        echo "   Versões novas usam: /usr/share/cockpit/scheduling_exec"
+    else
+        echo "   Deveria estar em: /usr/share/cockpit/scheduling_exec"
+    fi
     exit 1
 fi
 
@@ -66,21 +72,21 @@ echo ""
 echo "4. Verificando arquivos essenciais..."
 MISSING=0
 
-if [ -f "/usr/share/cockpit/scheduling-exec/manifest.json" ]; then
+if [ -f "/usr/share/cockpit/scheduling_exec/manifest.json" ]; then
     check 0 "manifest.json existe"
 else
     check 1 "manifest.json NÃO existe"
     MISSING=1
 fi
 
-if [ -f "/usr/share/cockpit/scheduling-exec/index.html" ]; then
+if [ -f "/usr/share/cockpit/scheduling_exec/index.html" ]; then
     check 0 "index.html existe"
 else
     check 1 "index.html NÃO existe"
     MISSING=1
 fi
 
-if [ -f "/usr/share/cockpit/scheduling-exec/index.js" ]; then
+if [ -f "/usr/share/cockpit/scheduling_exec/index.js" ]; then
     check 0 "index.js existe"
 else
     check 1 "index.js NÃO existe"
@@ -90,9 +96,9 @@ fi
 # 5. Verificar conteúdo do manifest.json
 echo ""
 echo "5. Verificando manifest.json..."
-if [ -f "/usr/share/cockpit/scheduling-exec/manifest.json" ]; then
+if [ -f "/usr/share/cockpit/scheduling_exec/manifest.json" ]; then
     # Verificar se tem campo "menu"
-    if grep -q '"menu"' /usr/share/cockpit/scheduling-exec/manifest.json; then
+    if grep -q '"menu"' /usr/share/cockpit/scheduling_exec/manifest.json; then
         check 0 "Campo 'menu' existe no manifest"
     else
         check 1 "Campo 'menu' NÃO existe no manifest"
@@ -100,7 +106,7 @@ if [ -f "/usr/share/cockpit/scheduling-exec/manifest.json" ]; then
     fi
 
     # Verificar se tem campo "name"
-    if grep -q '"name"' /usr/share/cockpit/scheduling-exec/manifest.json; then
+    if grep -q '"name"' /usr/share/cockpit/scheduling_exec/manifest.json; then
         check 0 "Campo 'name' existe no manifest"
     else
         check 1 "Campo 'name' NÃO existe no manifest"
@@ -109,7 +115,7 @@ if [ -f "/usr/share/cockpit/scheduling-exec/manifest.json" ]; then
     echo ""
     echo "   Conteúdo do manifest.json:"
     echo "   ----------------------------------------"
-    cat /usr/share/cockpit/scheduling-exec/manifest.json | sed 's/^/   /'
+    cat /usr/share/cockpit/scheduling_exec/manifest.json | sed 's/^/   /'
     echo "   ----------------------------------------"
 fi
 
@@ -118,14 +124,14 @@ echo ""
 echo "6. Verificando permissões..."
 PERM_OK=1
 
-if [ -r "/usr/share/cockpit/scheduling-exec/manifest.json" ]; then
+if [ -r "/usr/share/cockpit/scheduling_exec/manifest.json" ]; then
     check 0 "manifest.json é legível"
 else
     check 1 "manifest.json NÃO é legível"
     PERM_OK=0
 fi
 
-if [ -r "/usr/share/cockpit/scheduling-exec/index.html" ]; then
+if [ -r "/usr/share/cockpit/scheduling_exec/index.html" ]; then
     check 0 "index.html é legível"
 else
     check 1 "index.html NÃO é legível"
@@ -184,8 +190,8 @@ else
     echo -e "  ${RED}✗ Problemas encontrados!${NC}"
     echo ""
     echo "  Ações sugeridas:"
-    echo "  1. Reinstale o pacote: sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.7_all.deb"
-    echo "  2. Verifique permissões: sudo chmod -R 644 /usr/share/cockpit/scheduling-exec/*"
+    echo "  1. Reinstale o pacote: sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.8_all.deb"
+    echo "  2. Verifique permissões: sudo chmod -R 644 /usr/share/cockpit/scheduling_exec/*"
     echo "  3. Reinicie o Cockpit: sudo systemctl restart cockpit"
 fi
 echo "================================================"

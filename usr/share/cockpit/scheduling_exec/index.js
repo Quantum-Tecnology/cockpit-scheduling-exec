@@ -38,7 +38,7 @@ function loadScripts() {
   showLoading(true);
 
   cockpit
-    .spawn(["/usr/share/cockpit/scheduling-exec/scripts/list-scripts.sh"])
+    .spawn(["/usr/share/cockpit/scheduling_exec/scripts/list-scripts.sh"])
     .then((output) => {
       showLoading(false);
       const scripts = JSON.parse(output);
@@ -168,7 +168,7 @@ function editScript(scriptName) {
 
   cockpit
     .spawn([
-      "/usr/share/cockpit/scheduling-exec/scripts/get-script.sh",
+      "/usr/share/cockpit/scheduling_exec/scripts/get-script.sh",
       scriptName,
     ])
     .then((content) => {
@@ -205,7 +205,7 @@ document.getElementById("script-form").addEventListener("submit", function (e) {
   cockpit
     .spawn(
       [
-        "/usr/share/cockpit/scheduling-exec/scripts/save-script.sh",
+        "/usr/share/cockpit/scheduling_exec/scripts/save-script.sh",
         action,
         scriptName,
       ],
@@ -237,7 +237,7 @@ function deleteScript(scriptName) {
 
   cockpit
     .spawn([
-      "/usr/share/cockpit/scheduling-exec/scripts/delete-script.sh",
+      "/usr/share/cockpit/scheduling_exec/scripts/delete-script.sh",
       scriptName,
     ])
     .then(() => {
@@ -260,7 +260,7 @@ function executeScript(scriptName) {
 
   cockpit
     .spawn([
-      "/usr/share/cockpit/scheduling-exec/scripts/execute-script.sh",
+      "/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh",
       scriptName,
     ])
     .then((output) => {
@@ -281,7 +281,7 @@ function openCronModal(scriptName) {
   // Buscar configuração atual do cron
   cockpit
     .spawn([
-      "/usr/share/cockpit/scheduling-exec/scripts/get-cron.sh",
+      "/usr/share/cockpit/scheduling_exec/scripts/get-cron.sh",
       scriptName,
     ])
     .then((cronExpression) => {
@@ -350,7 +350,7 @@ document.getElementById("cron-form").addEventListener("submit", function (e) {
 
   cockpit
     .spawn([
-      "/usr/share/cockpit/scheduling-exec/scripts/set-cron.sh",
+      "/usr/share/cockpit/scheduling_exec/scripts/set-cron.sh",
       scriptName,
       cronExpression,
     ])
@@ -377,7 +377,7 @@ function removeCron() {
 
   cockpit
     .spawn([
-      "/usr/share/cockpit/scheduling-exec/scripts/remove-cron.sh",
+      "/usr/share/cockpit/scheduling_exec/scripts/remove-cron.sh",
       scriptName,
     ])
     .then(() => {

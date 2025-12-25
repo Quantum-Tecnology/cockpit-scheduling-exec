@@ -146,7 +146,7 @@ test_install() {
     sudo apt install ../cockpit-scheduling-exec*.deb
 
     # Verificar instalação
-    if [ -d /usr/share/cockpit/scheduling-exec ]; then
+    if [ -d /usr/share/cockpit/scheduling_exec ]; then
         print_success "Plugin instalado com sucesso!"
         print_info "Acesse: https://localhost:9090"
     else
@@ -166,9 +166,9 @@ validate_structure() {
         "DEBIAN/control"
         "DEBIAN/postinst"
         "DEBIAN/prerm"
-        "usr/share/cockpit/scheduling-exec/manifest.json"
-        "usr/share/cockpit/scheduling-exec/index.html"
-        "usr/share/cockpit/scheduling-exec/index.js"
+        "usr/share/cockpit/scheduling_exec/manifest.json"
+        "usr/share/cockpit/scheduling_exec/index.html"
+        "usr/share/cockpit/scheduling_exec/index.js"
     )
 
     for file in "${required_files[@]}"; do
@@ -179,7 +179,7 @@ validate_structure() {
     done
 
     # Verificar scripts
-    for script in usr/share/cockpit/scheduling-exec/scripts/*.sh; do
+    for script in usr/share/cockpit/scheduling_exec/scripts/*.sh; do
         if [ ! -x "$script" ]; then
             print_warning "Script sem permissão de execução: $script"
             chmod +x "$script"

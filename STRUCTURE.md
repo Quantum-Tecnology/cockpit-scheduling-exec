@@ -10,7 +10,7 @@ cockpit-scheduling-exec/
 │   ├── postinst                            # Script pós-instalação
 │   └── prerm                               # Script pré-remoção
 │
-├── 🌐 usr/share/cockpit/scheduling-exec/  # Arquivos do Plugin
+├── 🌐 usr/share/cockpit/scheduling_exec/  # Arquivos do Plugin
 │   │
 │   ├── 📄 manifest.json                    # Manifesto do plugin Cockpit
 │   ├── 🎨 index.html                       # Interface do usuário (UI)
@@ -178,7 +178,7 @@ cockpit-scheduling-exec/
 
 ### Arquivos do Plugin
 ```
-/usr/share/cockpit/scheduling-exec/
+/usr/share/cockpit/scheduling_exec/
 ├── manifest.json          (644 - rw-r--r--)
 ├── index.html             (644 - rw-r--r--)
 ├── index.js               (644 - rw-r--r--)
@@ -296,7 +296,7 @@ ls -la ~/.scripts-metadata/*.log
 bash ~/scripts/meu-script.sh
 
 # Testar backend script
-/usr/share/cockpit/scheduling-exec/scripts/list-scripts.sh
+/usr/share/cockpit/scheduling_exec/scripts/list-scripts.sh
 
 # Ver crontab
 crontab -l
@@ -308,11 +308,11 @@ crontab -l
 
 ```bash
 # 1. Editar arquivos
-vim usr/share/cockpit/scheduling-exec/index.js
+vim usr/share/cockpit/scheduling_exec/index.js
 
 # 2. Copiar para instalação
-sudo cp -r usr/share/cockpit/scheduling-exec/* \
-  /usr/share/cockpit/scheduling-exec/
+sudo cp -r usr/share/cockpit/scheduling_exec/* \
+   /usr/share/cockpit/scheduling_exec/
 
 # 3. Recarregar no navegador
 # (Ctrl + F5 no Cockpit)

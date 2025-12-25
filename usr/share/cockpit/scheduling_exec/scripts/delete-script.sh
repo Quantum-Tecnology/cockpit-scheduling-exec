@@ -19,7 +19,7 @@ if [ ! -f "$SCRIPT_PATH" ]; then
 fi
 
 # Remover do crontab se existir
-/usr/share/cockpit/scheduling-exec/scripts/remove-cron.sh "$SCRIPT_NAME" 2>/dev/null
+/usr/share/cockpit/scheduling_exec/scripts/remove-cron.sh "$SCRIPT_NAME" 2>/dev/null
 
 # Excluir arquivo de script
 rm -f "$SCRIPT_PATH"

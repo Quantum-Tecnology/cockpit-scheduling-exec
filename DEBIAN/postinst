@@ -4,7 +4,7 @@
 set -e
 
 # Configurar permissões corretas
-chmod +x /usr/share/cockpit/scheduling-exec/scripts/*.sh
+chmod +x /usr/share/cockpit/scheduling_exec/scripts/*.sh
 
 # Reiniciar cockpit se estiver rodando
 if systemctl is-active --quiet cockpit; then

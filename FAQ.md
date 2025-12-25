@@ -36,7 +36,7 @@ sudo ./install-manual.sh
 
 4. Verifique se os arquivos foram copiados:
    ```bash
-   ls -la /usr/share/cockpit/scheduling-exec/
+   ls -la /usr/share/cockpit/scheduling_exec/
    ```
 
 ### Preciso reiniciar o servidor após instalar?
@@ -343,7 +343,7 @@ Seus scripts e dados não são afetados.
 dpkg -l | grep cockpit-scheduling-exec
 
 # Ou verificar arquivo de controle
-cat /usr/share/cockpit/scheduling-exec/manifest.json
+   cat /usr/share/cockpit/scheduling_exec/manifest.json
 ```
 
 ## 💡 Dicas e Truques

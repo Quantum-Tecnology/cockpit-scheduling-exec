@@ -23,7 +23,7 @@ jobs:
 
       - name: Set permissions for scripts
         run: |
-          chmod +x usr/share/cockpit/scheduling-exec/scripts/*.sh
+          chmod +x usr/share/cockpit/scheduling_exec/scripts/*.sh
           chmod +x DEBIAN/postinst
           chmod +x DEBIAN/prerm
 

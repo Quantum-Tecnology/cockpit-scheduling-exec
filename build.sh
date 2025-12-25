@@ -24,14 +24,14 @@ fi
 
 # Garantir permissões corretas para os scripts
 echo "Configurando permissões dos scripts..."
-chmod +x usr/share/cockpit/scheduling-exec/scripts/*.sh
-chmod 644 usr/share/cockpit/scheduling-exec/manifest.json
-chmod 644 usr/share/cockpit/scheduling-exec/index.html
-chmod 644 usr/share/cockpit/scheduling-exec/index.js
+chmod +x usr/share/cockpit/scheduling_exec/scripts/*.sh
+chmod 644 usr/share/cockpit/scheduling_exec/manifest.json
+chmod 644 usr/share/cockpit/scheduling_exec/index.html
+chmod 644 usr/share/cockpit/scheduling_exec/index.js
 
 # Verificar se o manifest.json tem a estrutura correta
 echo "Verificando manifest.json..."
-if ! grep -q '"menu"' usr/share/cockpit/scheduling-exec/manifest.json; then
+if ! grep -q '"menu"' usr/share/cockpit/scheduling_exec/manifest.json; then
     echo "AVISO: manifest.json não contém campo 'menu' - o módulo pode não aparecer no menu!"
 fi
 

@@ -23,7 +23,7 @@ chmod +x check-install.sh
 
 ```bash
 # Verificar se o diretório existe
-ls -la /usr/share/cockpit/scheduling-exec/
+ls -la /usr/share/cockpit/scheduling_exec/
 
 # Deve mostrar:
 # - manifest.json
@@ -34,20 +34,20 @@ ls -la /usr/share/cockpit/scheduling-exec/
 
 **Se o diretório não existir:**
 ```bash
-sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.7_all.deb
+sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.8_all.deb
 ```
 
 #### 2. Verificar o manifest.json
 
 ```bash
-cat /usr/share/cockpit/scheduling-exec/manifest.json
+cat /usr/share/cockpit/scheduling_exec/manifest.json
 ```
 
 **O arquivo deve conter:**
 ```json
 {
   "version": 0,
-  "name": "scheduling-exec",
+  "name": "scheduling_exec",
   "description": "Gerenciador de Scripts Personalizados e Agendamentos",
   "requires": {
     "cockpit": ">=200"
@@ -55,7 +55,8 @@ cat /usr/share/cockpit/scheduling-exec/manifest.json
   "menu": {
     "index": {
       "label": "Scripts & Agendamentos",
-      "order": 50
+      "order": 50,
+      "path": "index.html"
     }
   },
   "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com"
@@ -65,21 +66,21 @@ cat /usr/share/cockpit/scheduling-exec/manifest.json
 **Se estiver diferente ou incompleto:**
 ```bash
 # Baixe o manifest correto
-sudo wget -O /usr/share/cockpit/scheduling-exec/manifest.json \
-  https://raw.githubusercontent.com/QuantumTecnology/cockpit-scheduling-exec/main/usr/share/cockpit/scheduling-exec/manifest.json
+sudo wget -O /usr/share/cockpit/scheduling_exec/manifest.json \
+  https://raw.githubusercontent.com/QuantumTecnology/cockpit-scheduling-exec/main/usr/share/cockpit/scheduling_exec/manifest.json
 
 # Defina permissões corretas
-sudo chmod 644 /usr/share/cockpit/scheduling-exec/manifest.json
+sudo chmod 644 /usr/share/cockpit/scheduling_exec/manifest.json
 ```
 
 #### 3. Verificar permissões dos arquivos
 
 ```bash
 # Corrigir permissões
-sudo chmod 644 /usr/share/cockpit/scheduling-exec/manifest.json
-sudo chmod 644 /usr/share/cockpit/scheduling-exec/index.html
-sudo chmod 644 /usr/share/cockpit/scheduling-exec/index.js
-sudo chmod -R 755 /usr/share/cockpit/scheduling-exec/scripts/
+sudo chmod 644 /usr/share/cockpit/scheduling_exec/manifest.json
+sudo chmod 644 /usr/share/cockpit/scheduling_exec/index.html
+sudo chmod 644 /usr/share/cockpit/scheduling_exec/index.js
+sudo chmod -R 755 /usr/share/cockpit/scheduling_exec/scripts/
 ```
 
 #### 4. Reiniciar o Cockpit
@@ -136,10 +137,10 @@ ls -la /usr/share/cockpit/
 sudo apt remove cockpit-scheduling-exec
 
 # Remover arquivos manualmente (se necessário)
-sudo rm -rf /usr/share/cockpit/scheduling-exec
+sudo rm -rf /usr/share/cockpit/scheduling_exec
 
 # Reinstalar
-sudo apt install ./cockpit-scheduling-exec_1.0.7_all.deb
+sudo apt install ./cockpit-scheduling-exec_1.0.8_all.deb
 
 # Reiniciar Cockpit
 sudo systemctl restart cockpit
@@ -155,12 +156,12 @@ git clone https://github.com/QuantumTecnology/cockpit-scheduling-exec.git
 cd cockpit-scheduling-exec
 
 # Copiar arquivos
-sudo mkdir -p /usr/share/cockpit/scheduling-exec
-sudo cp -r usr/share/cockpit/scheduling-exec/* /usr/share/cockpit/scheduling-exec/
+sudo mkdir -p /usr/share/cockpit/scheduling_exec
+sudo cp -r usr/share/cockpit/scheduling_exec/* /usr/share/cockpit/scheduling_exec/
 
 # Permissões
-sudo chmod 644 /usr/share/cockpit/scheduling-exec/*.{html,js,json}
-sudo chmod -R 755 /usr/share/cockpit/scheduling-exec/scripts/
+sudo chmod 644 /usr/share/cockpit/scheduling_exec/*.{html,js,json}
+sudo chmod -R 755 /usr/share/cockpit/scheduling_exec/scripts/
 
 # Reiniciar
 sudo systemctl restart cockpit
@@ -311,7 +312,7 @@ O plugin usa recursos do unpkg.com. Verifique se:
 
 ```bash
 # Verificar manifest.json
-cat /usr/share/cockpit/scheduling-exec/manifest.json | grep content-security-policy
+cat /usr/share/cockpit/scheduling_exec/manifest.json | grep content-security-policy
 ```
 
 Deve conter:

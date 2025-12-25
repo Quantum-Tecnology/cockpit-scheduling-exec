@@ -12,7 +12,7 @@ if [ -z "$SCRIPT_NAME" ] || [ -z "$CRON_EXPRESSION" ]; then
 fi
 
 SCRIPT_PATH="$SCRIPTS_DIR/$SCRIPT_NAME"
-EXECUTE_SCRIPT="/usr/share/cockpit/scheduling-exec/scripts/execute-script.sh"
+EXECUTE_SCRIPT="/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh"
 
 if [ ! -f "$SCRIPT_PATH" ]; then
     echo "Erro: Script não encontrado" >&2

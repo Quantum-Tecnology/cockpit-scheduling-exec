@@ -1,6 +1,6 @@
 {
   "version": 0,
-  "name": "scheduling-exec",
+  "name": "scheduling_exec",
   "description": "Gerenciador de Scripts Personalizados e Agendamentos",
   "requires": {
     "cockpit": ">=200"
@@ -8,7 +8,8 @@
   "menu": {
     "index": {
       "label": "Scripts & Agendamentos",
-      "order": 50
+      "order": 50,
+      "path": "index.html"
     }
   },
   "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com"

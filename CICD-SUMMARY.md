@@ -184,7 +184,7 @@ cockpit-scheduling-exec/
 ├── INDEX.md                        # ← ATUALIZADO: Links CI/CD
 │
 ├── DEBIAN/
-├── usr/share/cockpit/scheduling-exec/
+├── usr/share/cockpit/scheduling_exec/
 ├── (... outros arquivos existentes ...)
 │
 └── Documentação completa (8 arquivos .md)
