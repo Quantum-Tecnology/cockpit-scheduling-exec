@@ -79,6 +79,7 @@ jobs:
 
           mkdir -p "$REPO_DIR/pool/$COMPONENT/c/cockpit-scheduling-exec"
           mkdir -p "$REPO_DIR/dists/$CODENAME/$COMPONENT/binary-all"
+          mkdir -p "$REPO_DIR/dists/$CODENAME/$COMPONENT/binary-amd64"
 
           cp "build/cockpit-scheduling-exec_${{ steps.ver.outputs.version }}_all.deb" \
              "$REPO_DIR/pool/$COMPONENT/c/cockpit-scheduling-exec/"
@@ -88,7 +89,24 @@ jobs:
           dpkg-scanpackages -m pool /dev/null > "dists/$CODENAME/$COMPONENT/binary-all/Packages"
           gzip -k -f "dists/$CODENAME/$COMPONENT/binary-all/Packages"
 
-          apt-ftparchive release "dists/$CODENAME" > "dists/$CODENAME/Release"
+          # Alguns apt clients esperam o índice por arquitetura nativa.
+          # Como este pacote é Architecture: all, reutilizamos o mesmo índice em binary-amd64.
+          cp "dists/$CODENAME/$COMPONENT/binary-all/Packages" "dists/$CODENAME/$COMPONENT/binary-amd64/Packages"
+          gzip -k -f "dists/$CODENAME/$COMPONENT/binary-amd64/Packages"
+
+          # Release com campos esperados pelo apt (evita warning de distribuição vazia)
+          apt-ftparchive release "dists/$CODENAME" > "dists/$CODENAME/Release.tmp"
+          {
+            echo "Origin: QuantumTecnology"
+            echo "Label: cockpit-scheduling-exec"
+            echo "Suite: $CODENAME"
+            echo "Codename: $CODENAME"
+            echo "Architectures: amd64 all"
+            echo "Components: $COMPONENT"
+            echo "Description: cockpit-scheduling-exec APT repository"
+            cat "dists/$CODENAME/Release.tmp"
+          } > "dists/$CODENAME/Release"
+          rm -f "dists/$CODENAME/Release.tmp"
 
           # Página simples para facilitar validação do Pages
           cat > "index.html" <<'HTML'
@@ -133,10 +151,10 @@ jobs:
           gpg --batch --armor --export > apt-repo/gpg.key
 
           # Sign Release
-            gpg "${GPG_SIGN_OPTS[@]}" -abs -o "apt-repo/dists/stable/Release.gpg" "apt-repo/dists/stable/Release"
+          gpg "${GPG_SIGN_OPTS[@]}" -abs -o "apt-repo/dists/stable/Release.gpg" "apt-repo/dists/stable/Release"
 
           # Create InRelease
-            gpg "${GPG_SIGN_OPTS[@]}" --clearsign -o "apt-repo/dists/stable/InRelease" "apt-repo/dists/stable/Release"
+          gpg "${GPG_SIGN_OPTS[@]}" --clearsign -o "apt-repo/dists/stable/InRelease" "apt-repo/dists/stable/Release"
 
       - name: Publish to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v4

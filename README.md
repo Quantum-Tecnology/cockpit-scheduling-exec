@@ -49,13 +49,13 @@ Depois que o repositório APT deste projeto estiver publicado no GitHub Pages, v
 
 1. Importar a chave do repositório:
 ```bash
-curl -fsSL https://quantumtecnology.github.io/cockpit-scheduling-exec/gpg.key \
-  | sudo gpg --dearmor -o /usr/share/keyrings/cockpit-scheduling-exec-archive-keyring.gpg
+curl -fsSL https://quantum-tecnology.github.io/cockpit-scheduling-exec/gpg.key \
+  | sudo gpg --dearmor --yes -o /usr/share/keyrings/cockpit-scheduling-exec-archive-keyring.gpg
 ```
 
 2. Adicionar o repositório:
 ```bash
-echo "deb [signed-by=/usr/share/keyrings/cockpit-scheduling-exec-archive-keyring.gpg] https://quantumtecnology.github.io/cockpit-scheduling-exec stable main" \
+echo "deb [signed-by=/usr/share/keyrings/cockpit-scheduling-exec-archive-keyring.gpg] https://quantum-tecnology.github.io/cockpit-scheduling-exec stable main" \
   | sudo tee /etc/apt/sources.list.d/cockpit-scheduling-exec.list > /dev/null
 ```
 
