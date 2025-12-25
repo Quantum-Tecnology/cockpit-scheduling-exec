@@ -34,7 +34,7 @@ ls -la /usr/share/cockpit/scheduling-exec/
 
 **Se o diretório não existir:**
 ```bash
-sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.6_all.deb
+sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.7_all.deb
 ```
 
 #### 2. Verificar o manifest.json
@@ -139,7 +139,7 @@ sudo apt remove cockpit-scheduling-exec
 sudo rm -rf /usr/share/cockpit/scheduling-exec
 
 # Reinstalar
-sudo apt install ./cockpit-scheduling-exec_1.0.6_all.deb
+sudo apt install ./cockpit-scheduling-exec_1.0.7_all.deb
 
 # Reiniciar Cockpit
 sudo systemctl restart cockpit

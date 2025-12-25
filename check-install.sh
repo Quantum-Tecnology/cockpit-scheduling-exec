@@ -184,7 +184,7 @@ else
     echo -e "  ${RED}✗ Problemas encontrados!${NC}"
     echo ""
     echo "  Ações sugeridas:"
-    echo "  1. Reinstale o pacote: sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.6_all.deb"
+    echo "  1. Reinstale o pacote: sudo apt install --reinstall ./cockpit-scheduling-exec_1.0.7_all.deb"
     echo "  2. Verifique permissões: sudo chmod -R 644 /usr/share/cockpit/scheduling-exec/*"
     echo "  3. Reinicie o Cockpit: sudo systemctl restart cockpit"
 fi

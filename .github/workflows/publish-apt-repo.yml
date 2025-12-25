@@ -4,7 +4,12 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versão do pacote (ex: 1.0.7)'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -30,8 +35,21 @@ jobs:
 
       - name: Get version from tag
         id: ver
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
+          set -e
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="${INPUT_VERSION}"
+          fi
+
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version: '$VERSION' (expected x.y.z)" >&2
+            exit 1
+          fi
+
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Release version: $VERSION"
 
@@ -55,6 +73,10 @@ jobs:
           CODENAME="stable"
           COMPONENT="main"
 
+          # GitHub Pages/Jekyll: garante que arquivos sejam servidos como estão
+          mkdir -p "$REPO_DIR"
+          touch "$REPO_DIR/.nojekyll"
+
           mkdir -p "$REPO_DIR/pool/$COMPONENT/c/cockpit-scheduling-exec"
           mkdir -p "$REPO_DIR/dists/$CODENAME/$COMPONENT/binary-all"
 
@@ -67,6 +89,27 @@ jobs:
           gzip -k -f "dists/$CODENAME/$COMPONENT/binary-all/Packages"
 
           apt-ftparchive release "dists/$CODENAME" > "dists/$CODENAME/Release"
+
+          # Página simples para facilitar validação do Pages
+          cat > "index.html" <<'HTML'
+          <!doctype html>
+          <html lang="pt-BR">
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1" />
+              <title>cockpit-scheduling-exec APT</title>
+            </head>
+            <body>
+              <h1>Repositório APT: cockpit-scheduling-exec</h1>
+              <ul>
+                <li><a href="./gpg.key">gpg.key</a></li>
+                <li><a href="./dists/stable/Release">dists/stable/Release</a></li>
+                <li><a href="./dists/stable/InRelease">dists/stable/InRelease</a></li>
+                <li><a href="./dists/stable/main/binary-all/Packages.gz">Packages.gz</a></li>
+              </ul>
+            </body>
+          </html>
+          HTML
 
       - name: Import GPG key and sign Release
         env:

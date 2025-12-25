@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/build-debian.yml/badge.svg)
 ![Release](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/release.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.6-green.svg)
+![Version](https://img.shields.io/badge/version-1.0.7-green.svg)
 
 Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva.
 
@@ -37,10 +37,10 @@ Baixe o pacote .deb mais recente da [página de releases](https://github.com/Qua
 
 ```bash
 # Baixar última versão
-wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest/download/cockpit-scheduling-exec_1.0.6_all.deb
+wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest/download/cockpit-scheduling-exec_1.0.7_all.deb
 
 # Instalar
-sudo apt install ./cockpit-scheduling-exec_1.0.6_all.deb
+sudo apt install ./cockpit-scheduling-exec_1.0.7_all.deb
 ```
 
 ### Instalação via APT (repositório oficial)
@@ -235,12 +235,12 @@ Para maintainers:
 
 # 2. Commit e push
 git add .
-git commit -m "Release: v1.0.6"
+git commit -m "Release: v1.0.7"
 git push
 
 # 3. Criar e enviar tag
-git tag -a v1.0.6 -m "Release version 1.0.6"
-git push origin v1.0.6
+git tag -a v1.0.7 -m "Release version 1.0.7"
+git push origin v1.0.7
 
 # O GitHub Actions criará a release automaticamente
 ```
@@ -329,7 +329,7 @@ sudo systemctl restart cockpit
 7. **Se ainda não funcionar, reinstale:**
 ```bash
 sudo apt remove cockpit-scheduling-exec
-sudo apt install ./cockpit-scheduling-exec_1.0.6_all.deb
+sudo apt install ./cockpit-scheduling-exec_1.0.7_all.deb
 sudo systemctl restart cockpit
 ```
 

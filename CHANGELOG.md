@@ -5,6 +5,11 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.0.7] - 2025-12-25
+
+### Corrigido
+- Ajustes de publicação do repositório APT (nova tentativa de distribuição)
+
 ## [1.0.6] - 2025-12-25
 
 ### Corrigido

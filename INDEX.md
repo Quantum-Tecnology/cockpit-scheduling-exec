@@ -250,7 +250,7 @@ Você está aqui → INDEX.md
 
 ---
 
-**Versão**: 1.0.6  
+**Versão**: 1.0.7  
 **Última Atualização**: 25/12/2025  
 **Autor**: Gustavo Santarosa
 
