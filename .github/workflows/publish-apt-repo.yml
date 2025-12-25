@@ -25,7 +25,7 @@ jobs:
       - name: Install tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev apt-utils gnupg gzip rsync
+          sudo apt-get install -y dpkg-dev apt-utils gnupg gzip rsync fakeroot
 
       - name: Set permissions for scripts
         run: |
@@ -64,7 +64,7 @@ jobs:
           mkdir -p build pkgroot
           rsync -a --delete DEBIAN/ pkgroot/DEBIAN/
           rsync -a --delete usr/ pkgroot/usr/
-          dpkg-deb --build pkgroot build/cockpit-scheduling-exec_${{ steps.ver.outputs.version }}_all.deb
+          fakeroot -- sh -c 'chown -R root:root pkgroot || true; dpkg-deb --build pkgroot build/cockpit-scheduling-exec_${{ steps.ver.outputs.version }}_all.deb'
 
       - name: Build APT repository structure
         run: |

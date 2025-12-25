@@ -11,6 +11,11 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Migração do diretório do módulo Cockpit para `scheduling_exec` (evita problemas de detecção do pacote no Cockpit)
 - Padronização de caminhos/documentação para `/usr/share/cockpit/scheduling_exec`
 
+## [1.0.9] - 2025-12-25
+
+### Corrigido
+- `manifest.json` ajustado para `"version": 1` (melhora compatibilidade com Cockpit atual e visibilidade no menu)
+
 ## [1.0.7] - 2025-12-25
 
 ### Corrigido
