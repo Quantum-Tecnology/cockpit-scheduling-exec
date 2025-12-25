@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <title>Scripts & Agendamentos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../base1/patternfly.css" type="text/css" rel="stylesheet" />
+    <link
+      href="../base1/patternfly-addons.css"
+      type="text/css"
+      rel="stylesheet"
+    />
     <link href="../base1/cockpit.css" type="text/css" rel="stylesheet" />
     <script src="../base1/cockpit.js"></script>
     <script src="index.js"></script>
@@ -305,7 +311,7 @@
     </div>
 
     <div id="plugin-footer" class="plugin-footer">
-      v1.0.12 — Luis Gustavo Santarosa Pinto
+      v1.0.13 — Luis Gustavo Santarosa Pinto
     </div>
 
     <!-- Modal Importar Scripts -->
@@ -354,6 +360,11 @@
               <h2 class="pf-c-title pf-m-lg">Nenhum script encontrado</h2>
               <div class="pf-c-empty-state__body">
                 Nenhum arquivo .sh elegível foi encontrado para importação.
+                <br />
+                <small>
+                  Obs.: scripts que já estão em <code>~/scripts</code> não
+                  aparecem aqui.
+                </small>
               </div>
             </div>
           </div>

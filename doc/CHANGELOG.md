@@ -10,6 +10,16 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ### Corrigido
 - Adicionado `label` na raiz do `manifest.json` (melhora a integração com o menu/navegação do Cockpit)
 
+## [1.0.13] - 2025-12-25
+
+### Adicionado
+- Footer com versão do plugin e autor no canto inferior
+
+### Corrigido
+- Template volta a carregar PatternFly do Cockpit (`base1/patternfly*.css`), restaurando a estilização
+- Corrigido bind de eventos para salvar/criar script e salvar cron (evita falha ao clicar em "Salvar")
+- Corrigido scanner do modal de importação (volta a listar scripts .sh elegíveis no HOME)
+
 ## [1.0.12] - 2025-12-25
 
 ### Adicionado
