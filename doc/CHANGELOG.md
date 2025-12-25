@@ -5,16 +5,34 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [1.0.8] - 2025-12-25
+## [1.0.11] - 2025-12-25
 
 ### Corrigido
-- Migração do diretório do módulo Cockpit para `scheduling_exec` (evita problemas de detecção do pacote no Cockpit)
-- Padronização de caminhos/documentação para `/usr/share/cockpit/scheduling_exec`
+- Adicionado `label` na raiz do `manifest.json` (melhora a integração com o menu/navegação do Cockpit)
+
+## [1.0.12] - 2025-12-25
+
+### Adicionado
+- Botão "Buscar scripts" com modal para importar scripts existentes do HOME para `~/scripts`
+
+### Corrigido
+- UI passa a herdar o tema do Cockpit (remove dependência de PatternFly via CDN e evita cores hard-coded)
+
+## [1.0.10] - 2025-12-25
+
+### Corrigido
+- Removida a exigência de versão mínima do Cockpit no `manifest.json` (evita o módulo ser ignorado e não aparecer no menu)
 
 ## [1.0.9] - 2025-12-25
 
 ### Corrigido
 - `manifest.json` ajustado para `"version": 1` (melhora compatibilidade com Cockpit atual e visibilidade no menu)
+
+## [1.0.8] - 2025-12-25
+
+### Corrigido
+- Migração do diretório do módulo Cockpit para `scheduling_exec` (evita problemas de detecção do pacote no Cockpit)
+- Padronização de caminhos/documentação para `/usr/share/cockpit/scheduling_exec`
 
 ## [1.0.7] - 2025-12-25
 

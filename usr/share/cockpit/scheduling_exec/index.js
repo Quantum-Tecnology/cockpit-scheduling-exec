@@ -2,6 +2,123 @@
 const cockpit = window.cockpit;
 
 let currentEditingScript = null;
+let importCandidates = [];
+let eventHandlersBound = false;
+
+function updatePluginFooter() {
+  const footer = document.getElementById("plugin-footer");
+  if (!footer) return;
+
+  const fallbackVersion = "1.0.12";
+  const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
+
+  const format = (version, author) => `v${version} — ${author}`;
+  footer.textContent = format(fallbackVersion, fallbackAuthor);
+
+  if (!cockpit || typeof cockpit.file !== "function") return;
+
+  cockpit
+    .file("/usr/share/cockpit/scheduling_exec/manifest.json")
+    .read()
+    .then((content) => {
+      const manifest = JSON.parse(content);
+      const version = manifest["x-plugin-version"] || fallbackVersion;
+      const author = manifest["x-author"] || fallbackAuthor;
+      footer.textContent = format(version, author);
+    })
+    .catch(() => {
+      // Mantém fallback
+    });
+}
+
+function initEventHandlers() {
+  if (eventHandlersBound) return;
+  eventHandlersBound = true;
+
+  const scriptForm = document.getElementById("script-form");
+  if (scriptForm) {
+    scriptForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const scriptName = document.getElementById("script-name").value;
+      const scriptContent = document.getElementById("script-content").value;
+
+      if (!scriptName.endsWith(".sh")) {
+        showError("O nome do script deve terminar com .sh");
+        return;
+      }
+
+      showLoading(true);
+
+      const action = currentEditingScript ? "update" : "create";
+
+      cockpit
+        .spawn(
+          [
+            "/usr/share/cockpit/scheduling_exec/scripts/save-script.sh",
+            action,
+            scriptName,
+          ],
+          { err: "message" }
+        )
+        .input(scriptContent)
+        .then(() => {
+          showLoading(false);
+          closeScriptModal();
+          loadScripts();
+        })
+        .catch((error) => {
+          showLoading(false);
+          showError("Erro ao salvar script: " + error.message);
+        });
+    });
+  }
+
+  const cronForm = document.getElementById("cron-form");
+  if (cronForm) {
+    cronForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const scriptName = document.getElementById("cron-script-name").value;
+      const minute = document.getElementById("cron-minute").value;
+      const hour = document.getElementById("cron-hour").value;
+      const day = document.getElementById("cron-day").value;
+      const month = document.getElementById("cron-month").value;
+      const weekday = document.getElementById("cron-weekday").value;
+
+      const cronExpression = `${minute} ${hour} ${day} ${month} ${weekday}`;
+
+      showLoading(true);
+
+      cockpit
+        .spawn([
+          "/usr/share/cockpit/scheduling_exec/scripts/set-cron.sh",
+          scriptName,
+          cronExpression,
+        ])
+        .then(() => {
+          showLoading(false);
+          closeCronModal();
+          loadScripts();
+        })
+        .catch((error) => {
+          showLoading(false);
+          showError("Erro ao configurar agendamento: " + error.message);
+        });
+    });
+  }
+
+  // Fechar modais ao clicar fora deles
+  window.addEventListener("click", function (event) {
+    const scriptModal = document.getElementById("scriptModal");
+    const cronModal = document.getElementById("cronModal");
+    const importModal = document.getElementById("importModal");
+
+    if (event.target === scriptModal) closeScriptModal();
+    if (event.target === cronModal) closeCronModal();
+    if (event.target === importModal) closeImportModal();
+  });
+}
 
 // Função para mostrar mensagens de erro
 function showError(message) {
@@ -17,6 +134,24 @@ function showError(message) {
 // Função para mostrar loading
 function showLoading(show) {
   document.getElementById("loading").style.display = show ? "block" : "none";
+}
+
+function showImportLoading(show) {
+  document.getElementById("import-loading").style.display = show
+    ? "block"
+    : "none";
+}
+
+function showImportEmpty(show) {
+  document.getElementById("import-empty").style.display = show
+    ? "block"
+    : "none";
+}
+
+function showImportTable(show) {
+  document.getElementById("import-table-wrap").style.display = show
+    ? "block"
+    : "none";
 }
 
 // Função para formatar datas
@@ -61,7 +196,6 @@ function renderScripts(scripts) {
         <td colspan="8">
           <div class="pf-c-empty-state pf-m-sm">
             <div class="pf-c-empty-state__content">
-              <i class="fas fa-file-code pf-c-empty-state__icon" aria-hidden="true"></i>
               <h2 class="pf-c-title pf-m-lg">Nenhum script encontrado</h2>
               <div class="pf-c-empty-state__body">
                 Crie seu primeiro script personalizado para começar!
@@ -118,30 +252,117 @@ function renderScripts(scripts) {
         <div style="display: flex; gap: 4px; justify-content: center;">
           <button class="pf-c-button pf-m-primary pf-m-small" type="button" onclick="executeScript('${
             script.name
-          }')" title="Executar agora">
-            <i class="fas fa-play" aria-hidden="true"></i>
-          </button>
+          }')">Executar</button>
           <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="editScript('${
             script.name
-          }')" title="Editar">
-            <i class="fas fa-edit" aria-hidden="true"></i>
-          </button>
+          }')">Editar</button>
           <button class="pf-c-button pf-m-tertiary pf-m-small" type="button" onclick="openCronModal('${
             script.name
-          }')" title="Agendar">
-            <i class="fas fa-clock" aria-hidden="true"></i>
-          </button>
+          }')">Agendar</button>
           <button class="pf-c-button pf-m-danger pf-m-small" type="button" onclick="deleteScript('${
             script.name
-          }')" title="Excluir">
-            <i class="fas fa-trash" aria-hidden="true"></i>
-          </button>
+          }')">Excluir</button>
         </div>
       </td>
     `;
 
     tbody.appendChild(row);
   });
+}
+
+// ===== Importação de scripts =====
+function openImportModal() {
+  document.getElementById("importModal").style.display = "block";
+  loadImportCandidates();
+}
+
+function closeImportModal() {
+  document.getElementById("importModal").style.display = "none";
+  importCandidates = [];
+  const tbody = document.getElementById("import-body");
+  if (tbody) tbody.innerHTML = "";
+}
+
+function renderImportCandidates(candidates) {
+  const tbody = document.getElementById("import-body");
+  tbody.innerHTML = "";
+
+  candidates.forEach((c, idx) => {
+    const tr = document.createElement("tr");
+    tr.setAttribute("role", "row");
+    tr.innerHTML = `
+      <td role="cell" class="pf-m-fit-content" data-label="Selecionar">
+        <input type="checkbox" id="import-check-${idx}" />
+      </td>
+      <td role="cell" data-label="Nome"><strong>${c.name}</strong></td>
+      <td role="cell" data-label="Caminho"><code>${c.path}</code></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function loadImportCandidates() {
+  showImportLoading(true);
+  showImportEmpty(false);
+  showImportTable(false);
+
+  cockpit
+    .spawn(["/usr/share/cockpit/scheduling_exec/scripts/scan-user-scripts.sh"])
+    .then((output) => {
+      showImportLoading(false);
+      const candidates = JSON.parse(output);
+      importCandidates = candidates;
+
+      if (!candidates || candidates.length === 0) {
+        showImportEmpty(true);
+        return;
+      }
+
+      renderImportCandidates(candidates);
+      showImportTable(true);
+    })
+    .catch((error) => {
+      showImportLoading(false);
+      showError("Erro ao buscar scripts: " + error.message);
+      showImportEmpty(true);
+    });
+}
+
+function importSelectedScripts() {
+  const selected = [];
+  importCandidates.forEach((c, idx) => {
+    const checkbox = document.getElementById(`import-check-${idx}`);
+    if (checkbox && checkbox.checked) selected.push(c);
+  });
+
+  if (selected.length === 0) {
+    showError("Selecione pelo menos um script para importar");
+    return;
+  }
+
+  showImportLoading(true);
+
+  // Importa em série para manter simples
+  let chain = Promise.resolve();
+  selected.forEach((c) => {
+    chain = chain.then(() =>
+      cockpit.spawn([
+        "/usr/share/cockpit/scheduling_exec/scripts/import-user-script.sh",
+        c.path,
+      ])
+    );
+  });
+
+  chain
+    .then(() => {
+      showImportLoading(false);
+      closeImportModal();
+      loadScripts();
+    })
+    .catch((error) => {
+      showImportLoading(false);
+      showError("Erro ao importar scripts: " + error.message);
+    });
 }
 
 // Abrir modal de criação
@@ -185,43 +406,6 @@ function editScript(scriptName) {
       showError("Erro ao carregar script: " + error.message);
     });
 }
-
-// Salvar script (criar ou editar)
-document.getElementById("script-form").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const scriptName = document.getElementById("script-name").value;
-  const scriptContent = document.getElementById("script-content").value;
-
-  if (!scriptName.endsWith(".sh")) {
-    showError("O nome do script deve terminar com .sh");
-    return;
-  }
-
-  showLoading(true);
-
-  const action = currentEditingScript ? "update" : "create";
-
-  cockpit
-    .spawn(
-      [
-        "/usr/share/cockpit/scheduling_exec/scripts/save-script.sh",
-        action,
-        scriptName,
-      ],
-      { err: "message" }
-    )
-    .input(scriptContent)
-    .then(() => {
-      showLoading(false);
-      closeScriptModal();
-      loadScripts();
-    })
-    .catch((error) => {
-      showLoading(false);
-      showError("Erro ao salvar script: " + error.message);
-    });
-});
 
 // Excluir script
 function deleteScript(scriptName) {
@@ -333,38 +517,6 @@ function applyCronPreset() {
   }
 }
 
-// Salvar configuração de cron
-document.getElementById("cron-form").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const scriptName = document.getElementById("cron-script-name").value;
-  const minute = document.getElementById("cron-minute").value;
-  const hour = document.getElementById("cron-hour").value;
-  const day = document.getElementById("cron-day").value;
-  const month = document.getElementById("cron-month").value;
-  const weekday = document.getElementById("cron-weekday").value;
-
-  const cronExpression = `${minute} ${hour} ${day} ${month} ${weekday}`;
-
-  showLoading(true);
-
-  cockpit
-    .spawn([
-      "/usr/share/cockpit/scheduling_exec/scripts/set-cron.sh",
-      scriptName,
-      cronExpression,
-    ])
-    .then(() => {
-      showLoading(false);
-      closeCronModal();
-      loadScripts();
-    })
-    .catch((error) => {
-      showLoading(false);
-      showError("Erro ao configurar agendamento: " + error.message);
-    });
-});
-
 // Remover agendamento
 function removeCron() {
   const scriptName = document.getElementById("cron-script-name").value;
@@ -390,16 +542,3 @@ function removeCron() {
       showError("Erro ao remover agendamento: " + error.message);
     });
 }
-
-// Fechar modais ao clicar fora deles
-window.onclick = function (event) {
-  const scriptModal = document.getElementById("scriptModal");
-  const cronModal = document.getElementById("cronModal");
-
-  if (event.target === scriptModal) {
-    closeScriptModal();
-  }
-  if (event.target === cronModal) {
-    closeCronModal();
-  }
-};

@@ -5,13 +5,10 @@
     <title>Scripts & Agendamentos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="../base1/cockpit.css" type="text/css" rel="stylesheet" />
-    <link href="https://unpkg.com/@patternfly/patternfly@4/patternfly.min.css" rel="stylesheet" />
     <script src="../base1/cockpit.js"></script>
     <script src="index.js"></script>
     <style>
       body {
-        --pf-global--BackgroundColor--100: #f0f0f0;
-        background-color: var(--pf-global--BackgroundColor--100);
         margin: 0;
         padding: 0;
       }
@@ -98,64 +95,57 @@
         margin-bottom: var(--pf-global--spacer--lg);
       }
 
-      .stat-card {
-        background: white;
-        padding: var(--pf-global--spacer--md);
-        border-radius: var(--pf-global--BorderRadius--sm);
-        box-shadow: var(--pf-global--BoxShadow--sm);
-        text-align: center;
-      }
-
-      .stat-value {
-        font-size: 2rem;
-        font-weight: bold;
-        color: var(--pf-global--primary-color--100);
-      }
-
-      .stat-label {
-        font-size: 0.875rem;
+      .plugin-footer {
+        position: fixed;
+        right: var(--pf-global--spacer--md);
+        bottom: var(--pf-global--spacer--sm);
+        z-index: 10;
+        font-size: var(--pf-global--FontSize--xs);
         color: var(--pf-global--Color--200);
-        margin-top: var(--pf-global--spacer--xs);
-      }
-
-      .pf-c-empty-state {
-        text-align: center;
-        padding: var(--pf-global--spacer--2xl);
-      }
-
-      .pf-c-empty-state__icon {
-        font-size: 3rem;
-        color: var(--pf-global--Color--200);
-        margin-bottom: var(--pf-global--spacer--md);
+        user-select: text;
       }
     </style>
   </head>
   <body>
     <div class="pf-c-page">
       <main class="pf-c-page__main">
-
         <!-- Cabeçalho -->
-        <section class="pf-c-page__main-section pf-m-light">
+        <section class="pf-c-page__main-section">
           <div class="pf-l-split pf-m-gutter">
             <div class="pf-l-split__item pf-m-fill">
-              <h1 class="pf-c-title pf-m-2xl">Gerenciador de Scripts Personalizados</h1>
+              <h1 class="pf-c-title pf-m-2xl">
+                Gerenciador de Scripts Personalizados
+              </h1>
               <p class="pf-c-content">
-                <small>Crie, edite e agende scripts personalizados para execução automática</small>
+                <small
+                  >Crie, edite e agende scripts personalizados para execução
+                  automática</small
+                >
               </p>
             </div>
             <div class="pf-l-split__item">
-              <button class="pf-c-button pf-m-primary" type="button" onclick="openCreateModal()">
-                <span class="pf-c-button__icon pf-m-start">
-                  <i class="fas fa-plus" aria-hidden="true"></i>
-                </span>
-                Novo Script
-              </button>
+              <div style="display: flex; gap: var(--pf-global--spacer--sm)">
+                <button
+                  class="pf-c-button pf-m-secondary"
+                  type="button"
+                  onclick="openImportModal()"
+                >
+                  Buscar scripts
+                </button>
+                <button
+                  class="pf-c-button pf-m-primary"
+                  type="button"
+                  onclick="openCreateModal()"
+                >
+                  Novo Script
+                </button>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- Mensagens -->
-        <section class="pf-c-page__main-section" style="padding-top: 0;">
+        <section class="pf-c-page__main-section" style="padding-top: 0">
           <div id="loading" class="pf-c-empty-state" style="display: none">
             <div class="pf-c-empty-state__content">
               <div class="pf-c-spinner pf-m-xl" role="progressbar">
@@ -167,10 +157,11 @@
             </div>
           </div>
 
-          <div id="error-message" class="pf-c-alert pf-m-danger pf-m-inline" style="display: none; margin-bottom: var(--pf-global--spacer--md);">
-            <div class="pf-c-alert__icon">
-              <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
-            </div>
+          <div
+            id="error-message"
+            class="pf-c-alert pf-m-danger pf-m-inline"
+            style="display: none; margin-bottom: var(--pf-global--spacer--md)"
+          >
             <p class="pf-c-alert__title">
               <span class="pf-screen-reader">Erro: </span>
               <span id="error-text"></span>
@@ -182,7 +173,11 @@
         <section class="pf-c-page__main-section">
           <div class="pf-c-card">
             <div class="pf-c-card__body">
-              <table class="pf-c-table pf-m-compact pf-m-grid-md" role="grid" id="scripts-table">
+              <table
+                class="pf-c-table pf-m-compact pf-m-grid-md"
+                role="grid"
+                id="scripts-table"
+              >
                 <thead>
                   <tr role="row">
                     <th role="columnheader" scope="col">Nome do Script</th>
@@ -190,9 +185,15 @@
                     <th role="columnheader" scope="col">Última Execução</th>
                     <th role="columnheader" scope="col">Criado Em</th>
                     <th role="columnheader" scope="col">Atualizado Em</th>
-                    <th role="columnheader" scope="col" class="pf-m-center">Execuções</th>
-                    <th role="columnheader" scope="col" class="pf-m-center">Sucessos</th>
-                    <th role="columnheader" scope="col" class="pf-m-center">Ações</th>
+                    <th role="columnheader" scope="col" class="pf-m-center">
+                      Execuções
+                    </th>
+                    <th role="columnheader" scope="col" class="pf-m-center">
+                      Sucessos
+                    </th>
+                    <th role="columnheader" scope="col" class="pf-m-center">
+                      Ações
+                    </th>
                   </tr>
                 </thead>
                 <tbody role="rowgroup" id="scripts-body">
@@ -202,18 +203,26 @@
             </div>
           </div>
         </section>
-
       </main>
-    </div>
-
     </div>
 
     <!-- Modal Criar/Editar Script -->
     <div id="scriptModal" class="modal">
       <div class="modal-content">
         <div class="pf-c-modal-box__header">
-          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl" id="modal-title">Novo Script</h2>
-          <button class="close" onclick="closeScriptModal()" aria-label="Fechar">&times;</button>
+          <h2
+            class="pf-c-modal-box__title pf-c-title pf-m-2xl"
+            id="modal-title"
+          >
+            Novo Script
+          </h2>
+          <button
+            class="close"
+            onclick="closeScriptModal()"
+            aria-label="Fechar"
+          >
+            &times;
+          </button>
         </div>
 
         <div class="pf-c-modal-box__body">
@@ -223,7 +232,9 @@
                 <div class="pf-c-form__group-label">
                   <label class="pf-c-form__label" for="script-name">
                     <span class="pf-c-form__label-text">Nome do Script</span>
-                    <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+                    <span class="pf-c-form__label-required" aria-hidden="true"
+                      >*</span
+                    >
                   </label>
                 </div>
                 <div class="pf-c-form__group-control">
@@ -248,8 +259,12 @@
               <div class="pf-c-form__group">
                 <div class="pf-c-form__group-label">
                   <label class="pf-c-form__label" for="script-content">
-                    <span class="pf-c-form__label-text">Conteúdo do Script</span>
-                    <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+                    <span class="pf-c-form__label-text"
+                      >Conteúdo do Script</span
+                    >
+                    <span class="pf-c-form__label-required" aria-hidden="true"
+                      >*</span
+                    >
                   </label>
                 </div>
                 <div class="pf-c-form__group-control">
@@ -259,7 +274,9 @@
                     name="script-content"
                     required
                     rows="15"
-                    style="font-family: 'Red Hat Mono', 'Courier New', monospace;"
+                    style="
+                      font-family: 'Red Hat Mono', 'Courier New', monospace;
+                    "
                     placeholder="#!/bin/bash&#10;&#10;echo 'Olá Mundo'"
                   ></textarea>
                 </div>
@@ -269,11 +286,110 @@
         </div>
 
         <div class="pf-c-modal-box__footer">
-          <button type="button" class="pf-c-button pf-m-secondary" onclick="closeScriptModal()">
+          <button
+            type="button"
+            class="pf-c-button pf-m-secondary"
+            onclick="closeScriptModal()"
+          >
             Cancelar
           </button>
-          <button type="button" class="pf-c-button pf-m-primary" onclick="document.getElementById('script-form').requestSubmit()">
+          <button
+            type="button"
+            class="pf-c-button pf-m-primary"
+            onclick="document.getElementById('script-form').requestSubmit()"
+          >
             Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="plugin-footer" class="plugin-footer">
+      v1.0.12 — Luis Gustavo Santarosa Pinto
+    </div>
+
+    <!-- Modal Importar Scripts -->
+    <div id="importModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">
+            Importar scripts
+          </h2>
+          <button
+            class="close"
+            onclick="closeImportModal()"
+            aria-label="Fechar"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="pf-c-modal-box__body">
+          <p class="pf-c-content">
+            Selecione scripts <strong>.sh</strong> encontrados no seu
+            <strong>HOME</strong> para copiar para <code>~/scripts</code>.
+          </p>
+
+          <div
+            id="import-loading"
+            class="pf-c-empty-state"
+            style="display: none"
+          >
+            <div class="pf-c-empty-state__content">
+              <div class="pf-c-spinner pf-m-xl" role="progressbar">
+                <span class="pf-c-spinner__clipper"></span>
+                <span class="pf-c-spinner__lead-ball"></span>
+                <span class="pf-c-spinner__tail-ball"></span>
+              </div>
+              <h2 class="pf-c-title pf-m-lg">Buscando scripts...</h2>
+            </div>
+          </div>
+
+          <div
+            id="import-empty"
+            class="pf-c-empty-state pf-m-sm"
+            style="display: none"
+          >
+            <div class="pf-c-empty-state__content">
+              <h2 class="pf-c-title pf-m-lg">Nenhum script encontrado</h2>
+              <div class="pf-c-empty-state__body">
+                Nenhum arquivo .sh elegível foi encontrado para importação.
+              </div>
+            </div>
+          </div>
+
+          <div id="import-table-wrap" style="display: none">
+            <table class="pf-c-table pf-m-compact pf-m-grid-md" role="grid">
+              <thead>
+                <tr role="row">
+                  <th
+                    role="columnheader"
+                    scope="col"
+                    class="pf-m-fit-content"
+                  ></th>
+                  <th role="columnheader" scope="col">Nome</th>
+                  <th role="columnheader" scope="col">Caminho</th>
+                </tr>
+              </thead>
+              <tbody role="rowgroup" id="import-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            type="button"
+            onclick="closeImportModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            type="button"
+            onclick="importSelectedScripts()"
+          >
+            Importar selecionados
           </button>
         </div>
       </div>
@@ -283,13 +399,21 @@
     <div id="cronModal" class="modal">
       <div class="modal-content">
         <div class="pf-c-modal-box__header">
-          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">Configurar Agendamento</h2>
-          <button class="close" onclick="closeCronModal()" aria-label="Fechar">&times;</button>
+          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">
+            Configurar Agendamento
+          </h2>
+          <button class="close" onclick="closeCronModal()" aria-label="Fechar">
+            &times;
+          </button>
         </div>
 
         <div class="pf-c-modal-box__body">
           <form id="cron-form">
-            <input type="hidden" id="cron-script-name" name="cron-script-name" />
+            <input
+              type="hidden"
+              id="cron-script-name"
+              name="cron-script-name"
+            />
 
             <div class="pf-c-form">
               <div class="pf-c-form__group">
@@ -304,7 +428,13 @@
                       <label class="pf-c-form__label" for="cron-minute">
                         <span class="pf-c-form__label-text">Minuto</span>
                       </label>
-                      <input class="pf-c-form-control" type="text" id="cron-minute" placeholder="*" value="*" />
+                      <input
+                        class="pf-c-form-control"
+                        type="text"
+                        id="cron-minute"
+                        placeholder="*"
+                        value="*"
+                      />
                       <p class="pf-c-form__helper-text">
                         <span class="pf-c-form__helper-text-icon">
                           <i class="fas fa-info-circle" aria-hidden="true"></i>
@@ -316,7 +446,13 @@
                       <label class="pf-c-form__label" for="cron-hour">
                         <span class="pf-c-form__label-text">Hora</span>
                       </label>
-                      <input class="pf-c-form-control" type="text" id="cron-hour" placeholder="*" value="*" />
+                      <input
+                        class="pf-c-form-control"
+                        type="text"
+                        id="cron-hour"
+                        placeholder="*"
+                        value="*"
+                      />
                       <p class="pf-c-form__helper-text">
                         <span class="pf-c-form__helper-text-icon">
                           <i class="fas fa-info-circle" aria-hidden="true"></i>
@@ -328,7 +464,13 @@
                       <label class="pf-c-form__label" for="cron-day">
                         <span class="pf-c-form__label-text">Dia</span>
                       </label>
-                      <input class="pf-c-form-control" type="text" id="cron-day" placeholder="*" value="*" />
+                      <input
+                        class="pf-c-form-control"
+                        type="text"
+                        id="cron-day"
+                        placeholder="*"
+                        value="*"
+                      />
                       <p class="pf-c-form__helper-text">
                         <span class="pf-c-form__helper-text-icon">
                           <i class="fas fa-info-circle" aria-hidden="true"></i>
@@ -340,7 +482,13 @@
                       <label class="pf-c-form__label" for="cron-month">
                         <span class="pf-c-form__label-text">Mês</span>
                       </label>
-                      <input class="pf-c-form-control" type="text" id="cron-month" placeholder="*" value="*" />
+                      <input
+                        class="pf-c-form-control"
+                        type="text"
+                        id="cron-month"
+                        placeholder="*"
+                        value="*"
+                      />
                       <p class="pf-c-form__helper-text">
                         <span class="pf-c-form__helper-text-icon">
                           <i class="fas fa-info-circle" aria-hidden="true"></i>
@@ -352,7 +500,13 @@
                       <label class="pf-c-form__label" for="cron-weekday">
                         <span class="pf-c-form__label-text">Dia Semana</span>
                       </label>
-                      <input class="pf-c-form-control" type="text" id="cron-weekday" placeholder="*" value="*" />
+                      <input
+                        class="pf-c-form-control"
+                        type="text"
+                        id="cron-weekday"
+                        placeholder="*"
+                        value="*"
+                      />
                       <p class="pf-c-form__helper-text">
                         <span class="pf-c-form__helper-text-icon">
                           <i class="fas fa-info-circle" aria-hidden="true"></i>
@@ -364,12 +518,18 @@
 
                   <div class="cron-helper">
                     <strong>Exemplos de expressões cron:</strong>
-                    <ul style="margin: 8px 0; padding-left: 20px;">
+                    <ul style="margin: 8px 0; padding-left: 20px">
                       <li><code>* * * * *</code> - A cada minuto</li>
                       <li><code>0 * * * *</code> - A cada hora</li>
                       <li><code>0 0 * * *</code> - Diariamente à meia-noite</li>
-                      <li><code>0 0 * * 0</code> - Semanalmente aos domingos à meia-noite</li>
-                      <li><code>0 0 1 * *</code> - Mensalmente no dia 1 à meia-noite</li>
+                      <li>
+                        <code>0 0 * * 0</code> - Semanalmente aos domingos à
+                        meia-noite
+                      </li>
+                      <li>
+                        <code>0 0 1 * *</code> - Mensalmente no dia 1 à
+                        meia-noite
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -378,11 +538,17 @@
               <div class="pf-c-form__group">
                 <div class="pf-c-form__group-label">
                   <label class="pf-c-form__label" for="cron-preset">
-                    <span class="pf-c-form__label-text">Ou escolha um modelo</span>
+                    <span class="pf-c-form__label-text"
+                      >Ou escolha um modelo</span
+                    >
                   </label>
                 </div>
                 <div class="pf-c-form__group-control">
-                  <select class="pf-c-form-control" id="cron-preset" onchange="applyCronPreset()">
+                  <select
+                    class="pf-c-form-control"
+                    id="cron-preset"
+                    onchange="applyCronPreset()"
+                  >
                     <option value="">-- Selecione um modelo --</option>
                     <option value="* * * * *">A cada minuto</option>
                     <option value="*/5 * * * *">A cada 5 minutos</option>
@@ -399,13 +565,25 @@
         </div>
 
         <div class="pf-c-modal-box__footer">
-          <button type="button" class="pf-c-button pf-m-link" onclick="closeCronModal()">
+          <button
+            type="button"
+            class="pf-c-button pf-m-link"
+            onclick="closeCronModal()"
+          >
             Cancelar
           </button>
-          <button type="button" class="pf-c-button pf-m-warning" onclick="removeCron()">
+          <button
+            type="button"
+            class="pf-c-button pf-m-warning"
+            onclick="removeCron()"
+          >
             Remover Agendamento
           </button>
-          <button type="button" class="pf-c-button pf-m-primary" onclick="document.getElementById('cron-form').requestSubmit()">
+          <button
+            type="button"
+            class="pf-c-button pf-m-primary"
+            onclick="document.getElementById('cron-form').requestSubmit()"
+          >
             Salvar Agendamento
           </button>
         </div>
@@ -415,6 +593,12 @@
     <script>
       // Inicializar ao carregar a página
       document.addEventListener("DOMContentLoaded", function () {
+        if (typeof initEventHandlers === "function") {
+          initEventHandlers();
+        }
+        if (typeof updatePluginFooter === "function") {
+          updatePluginFooter();
+        }
         loadScripts();
       });
     </script>

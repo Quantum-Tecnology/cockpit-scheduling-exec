@@ -1,10 +1,10 @@
 {
   "version": 1,
   "name": "scheduling_exec",
+  "label": "Scripts & Agendamentos",
+  "x-plugin-version": "1.0.12",
+  "x-author": "Luis Gustavo Santarosa Pinto",
   "description": "Gerenciador de Scripts Personalizados e Agendamentos",
-  "requires": {
-    "cockpit": ">=200"
-  },
   "menu": {
     "index": {
       "label": "Scripts & Agendamentos",
