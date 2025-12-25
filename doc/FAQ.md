@@ -7,17 +7,16 @@
 **Opção 1: Via pacote Debian (recomendado)**
 ```bash
 cd cockpit-scheduling-exec
-chmod +x build.sh
-./build.sh
-cd ..
-sudo apt install ./cockpit-scheduling-exec.deb
+chmod +x scripts/build.sh
+./scripts/build.sh
+sudo apt install ./build/cockpit-scheduling-exec_*_all.deb
 ```
 
 **Opção 2: Instalação manual**
 ```bash
 cd cockpit-scheduling-exec
-chmod +x install-manual.sh
-sudo ./install-manual.sh
+chmod +x scripts/install-manual.sh
+sudo ./scripts/install-manual.sh
 ```
 
 ### O plugin não aparece no menu do Cockpit
@@ -327,11 +326,12 @@ Sim! Os scripts em `~/scripts/` e metadados em `~/.scripts-metadata/` são prese
 
 ```bash
 # Se instalou via pacote .deb
-sudo apt install ./cockpit-scheduling-exec.deb
+sudo apt install ./build/cockpit-scheduling-exec_*_all.deb
 
 # Se instalou manualmente
 cd cockpit-scheduling-exec
-sudo ./install-manual.sh
+chmod +x scripts/install-manual.sh
+sudo ./scripts/install-manual.sh
 ```
 
 Seus scripts e dados não são afetados.

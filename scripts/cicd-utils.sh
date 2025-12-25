@@ -4,6 +4,10 @@
 
 set -e
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+cd "$REPO_ROOT"
+
 # Cores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -59,14 +63,14 @@ check_clean_working_tree() {
 build_local() {
     print_info "Construindo pacote localmente..."
 
-    if [ ! -x build.sh ]; then
-        chmod +x build.sh
+    if [ ! -x scripts/build.sh ]; then
+        chmod +x scripts/build.sh
     fi
 
-    ./build.sh
+    ./scripts/build.sh
 
     print_success "Pacote construído com sucesso!"
-    ls -lh ../cockpit-scheduling-exec*.deb
+    ls -lh build/cockpit-scheduling-exec_*_all.deb
 }
 
 # Função para criar release
@@ -86,15 +90,15 @@ create_release() {
     sed -i "s/^Version: .*/Version: $version/" DEBIAN/control
 
     # Verificar se CHANGELOG foi atualizado
-    if ! grep -q "\[$version\]" CHANGELOG.md; then
-        print_warning "CHANGELOG.md não contém versão $version"
-        print_info "Atualize CHANGELOG.md antes de continuar"
+    if ! grep -q "\[$version\]" doc/CHANGELOG.md; then
+        print_warning "doc/CHANGELOG.md não contém versão $version"
+        print_info "Atualize doc/CHANGELOG.md antes de continuar"
         exit 1
     fi
 
     # Commit mudanças
     print_info "Fazendo commit das mudanças..."
-    git add DEBIAN/control
+    git add DEBIAN/control doc/CHANGELOG.md
     git commit -m "Release: Version $version"
 
     # Criar tag

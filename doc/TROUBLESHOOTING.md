@@ -12,7 +12,7 @@ Após instalar o pacote `.deb`, o módulo "Scripts & Agendamentos" não aparece 
 Execute o script de verificação para identificar o problema:
 
 ```bash
-wget https://raw.githubusercontent.com/QuantumTecnology/cockpit-scheduling-exec/main/check-install.sh
+wget https://raw.githubusercontent.com/QuantumTecnology/cockpit-scheduling-exec/main/scripts/check-install.sh -O check-install.sh
 chmod +x check-install.sh
 ./check-install.sh
 ```

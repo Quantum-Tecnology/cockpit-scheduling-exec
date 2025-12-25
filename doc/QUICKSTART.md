@@ -7,20 +7,19 @@
 ```bash
 # 1. Construir o pacote
 cd cockpit-scheduling-exec
-chmod +x build.sh
-./build.sh
+chmod +x scripts/build.sh
+./scripts/build.sh
 
 # 2. Instalar
-cd ..
-sudo apt install ./cockpit-scheduling-exec.deb
+sudo apt install ./build/cockpit-scheduling-exec_*_all.deb
 ```
 
 ### Método 2: Instalação Manual
 
 ```bash
 cd cockpit-scheduling-exec
-chmod +x install-manual.sh
-sudo ./install-manual.sh
+chmod +x scripts/install-manual.sh
+sudo ./scripts/install-manual.sh
 ```
 
 ## 📋 Pré-requisitos
@@ -133,8 +132,8 @@ sudo apt remove cockpit-scheduling-exec
 
 # Manual
 cd cockpit-scheduling-exec
-chmod +x uninstall.sh
-sudo ./uninstall.sh
+chmod +x scripts/uninstall.sh
+sudo ./scripts/uninstall.sh
 ```
 
 ## 💡 Dicas

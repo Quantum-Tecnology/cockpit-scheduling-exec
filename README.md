@@ -84,19 +84,18 @@ cd cockpit-scheduling-exec
 
 2. Construa o pacote .deb:
 ```bash
-chmod +x build.sh
-./build.sh
+chmod +x scripts/build.sh
+./scripts/build.sh
 ```
 
 3. Instale o pacote:
 ```bash
-cd ..
-sudo apt install ./cockpit-scheduling-exec.deb
+sudo apt install ./build/cockpit-scheduling-exec_*_all.deb
 ```
 
 Ou usando dpkg:
 ```bash
-sudo dpkg -i cockpit-scheduling-exec.deb
+sudo dpkg -i build/cockpit-scheduling-exec_*_all.deb
 sudo apt-get install -f  # Resolve dependências se necessário
 ```
 
@@ -231,7 +230,7 @@ Este projeto usa GitHub Actions para build automático:
 Para maintainers:
 
 ```bash
-# 1. Atualizar CHANGELOG.md
+# 1. Atualizar doc/CHANGELOG.md
 
 # 2. Commit e push
 git add .
@@ -245,7 +244,7 @@ git push origin v1.0.8
 # O GitHub Actions criará a release automaticamente
 ```
 
-Veja [.github/README.md](.github/README.md) para mais detalhes sobre CI/CD.
+Veja [doc/GITHUB.md](doc/GITHUB.md) para mais detalhes sobre CI/CD.
 
 ## 🛠️ Desenvolvimento
 
@@ -290,7 +289,7 @@ Se o plugin não aparecer no menu lateral após a instalação, execute o script
 
 ```bash
 # Baixar e executar o script de verificação
-wget https://raw.githubusercontent.com/QuantumTecnology/cockpit-scheduling-exec/main/check-install.sh
+wget https://raw.githubusercontent.com/QuantumTecnology/cockpit-scheduling-exec/main/scripts/check-install.sh -O check-install.sh
 chmod +x check-install.sh
 ./check-install.sh
 ```

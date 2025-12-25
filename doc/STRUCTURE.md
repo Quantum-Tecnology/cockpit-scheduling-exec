@@ -27,16 +27,17 @@ cockpit-scheduling-exec/
 │       ├── remove-cron.sh                  # Remove config cron
 │       └── rotina.sh                       # Script de exemplo
 │
-├── 🔧 build.sh                             # Construir pacote .deb
-├── 📦 install-manual.sh                    # Instalação manual
-├── 🗑️ uninstall.sh                         # Desinstalação
+├── 🔧 scripts/                             # Scripts utilitários
+│   ├── build.sh                            # Construir pacote .deb
+│   ├── install-manual.sh                   # Instalação manual
+│   ├── uninstall.sh                        # Desinstalação
+│   ├── check-install.sh                    # Diagnóstico
+│   ├── cicd-utils.sh                       # Utilitários CI/CD
+│   └── download-and-install.sh             # Baixar artefato do Actions
 │
 ├── 📚 Documentação
-│   ├── README.md                           # Documentação completa
-│   ├── QUICKSTART.md                       # Guia de início rápido
-│   ├── CHANGELOG.md                        # Histórico de versões
-│   ├── CONTRIBUTING.md                     # Guia de contribuição
-│   └── STRUCTURE.md                        # Este arquivo
+│   ├── README.md                           # Documentação completa (raiz)
+│   └── doc/                                # Demais documentos
 │
 ├── 📜 LICENSE                              # Licença MIT
 └── 🚫 .gitignore                           # Arquivos ignorados pelo Git

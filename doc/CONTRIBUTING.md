@@ -43,8 +43,9 @@ Para sugerir novas funcionalidades:
 
 5. **Teste** suas alterações:
    ```bash
-   chmod +x install-manual.sh
-   sudo ./install-manual.sh
+   cd cockpit-scheduling-exec
+   chmod +x scripts/install-manual.sh
+   sudo ./scripts/install-manual.sh
    # Teste no Cockpit
    ```
 
@@ -131,7 +132,7 @@ Antes de enviar um PR, teste:
 
 1. **Instalação**:
    ```bash
-   sudo ./install-manual.sh
+   sudo ./scripts/install-manual.sh
    ```
 
 2. **Funcionalidades básicas**:
@@ -173,13 +174,20 @@ cockpit-scheduling-exec/
 │       ├── set-cron.sh
 │       ├── remove-cron.sh
 │       └── rotina.sh
-├── build.sh             # Construir pacote .deb
-├── install-manual.sh    # Instalação manual
-├── uninstall.sh         # Desinstalação
+├── scripts/             # Scripts utilitários
+│   ├── build.sh
+│   ├── install-manual.sh
+│   ├── uninstall.sh
+│   ├── check-install.sh
+│   ├── cicd-utils.sh
+│   └── download-and-install.sh
+├── doc/                 # Documentação
+│   ├── QUICKSTART.md
+│   ├── FAQ.md
+│   ├── TROUBLESHOOTING.md
+│   ├── CHANGELOG.md
+│   └── ...
 ├── README.md
-├── QUICKSTART.md
-├── CHANGELOG.md
-├── CONTRIBUTING.md
 └── LICENSE
 ```
 

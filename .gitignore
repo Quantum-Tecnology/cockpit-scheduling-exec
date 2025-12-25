@@ -6,6 +6,10 @@
 # Build directory
 build/
 
+# Staging local (usado por builds/CI)
+pkgroot/
+apt-repo/
+
 # Arquivos temporários
 *.log
 *.tmp

@@ -191,8 +191,8 @@ Os workflows precisam de:
 
 1. **Teste localmente antes de fazer push**
    ```bash
-   chmod +x build.sh
-   ./build.sh
+   chmod +x scripts/build.sh
+   ./scripts/build.sh
    ```
 
 2. **Use tags semânticas**
@@ -200,7 +200,7 @@ Os workflows precisam de:
    - `v1.1.0` - Minor release (nova funcionalidade)
    - `v1.0.1` - Patch release (bug fix)
 
-3. **Mantenha CHANGELOG atualizado**
+3. **Mantenha doc/CHANGELOG atualizado**
    - Documente todas as mudanças
    - Facilita criar release notes
 

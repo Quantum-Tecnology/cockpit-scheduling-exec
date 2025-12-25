@@ -63,9 +63,9 @@ Para começar imediatamente:
 - **DEBIAN/control** - Metadados do pacote Debian
 - **DEBIAN/postinst** - Script pós-instalação
 - **DEBIAN/prerm** - Script pré-remoção
-- **build.sh** - Construir pacote .deb
-- **install-manual.sh** - Instalação manual
-- **uninstall.sh** - Desinstalação
+- **scripts/build.sh** - Construir pacote .deb
+- **scripts/install-manual.sh** - Instalação manual
+- **scripts/uninstall.sh** - Desinstalação
 
 ### Frontend (Interface Web)
 

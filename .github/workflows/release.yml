@@ -83,7 +83,7 @@ jobs:
             ### 📚 Documentação
 
             - [README](https://github.com/${{ github.repository }}/blob/main/README.md)
-            - [Quick Start](https://github.com/${{ github.repository }}/blob/main/QUICKSTART.md)
-            - [FAQ](https://github.com/${{ github.repository }}/blob/main/FAQ.md)
+            - [Quick Start](https://github.com/${{ github.repository }}/blob/main/doc/QUICKSTART.md)
+            - [FAQ](https://github.com/${{ github.repository }}/blob/main/doc/FAQ.md)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

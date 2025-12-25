@@ -83,8 +83,8 @@ git push origin main
 #### Passo 1: Preparar Release
 
 ```bash
-# Atualizar CHANGELOG.md
-cat >> CHANGELOG.md << 'EOF'
+# Atualizar doc/CHANGELOG.md
+cat >> doc/CHANGELOG.md << 'EOF'
 
 ## [1.0.1] - 2025-12-24
 
@@ -96,7 +96,7 @@ cat >> CHANGELOG.md << 'EOF'
 EOF
 
 # Commit
-git add CHANGELOG.md
+git add doc/CHANGELOG.md
 git commit -m "Docs: Update changelog for v1.0.1"
 git push
 ```
@@ -283,11 +283,11 @@ Ver em: Actions → Insights
 
 ```bash
 # Sempre teste antes de push
-chmod +x build.sh
-./build.sh
+chmod +x scripts/build.sh
+./scripts/build.sh
 
 # Instale e teste
-sudo apt install ./cockpit-scheduling-exec.deb
+sudo apt install ./build/cockpit-scheduling-exec_*_all.deb
 ```
 
 ### 2. Commits Semânticos
@@ -307,7 +307,7 @@ git commit -m "Docs: Atualizar documentação"
 
 ### 4. Changelog Atualizado
 
-Sempre atualize CHANGELOG.md antes de criar tag:
+Sempre atualize doc/CHANGELOG.md antes de criar tag:
 ```markdown
 ## [1.0.1] - 2025-12-24
 
@@ -345,7 +345,7 @@ gh run list
 gh run view --log
 
 # Criar release manualmente
-gh release create v1.0.1 ./cockpit-scheduling-exec.deb
+gh release create v1.0.1 ./build/cockpit-scheduling-exec_1.0.1_all.deb
 
 # Listar releases
 gh release list
@@ -353,4 +353,4 @@ gh release list
 
 ---
 
-**Dúvidas?** Veja [.github/README.md](.github/README.md) ou abra uma issue!
+**Dúvidas?** Veja [doc/GITHUB.md](GITHUB.md) ou abra uma issue!
