@@ -10,5 +10,6 @@
       "label": "Scripts & Agendamentos",
       "order": 50
     }
-  }
+  },
+  "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com"
 }

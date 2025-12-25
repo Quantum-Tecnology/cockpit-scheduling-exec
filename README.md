@@ -257,18 +257,50 @@ $HOME/.scripts-metadata/<nome-do-script>.log
 
 ### Plugin não aparece no menu do Cockpit
 
-1. Verifique se o Cockpit está rodando:
+Se o plugin não aparecer no menu lateral após a instalação, execute o script de verificação:
+
+```bash
+# Baixar e executar o script de verificação
+wget https://raw.githubusercontent.com/QuantumTecnology/cockpit-scheduling-exec/main/check-install.sh
+chmod +x check-install.sh
+./check-install.sh
+```
+
+Ou verifique manualmente:
+
+1. **Verifique se o Cockpit está rodando:**
 ```bash
 sudo systemctl status cockpit
 ```
 
-2. Verifique se os arquivos foram copiados corretamente:
+2. **Verifique se os arquivos foram instalados:**
 ```bash
 ls -la /usr/share/cockpit/scheduling-exec/
 ```
+Devem existir: `manifest.json`, `index.html`, `index.js` e pasta `scripts/`
 
-3. Reinicie o Cockpit:
+3. **Verifique o conteúdo do manifest.json:**
 ```bash
+cat /usr/share/cockpit/scheduling-exec/manifest.json
+```
+Deve conter o campo `"menu"` com a entrada `"index"`.
+
+4. **Reinicie o Cockpit:**
+```bash
+sudo systemctl restart cockpit
+```
+
+5. **Limpe o cache do navegador:**
+   - Pressione `Ctrl+Shift+Del`
+   - Selecione "Imagens e arquivos em cache"
+   - Clique em "Limpar dados"
+
+6. **Faça logout e login novamente no Cockpit**
+
+7. **Se ainda não funcionar, reinstale:**
+```bash
+sudo apt remove cockpit-scheduling-exec
+sudo apt install ./cockpit-scheduling-exec_1.0.5_all.deb
 sudo systemctl restart cockpit
 ```
 
