@@ -1,0 +1,104 @@
+name: Publish APT Repository
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev apt-utils gnupg gzip rsync
+
+      - name: Set permissions for scripts
+        run: |
+          chmod +x usr/share/cockpit/scheduling-exec/scripts/*.sh || true
+          chmod +x DEBIAN/postinst || true
+          chmod +x DEBIAN/prerm || true
+
+      - name: Get version from tag
+        id: ver
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Release version: $VERSION"
+
+      - name: Update version in control file
+        run: |
+          sed -i "s/^Version: .*/Version: ${{ steps.ver.outputs.version }}/" DEBIAN/control
+          grep -E "^(Package|Version|Architecture|Depends):" DEBIAN/control
+
+      - name: Build Debian package (staging)
+        run: |
+          set -e
+          mkdir -p build pkgroot
+          rsync -a --delete DEBIAN/ pkgroot/DEBIAN/
+          rsync -a --delete usr/ pkgroot/usr/
+          dpkg-deb --build pkgroot build/cockpit-scheduling-exec_${{ steps.ver.outputs.version }}_all.deb
+
+      - name: Build APT repository structure
+        run: |
+          set -e
+          REPO_DIR="apt-repo"
+          CODENAME="stable"
+          COMPONENT="main"
+
+          mkdir -p "$REPO_DIR/pool/$COMPONENT/c/cockpit-scheduling-exec"
+          mkdir -p "$REPO_DIR/dists/$CODENAME/$COMPONENT/binary-all"
+
+          cp "build/cockpit-scheduling-exec_${{ steps.ver.outputs.version }}_all.deb" \
+             "$REPO_DIR/pool/$COMPONENT/c/cockpit-scheduling-exec/"
+
+          cd "$REPO_DIR"
+
+          dpkg-scanpackages -m pool /dev/null > "dists/$CODENAME/$COMPONENT/binary-all/Packages"
+          gzip -k -f "dists/$CODENAME/$COMPONENT/binary-all/Packages"
+
+          apt-ftparchive release "dists/$CODENAME" > "dists/$CODENAME/Release"
+
+      - name: Import GPG key and sign Release
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: |
+          set -e
+          if [ -z "$APT_GPG_PRIVATE_KEY" ]; then
+            echo "Missing secret APT_GPG_PRIVATE_KEY" >&2
+            exit 1
+          fi
+
+          echo "$APT_GPG_PRIVATE_KEY" | gpg --batch --import
+
+          GPG_SIGN_OPTS=(--batch --yes)
+          if [ -n "$APT_GPG_PASSPHRASE" ]; then
+            GPG_SIGN_OPTS+=(--pinentry-mode loopback --passphrase "$APT_GPG_PASSPHRASE")
+          fi
+
+          # Public key for clients
+          gpg --batch --armor --export > apt-repo/gpg.key
+
+          # Sign Release
+            gpg "${GPG_SIGN_OPTS[@]}" -abs -o "apt-repo/dists/stable/Release.gpg" "apt-repo/dists/stable/Release"
+
+          # Create InRelease
+            gpg "${GPG_SIGN_OPTS[@]}" --clearsign -o "apt-repo/dists/stable/InRelease" "apt-repo/dists/stable/Release"
+
+      - name: Publish to GitHub Pages (gh-pages)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: apt-repo
+          publish_branch: gh-pages
+          force_orphan: true

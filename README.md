@@ -43,6 +43,35 @@ wget https://github.com/QuantumTecnology/cockpit-scheduling-exec/releases/latest
 sudo apt install ./cockpit-scheduling-exec_1.0.3_all.deb
 ```
 
+### Instalação via APT (repositório oficial)
+
+Depois que o repositório APT deste projeto estiver publicado no GitHub Pages, você pode instalar sem baixar o `.deb` manualmente.
+
+1. Importar a chave do repositório:
+```bash
+curl -fsSL https://quantumtecnology.github.io/cockpit-scheduling-exec/gpg.key \
+  | sudo gpg --dearmor -o /usr/share/keyrings/cockpit-scheduling-exec-archive-keyring.gpg
+```
+
+2. Adicionar o repositório:
+```bash
+echo "deb [signed-by=/usr/share/keyrings/cockpit-scheduling-exec-archive-keyring.gpg] https://quantumtecnology.github.io/cockpit-scheduling-exec stable main" \
+  | sudo tee /etc/apt/sources.list.d/cockpit-scheduling-exec.list > /dev/null
+```
+
+3. Instalar:
+```bash
+sudo apt update
+sudo apt install cockpit-scheduling-exec
+```
+
+Atualização:
+```bash
+sudo apt update
+sudo apt upgrade
+```
+```
+
 ### Construir o Pacote Debian
 
 Se preferir construir o pacote você mesmo:
