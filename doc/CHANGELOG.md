@@ -5,18 +5,19 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [1.0.11] - 2025-12-25
-
-### Corrigido
-- Adicionado `label` na raiz do `manifest.json` (melhora a integração com o menu/navegação do Cockpit)
-
 ## [1.0.13] - 2025-12-25
+
+## [1.0.14] - 2025-12-25
+
+### Alterado
+- Bump de versão para 1.0.14
 
 ### Adicionado
 - Footer com versão do plugin e autor no canto inferior
 
 ### Corrigido
-- Template volta a carregar PatternFly do Cockpit (`base1/patternfly*.css`), restaurando a estilização
+- Carregamento de CSS mais resiliente (tenta `shell/` e `branding/`, depois `base1/`/`static/`, com fallback via unpkg quando necessário)
+- CSP explicitado para permitir CSS/fontes do unpkg (e `data:`) quando necessário
 - Corrigido bind de eventos para salvar/criar script e salvar cron (evita falha ao clicar em "Salvar")
 - Corrigido scanner do modal de importação (volta a listar scripts .sh elegíveis no HOME)
 
@@ -27,6 +28,11 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### Corrigido
 - UI passa a herdar o tema do Cockpit (remove dependência de PatternFly via CDN e evita cores hard-coded)
+
+## [1.0.11] - 2025-12-25
+
+### Corrigido
+- Adicionado `label` na raiz do `manifest.json` (melhora a integração com o menu/navegação do Cockpit)
 
 ## [1.0.10] - 2025-12-25
 

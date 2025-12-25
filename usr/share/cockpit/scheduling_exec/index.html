@@ -4,23 +4,104 @@
     <meta charset="utf-8" />
     <title>Scripts & Agendamentos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="../base1/patternfly.css" type="text/css" rel="stylesheet" />
-    <link
-      href="../base1/patternfly-addons.css"
-      type="text/css"
-      rel="stylesheet"
-    />
-    <link href="../base1/cockpit.css" type="text/css" rel="stylesheet" />
+    <script>
+      (function () {
+        function loadFirstCss(paths) {
+          return new Promise(function (resolve) {
+            let i = 0;
+
+            function tryNext() {
+              if (i >= paths.length) {
+                resolve(false);
+                return;
+              }
+
+              const href = paths[i++];
+              const link = document.createElement("link");
+              link.rel = "stylesheet";
+              link.type = "text/css";
+              link.href = href;
+              link.onload = function () {
+                resolve(true);
+              };
+              link.onerror = function () {
+                link.remove();
+                tryNext();
+              };
+
+              document.head.appendChild(link);
+            }
+
+            tryNext();
+          });
+        }
+
+        // Em algumas instalações, os CSS do `base1/` não existem, mas o Cockpit
+        // ainda expõe os estilos do shell/branding. Tentamos esses primeiro.
+        loadFirstCss([
+          "../shell/shell.css",
+          "../shell/shell.min.css",
+          "../static/shell.css",
+          "../static/shell.min.css",
+        ]);
+
+        loadFirstCss([
+          "../shell/branding.css",
+          "../shell/branding.min.css",
+          "../static/branding.css",
+          "../static/branding.min.css",
+        ]);
+
+        // Algumas instalações não expõem patternfly.css/cockpit.css em base1.
+        // Tentamos múltiplos caminhos/nomes para manter compatibilidade.
+        loadFirstCss([
+          "../base1/patternfly.css",
+          "../base1/patternfly.min.css",
+          "../base1/patternfly-4-cockpit.css",
+          "../static/patternfly.css",
+          "../static/patternfly.min.css",
+          "../static/patternfly-4-cockpit.css",
+          "https://unpkg.com/@patternfly/patternfly@4/patternfly.min.css",
+        ]);
+
+        loadFirstCss([
+          "../base1/patternfly-addons.css",
+          "../base1/patternfly-addons.min.css",
+          "../static/patternfly-addons.css",
+          "../static/patternfly-addons.min.css",
+          "https://unpkg.com/@patternfly/patternfly@4/patternfly-addons.min.css",
+        ]);
+
+        loadFirstCss([
+          "../base1/cockpit.css",
+          "../base1/cockpit.min.css",
+          "../static/cockpit.css",
+          "../static/cockpit.min.css",
+        ]);
+      })();
+    </script>
     <script src="../base1/cockpit.js"></script>
     <script src="index.js"></script>
     <style>
+      html,
+      body {
+        height: 100%;
+      }
+
       body {
         margin: 0;
         padding: 0;
+        background-color: var(--pf-global--BackgroundColor--light-300);
+      }
+
+      .pf-c-page {
+        min-height: 100vh;
+        background-color: var(--pf-global--BackgroundColor--light-300);
       }
 
       .pf-c-page__main {
         padding: var(--pf-global--spacer--md);
+        background-color: var(--pf-global--BackgroundColor--light-300);
       }
 
       .modal {
@@ -311,7 +392,7 @@
     </div>
 
     <div id="plugin-footer" class="plugin-footer">
-      v1.0.13 — Luis Gustavo Santarosa Pinto
+      v1.0.14 — Luis Gustavo Santarosa Pinto
     </div>
 
     <!-- Modal Importar Scripts -->
