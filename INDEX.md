@@ -250,8 +250,8 @@ Você está aqui → INDEX.md
 
 ---
 
-**Versão**: 1.0.0  
-**Última Atualização**: 24/12/2025  
+**Versão**: 1.0.6  
+**Última Atualização**: 25/12/2025  
 **Autor**: Gustavo Santarosa
 
 **Dica**: Use Ctrl+F para buscar tópicos específicos neste índice!
