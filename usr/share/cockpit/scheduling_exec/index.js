@@ -4,12 +4,13 @@ const cockpit = window.cockpit;
 let currentEditingScript = null;
 let importCandidates = [];
 let eventHandlersBound = false;
+let currentSudoScript = null;
 
 function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.0";
+  const fallbackVersion = "1.2.1";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -132,6 +133,30 @@ function initEventHandlers() {
     });
   }
 
+  const sudoForm = document.getElementById("sudo-form");
+  if (sudoForm) {
+    sudoForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const scriptName = currentSudoScript;
+      const passwordInput = document.getElementById("sudo-password");
+      const password = passwordInput ? passwordInput.value : "";
+
+      if (!scriptName) {
+        showError("Nenhum script selecionado para executar como admin");
+        return;
+      }
+
+      if (!password) {
+        showError("Informe a senha do sudo");
+        return;
+      }
+
+      closeSudoModal();
+      executeScript(scriptName, { sudoPassword: password });
+    });
+  }
+
   // Fechar modais ao clicar fora deles
   window.addEventListener("click", function (event) {
     const scriptModal = document.getElementById("scriptModal");
@@ -139,12 +164,14 @@ function initEventHandlers() {
     const importModal = document.getElementById("importModal");
     const envModal = document.getElementById("envModal");
     const logModal = document.getElementById("logModal");
+    const sudoModal = document.getElementById("sudoModal");
 
     if (event.target === scriptModal) closeScriptModal();
     if (event.target === cronModal) closeCronModal();
     if (event.target === importModal) closeImportModal();
     if (event.target === envModal) closeEnvModal();
     if (event.target === logModal) closeLogModal();
+    if (event.target === sudoModal) closeSudoModal();
   });
 }
 
@@ -344,6 +371,9 @@ function renderScripts(scripts) {
           <button class="pf-c-button pf-m-primary pf-m-small" type="button" onclick="executeScript('${
             script.name
           }')">Executar</button>
+          <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="openSudoModal('${
+            script.name
+          }')">Executar (admin)</button>
           <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="openLogModal('${
             script.name
           }')">Logs</button>
@@ -362,6 +392,32 @@ function renderScripts(scripts) {
 
     tbody.appendChild(row);
   });
+}
+
+function openSudoModal(scriptName) {
+  currentSudoScript = scriptName;
+
+  const title = document.getElementById("sudo-title");
+  if (title) title.textContent = `Executar como admin: ${scriptName}`;
+
+  const password = document.getElementById("sudo-password");
+  if (password) password.value = "";
+
+  const modal = document.getElementById("sudoModal");
+  if (modal) modal.style.display = "block";
+
+  if (password && typeof password.focus === "function") {
+    setTimeout(() => password.focus(), 0);
+  }
+}
+
+function closeSudoModal() {
+  const modal = document.getElementById("sudoModal");
+  if (modal) modal.style.display = "none";
+  currentSudoScript = null;
+
+  const password = document.getElementById("sudo-password");
+  if (password) password.value = "";
 }
 
 // ===== Importação de scripts =====
@@ -616,18 +672,31 @@ function deleteScript(scriptName) {
 }
 
 // Executar script
-function executeScript(scriptName) {
-  if (!confirm(`Executar o script "${scriptName}" agora?`)) {
-    return;
+function executeScript(scriptName, options) {
+  const sudoPassword =
+    options && typeof options.sudoPassword === "string"
+      ? options.sudoPassword
+      : "";
+
+  if (!sudoPassword) {
+    if (!confirm(`Executar o script "${scriptName}" agora?`)) {
+      return;
+    }
   }
 
   showLoading(true);
 
-  cockpit
-    .spawn([
-      "/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh",
-      scriptName,
-    ])
+  const args = ["/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh"];
+  if (sudoPassword) args.push("--sudo");
+  args.push(scriptName);
+
+  let proc = cockpit.spawn(args);
+  if (sudoPassword) {
+    // Envia a senha via stdin (uma vez para a execução).
+    proc = proc.input(sudoPassword + "\n");
+  }
+
+  proc
     .then((raw) => {
       showLoading(false);
 
@@ -645,10 +714,20 @@ function executeScript(scriptName) {
       const output = typeof result.output === "string" ? result.output : "";
 
       if (exitCode === 0) {
-        alert("Script executado com sucesso!\n\nSaída:\n" + output);
+        alert(
+          (sudoPassword
+            ? "Script executado como admin com sucesso!"
+            : "Script executado com sucesso!") +
+            "\n\nSaída:\n" +
+            output
+        );
       } else {
         alert(
-          `Script finalizou com erro (exit ${exitCode}).\n\nSaída:\n${output}`
+          `${
+            sudoPassword
+              ? "Script como admin finalizou com erro"
+              : "Script finalizou com erro"
+          } (exit ${exitCode}).\n\nSaída:\n${output}`
         );
       }
       loadScripts(); // Recarregar para atualizar estatísticas

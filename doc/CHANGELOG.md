@@ -10,6 +10,11 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ### Adicionado
 - Visualização de logs por script via modal (ordem desc)
 
+## [1.2.1] - 2025-12-26
+
+### Adicionado
+- Execução de script como admin (sudo) via modal de senha
+
 ## [1.1.0] - 2025-12-26
 
 ### Adicionado

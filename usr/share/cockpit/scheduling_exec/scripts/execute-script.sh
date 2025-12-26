@@ -4,6 +4,13 @@
 SCRIPTS_DIR="$HOME/scripts"
 METADATA_DIR="$HOME/.scripts-metadata"
 ENV_FILE="$SCRIPTS_DIR/.env"
+RUN_AS_SUDO=0
+
+if [ "$1" = "--sudo" ]; then
+    RUN_AS_SUDO=1
+    shift
+fi
+
 SCRIPT_NAME="$1"
 
 if [ -z "$SCRIPT_NAME" ]; then
@@ -64,8 +71,24 @@ fi
 if [ $exit_code -eq 0 ]; then
     # Executar o script
     cd "$SCRIPTS_DIR"
-    output=$("$SCRIPT_PATH" 2>&1)
-    exit_code=$?
+    if [ $RUN_AS_SUDO -eq 1 ]; then
+        SUDO_PASSWORD=""
+        IFS= read -r SUDO_PASSWORD || true
+
+        if [ -z "$SUDO_PASSWORD" ]; then
+            output="Erro: senha do sudo não informada"
+            exit_code=1
+        else
+            # Executa via sudo sem prompt (para não poluir a saída) e tenta preservar env carregado (.env).
+            # Enviamos a senha duas vezes para evitar travar se o sudo pedir retry.
+            sudo_input=$(printf '%s\n%s\n' "$SUDO_PASSWORD" "$SUDO_PASSWORD")
+            output=$(printf '%s' "$sudo_input" | sudo -S -p "" -E "$SCRIPT_PATH" 2>&1)
+            exit_code=$?
+        fi
+    else
+        output=$("$SCRIPT_PATH" 2>&1)
+        exit_code=$?
+    fi
 fi
 
 # Registrar log (mesmo arquivo usado no cron)

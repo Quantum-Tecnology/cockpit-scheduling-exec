@@ -399,7 +399,7 @@
     </div>
 
     <div id="plugin-footer" class="plugin-footer">
-      v1.2.0 — Luis Gustavo Santarosa Pinto
+      v1.2.1 — Luis Gustavo Santarosa Pinto
     </div>
 
     <!-- Modal Variáveis de Ambiente (.env) -->
@@ -515,6 +515,67 @@
             onclick="closeLogModal()"
           >
             Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Executar como Admin (sudo) -->
+    <div id="sudoModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl" id="sudo-title">
+            Executar como admin
+          </h2>
+          <button class="close" onclick="closeSudoModal()" aria-label="Fechar">
+            &times;
+          </button>
+        </div>
+
+        <div class="pf-c-modal-box__body">
+          <form id="sudo-form">
+            <div class="pf-c-form">
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="sudo-password">
+                    <span class="pf-c-form__label-text">Senha do sudo</span>
+                    <span class="pf-c-form__label-required" aria-hidden="true"
+                      >*</span
+                    >
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <input
+                    class="pf-c-form-control"
+                    type="password"
+                    id="sudo-password"
+                    name="sudo-password"
+                    autocomplete="current-password"
+                    required
+                  />
+                  <p class="pf-c-form__helper-text">
+                    A senha será enviada via stdin apenas para esta execução.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="pf-c-modal-box__footer">
+          <button
+            type="button"
+            class="pf-c-button pf-m-secondary"
+            onclick="closeSudoModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="pf-c-button pf-m-primary"
+            onclick="document.getElementById('sudo-form').requestSubmit()"
+          >
+            Executar
           </button>
         </div>
       </div>
