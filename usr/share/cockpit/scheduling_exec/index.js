@@ -43,15 +43,9 @@ function extractReferencedVars(scriptContent) {
   }
 
   // Remove variáveis especiais mais comuns que não são "env vars"
-  [
-    "IFS",
-    "PWD",
-    "OLDPWD",
-    "SHLVL",
-    "RANDOM",
-    "SECONDS",
-    "LINENO",
-  ].forEach((v) => vars.delete(v));
+  ["IFS", "PWD", "OLDPWD", "SHLVL", "RANDOM", "SECONDS", "LINENO"].forEach(
+    (v) => vars.delete(v)
+  );
 
   return vars;
 }
@@ -98,7 +92,10 @@ function refreshScriptModalVarsSummary() {
     else missing.push(v);
   });
 
-  const fmt = (arr) => (arr.length ? `<code>${escapeHtml(arr.join(", "))}</code>` : "<code>-</code>");
+  const fmt = (arr) =>
+    arr.length
+      ? `<code>${escapeHtml(arr.join(", "))}</code>`
+      : "<code>-</code>";
 
   summary.innerHTML =
     `Variáveis referenciadas detectadas: ` +
@@ -212,7 +209,9 @@ async function copyScriptWithVariables() {
       `# Global env: ~/scripts/.env\n` +
       `# Script env: ~/scripts/.env.${scriptName || "<script>"}\n\n` +
       `### Global env (.env)\n${scriptModalGlobalEnv || "(vazio)"}\n\n` +
-      `### Script env (.env.<script>)\n${scriptModalScriptEnv || "(vazio)"}\n\n` +
+      `### Script env (.env.<script>)\n${
+        scriptModalScriptEnv || "(vazio)"
+      }\n\n` +
       `### Script content\n${scriptContent || "(vazio)"}\n`;
 
     await copyTextToClipboard(text);
@@ -270,7 +269,7 @@ function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.5";
+  const fallbackVersion = "1.2.6";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;

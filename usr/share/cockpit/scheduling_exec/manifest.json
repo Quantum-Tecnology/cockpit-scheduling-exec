@@ -2,7 +2,7 @@
   "version": 1,
   "name": "scheduling_exec",
   "label": "Scripts & Agendamentos",
-  "x-plugin-version": "1.2.5",
+  "x-plugin-version": "1.2.6",
   "x-author": "Luis Gustavo Santarosa Pinto",
   "description": "Gerenciador de Scripts Personalizados e Agendamentos",
   "menu": {
@@ -12,5 +12,5 @@
       "path": "index.html"
     }
   },
-  "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://unpkg.com; font-src 'self' data: https://unpkg.com; img-src 'self' data:; connect-src 'self'"
+  "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'self'"
 }

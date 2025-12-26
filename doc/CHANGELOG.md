@@ -45,7 +45,13 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Bump de versão para 1.2.5
 - Modal de criar/editar script com visualização das variáveis carregadas (.env global e por script)
 - Botão para copiar “script + variáveis” para facilitar suporte/uso com Copilot
+## [1.2.6] - 2025-12-26
 
+### Alterado
+- Bump de versão para 1.2.6
+- Importação de CSS refatorada para seguir o padrão do Cockpit (links estáticos em vez de JS dinâmico)
+- CSP simplificada (removido fallback externo unpkg e unsafe-eval desnecessário)
+- Adicionado atributo `lang="pt-BR"` no HTML
 ## [1.1.0] - 2025-12-26
 
 ### Adicionado
