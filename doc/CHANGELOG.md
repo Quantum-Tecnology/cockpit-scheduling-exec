@@ -33,6 +33,12 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ### Alterado
 - Bump de versão para 1.2.3
 
+## [1.2.4] - 2025-12-26
+
+### Alterado
+- Bump de versão para 1.2.4
+- Ações da tabela de scripts movidas para menu dropdown (reduz quantidade de botões)
+
 ## [1.1.0] - 2025-12-26
 
 ### Adicionado

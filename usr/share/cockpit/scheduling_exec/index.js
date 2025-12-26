@@ -7,12 +7,57 @@ let eventHandlersBound = false;
 let currentSudoScript = null;
 let currentScriptEnv = null;
 let cronModalMode = "script";
+let openRowActionsMenuId = null;
+
+function makeSafeId(value) {
+  return String(value || "")
+    .replaceAll(/[^a-zA-Z0-9_-]/g, "_")
+    .replaceAll(/_+/g, "_")
+    .replaceAll(/^_+|_+$/g, "");
+}
+
+function closeAllRowActionsMenus() {
+  const menus = document.querySelectorAll(".js-row-actions-menu");
+  menus.forEach((menu) => {
+    menu.hidden = true;
+  });
+
+  const toggles = document.querySelectorAll(".js-row-actions-toggle");
+  toggles.forEach((toggle) => {
+    toggle.setAttribute("aria-expanded", "false");
+  });
+
+  openRowActionsMenuId = null;
+}
+
+function toggleRowActionsMenu(menuId) {
+  const menu = document.getElementById(menuId);
+  if (!menu) return;
+
+  const toggle = document.querySelector(
+    `.js-row-actions-toggle[data-menu-id="${menuId}"]`
+  );
+
+  // Fecha o que estiver aberto (inclusive o próprio)
+  if (openRowActionsMenuId && openRowActionsMenuId !== menuId) {
+    closeAllRowActionsMenus();
+  }
+
+  const willOpen = menu.hidden === true;
+  closeAllRowActionsMenus();
+
+  if (willOpen) {
+    menu.hidden = false;
+    if (toggle) toggle.setAttribute("aria-expanded", "true");
+    openRowActionsMenuId = menuId;
+  }
+}
 
 function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.3";
+  const fallbackVersion = "1.2.4";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -220,6 +265,13 @@ function initEventHandlers() {
     if (event.target === logModal) closeLogModal();
     if (event.target === sudoModal) closeSudoModal();
     if (event.target === scriptEnvModal) closeScriptEnvModal();
+
+    // Fecha dropdown de ações ao clicar fora
+    const insideRowActions =
+      event.target &&
+      typeof event.target.closest === "function" &&
+      event.target.closest(".js-row-actions");
+    if (!insideRowActions) closeAllRowActionsMenus();
   });
 }
 
@@ -518,6 +570,8 @@ function renderScripts(scripts) {
     row.setAttribute("role", "row");
 
     const scriptName = script.name;
+    const safeId = makeSafeId(scriptName) || "script";
+    const menuId = `row-actions-${safeId}`;
     const scriptPath = script.path || `~/scripts/${scriptName}`;
     const prettyPath = prettyScriptPath(scriptPath, scriptName);
 
@@ -562,28 +616,61 @@ function renderScripts(scripts) {
         }
       </td>
       <td role="cell" data-label="Ações" class="pf-m-center">
-        <div style="display: flex; gap: 4px; justify-content: center;">
-          <button class="pf-c-button pf-m-primary pf-m-small" type="button" onclick="executeScript('${
-            script.name
-          }')">Executar</button>
-          <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="openSudoModal('${
-            script.name
-          }')">Executar (admin)</button>
-          <button class="pf-c-button pf-m-tertiary pf-m-small" type="button" onclick="openScriptEnvModal('${
-            script.name
-          }')">Variáveis (script)</button>
-          <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="openLogModal('${
-            script.name
-          }')">Logs</button>
-          <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="editScript('${
-            script.name
-          }')">Editar</button>
-          <button class="pf-c-button pf-m-tertiary pf-m-small" type="button" onclick="openCronModal('${
-            script.name
-          }')">Agendar</button>
-          <button class="pf-c-button pf-m-danger pf-m-small" type="button" onclick="deleteScript('${
-            script.name
-          }')">Excluir</button>
+        <div style="display: flex; justify-content: center;">
+          <div class="pf-c-dropdown js-row-actions">
+            <button
+              class="pf-c-dropdown__toggle pf-m-plain js-row-actions-toggle"
+              type="button"
+              aria-label="Ações"
+              aria-expanded="false"
+              data-menu-id="${escapeHtml(menuId)}"
+              onclick="toggleRowActionsMenu(${JSON.stringify(menuId)})"
+              title="Ações"
+            >
+              &#8942;
+            </button>
+            <ul
+              class="pf-c-dropdown__menu js-row-actions-menu"
+              id="${escapeHtml(menuId)}"
+              hidden
+            >
+              <li>
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); executeScript(${JSON.stringify(
+                  scriptName
+                )});">Executar</button>
+              </li>
+              <li>
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openSudoModal(${JSON.stringify(
+                  scriptName
+                )});">Executar (admin)</button>
+              </li>
+              <li>
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openScriptEnvModal(${JSON.stringify(
+                  scriptName
+                )});">Variáveis (script)</button>
+              </li>
+              <li>
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openLogModal(${JSON.stringify(
+                  scriptName
+                )});">Logs</button>
+              </li>
+              <li>
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); editScript(${JSON.stringify(
+                  scriptName
+                )});">Editar</button>
+              </li>
+              <li>
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openCronModal(${JSON.stringify(
+                  scriptName
+                )});">Agendar</button>
+              </li>
+              <li>
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); deleteScript(${JSON.stringify(
+                  scriptName
+                )});">Excluir</button>
+              </li>
+            </ul>
+          </div>
         </div>
       </td>
     `;
