@@ -52,6 +52,13 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Importação de CSS refatorada para seguir o padrão do Cockpit (links estáticos em vez de JS dinâmico)
 - CSP simplificada (removido fallback externo unpkg e unsafe-eval desnecessário)
 - Adicionado atributo `lang="pt-BR"` no HTML
+
+## [1.2.7] - 2025-12-26
+
+### Alterado
+- Bump de versão para 1.2.7
+- Carregamento de CSS simplificado usando PatternFly 4 via CDN (unpkg)
+- Removido loader JavaScript complexo que causava erros de DOM
 ## [1.1.0] - 2025-12-26
 
 ### Adicionado
