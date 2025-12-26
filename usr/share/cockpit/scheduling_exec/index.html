@@ -127,6 +127,71 @@
         color: var(--pf-global--Color--200);
         user-select: text;
       }
+
+      /* Dropdown de ações da tabela */
+      .js-row-actions {
+        position: relative;
+        display: inline-block;
+      }
+
+      .js-row-actions-toggle {
+        background: none;
+        border: none;
+        padding: 0.5rem;
+        cursor: pointer;
+        font-size: 1.25rem;
+        line-height: 1;
+        color: var(--pf-global--Color--100);
+        border-radius: var(--pf-global--BorderRadius--sm);
+      }
+
+      .js-row-actions-toggle:hover,
+      .js-row-actions-toggle:focus {
+        background-color: var(--pf-global--BackgroundColor--light-300);
+        outline: none;
+      }
+
+      .js-row-actions-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 1000;
+        min-width: 10rem;
+        margin: 0;
+        padding: 0.5rem 0;
+        list-style: none;
+        background-color: var(--pf-global--BackgroundColor--light-100);
+        border: 1px solid var(--pf-global--BorderColor--100);
+        border-radius: var(--pf-global--BorderRadius--sm);
+        box-shadow: var(--pf-global--BoxShadow--md);
+      }
+
+      .js-row-actions-menu[hidden] {
+        display: none;
+      }
+
+      .js-row-actions-menu li {
+        margin: 0;
+        padding: 0;
+      }
+
+      .js-row-actions-menu .pf-c-dropdown__menu-item {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        text-align: left;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: var(--pf-global--FontSize--sm);
+        color: var(--pf-global--Color--100);
+      }
+
+      .js-row-actions-menu .pf-c-dropdown__menu-item:hover,
+      .js-row-actions-menu .pf-c-dropdown__menu-item:focus {
+        background-color: var(--pf-global--BackgroundColor--light-300);
+        outline: none;
+      }
     </style>
   </head>
   <body>
@@ -442,7 +507,7 @@
     </div>
 
     <div id="plugin-footer" class="plugin-footer">
-      v1.2.7 — Luis Gustavo Santarosa Pinto
+      v1.2.8 — Luis Gustavo Santarosa Pinto
     </div>
 
     <!-- Modal Variáveis de Ambiente (.env) -->
