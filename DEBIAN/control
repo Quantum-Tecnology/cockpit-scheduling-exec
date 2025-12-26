@@ -1,5 +1,5 @@
 Package: cockpit-scheduling-exec
-Version: 1.0.15
+Version: 1.1.0
 Section: admin
 Priority: optional
 Architecture: all

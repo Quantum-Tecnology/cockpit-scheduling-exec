@@ -9,7 +9,7 @@ function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.0.15";
+  const fallbackVersion = "1.1.0";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -108,15 +108,41 @@ function initEventHandlers() {
     });
   }
 
+  const envForm = document.getElementById("env-form");
+  if (envForm) {
+    envForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const envContent = document.getElementById("env-content").value;
+      showLoading(true);
+
+      cockpit
+        .spawn(["/usr/share/cockpit/scheduling_exec/scripts/save-env.sh"], {
+          err: "message",
+        })
+        .input(envContent)
+        .then(() => {
+          showLoading(false);
+          closeEnvModal();
+        })
+        .catch((error) => {
+          showLoading(false);
+          showError("Erro ao salvar .env: " + formatCockpitError(error));
+        });
+    });
+  }
+
   // Fechar modais ao clicar fora deles
   window.addEventListener("click", function (event) {
     const scriptModal = document.getElementById("scriptModal");
     const cronModal = document.getElementById("cronModal");
     const importModal = document.getElementById("importModal");
+    const envModal = document.getElementById("envModal");
 
     if (event.target === scriptModal) closeScriptModal();
     if (event.target === cronModal) closeCronModal();
     if (event.target === importModal) closeImportModal();
+    if (event.target === envModal) closeEnvModal();
   });
 }
 
@@ -165,6 +191,26 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function prettyScriptPath(scriptPath, scriptName) {
+  const raw = (scriptPath && String(scriptPath)) || "";
+  const safeName = scriptName ? String(scriptName) : "";
+
+  if (!raw) return `~/scripts/${safeName}`;
+
+  // Caso padrão: .../scripts/<nome>
+  const scriptsMatch = raw.match(/\/scripts\/([^/]+)$/);
+  if (scriptsMatch) return `~/scripts/${scriptsMatch[1]}`;
+
+  // Abrevia /home/<user>/... para ~/...
+  const homeMatch = raw.match(/^\/home\/[^/]+\/(.+)$/);
+  if (homeMatch) return `~/${homeMatch[1]}`;
+
+  // Abrevia /root/... para ~/...
+  if (raw.startsWith("/root/")) return `~/${raw.slice("/root/".length)}`;
+
+  return raw;
 }
 
 // Função para mostrar loading
@@ -249,6 +295,7 @@ function renderScripts(scripts) {
 
     const scriptName = script.name;
     const scriptPath = script.path || `~/scripts/${scriptName}`;
+    const prettyPath = prettyScriptPath(scriptPath, scriptName);
 
     const successRate =
       script.total_executions > 0
@@ -261,7 +308,9 @@ function renderScripts(scripts) {
     row.innerHTML = `
       <td role="cell" data-label="Nome do Script">
         <strong>${escapeHtml(scriptName)}</strong>
-        <div><small><code>${escapeHtml(scriptPath)}</code></small></div>
+        <div><small><code title="${escapeHtml(scriptPath)}">${escapeHtml(
+      prettyPath
+    )}</code></small></div>
       </td>
       <td role="cell" data-label="Próxima Execução">
         ${getNextCronExecution(script.cron_expression)}
@@ -365,6 +414,41 @@ function loadImportCandidates() {
       showImportLoading(false);
       showError("Erro ao buscar scripts: " + error.message);
       showImportEmpty(true);
+    });
+}
+
+// ===== Variáveis de ambiente (.env) =====
+function openEnvModal() {
+  const modal = document.getElementById("envModal");
+  if (modal) modal.style.display = "block";
+  loadEnvFile();
+}
+
+function closeEnvModal() {
+  const modal = document.getElementById("envModal");
+  if (modal) modal.style.display = "none";
+
+  const textarea = document.getElementById("env-content");
+  if (textarea) textarea.value = "";
+}
+
+function loadEnvFile() {
+  const textarea = document.getElementById("env-content");
+  if (!textarea) return;
+
+  showLoading(true);
+  cockpit
+    .spawn(["/usr/share/cockpit/scheduling_exec/scripts/get-env.sh"], {
+      err: "message",
+    })
+    .then((content) => {
+      showLoading(false);
+      textarea.value = content || "";
+    })
+    .catch((error) => {
+      showLoading(false);
+      showError("Erro ao carregar .env: " + formatCockpitError(error));
+      textarea.value = "";
     });
 }
 

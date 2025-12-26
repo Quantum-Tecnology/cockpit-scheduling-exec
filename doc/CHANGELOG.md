@@ -5,6 +5,14 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2025-12-26
+
+### Adicionado
+- Editor de variáveis `~/scripts/.env` via modal na UI
+
+### Alterado
+- Execução/agendamentos passam a carregar `~/scripts/.env` antes de rodar o script
+
 ## [1.0.13] - 2025-12-25
 
 ### Adicionado
@@ -25,7 +33,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### Alterado
 - Bump de versão para 1.0.15
-- Exibição do caminho do script (ex.: `~/scripts/meu-script.sh`) na tabela
+- Exibição do caminho do script em formato abreviado (ex.: `~/scripts/meu-script.sh`) na tabela
 - Execução passa a exibir saída completa mesmo em caso de erro
 
 ## [1.0.12] - 2025-12-25
