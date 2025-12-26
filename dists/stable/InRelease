@@ -1,0 +1,38 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: QuantumTecnology
+Label: cockpit-scheduling-exec
+Suite: stable
+Codename: stable
+Architectures: amd64 all
+Components: main
+Description: cockpit-scheduling-exec APT repository
+Date: Fri, 26 Dec 2025 19:55:01 +0000
+MD5Sum:
+ 833be662d94247aaa8531b7a9d471c4d              774 main/binary-all/Packages
+ cffdab67015be58fe2be4611ec709aec              520 main/binary-all/Packages.gz
+ 833be662d94247aaa8531b7a9d471c4d              774 main/binary-amd64/Packages
+ cffdab67015be58fe2be4611ec709aec              520 main/binary-amd64/Packages.gz
+SHA1:
+ 2825ac5ce97539b774a970d557ddd425fa99f6af              774 main/binary-all/Packages
+ fd5bd09da13989da5a3e6ba86fe9dc8f6f709f07              520 main/binary-all/Packages.gz
+ 2825ac5ce97539b774a970d557ddd425fa99f6af              774 main/binary-amd64/Packages
+ fd5bd09da13989da5a3e6ba86fe9dc8f6f709f07              520 main/binary-amd64/Packages.gz
+SHA256:
+ 5ab280c420fd5a47e699f7e215818679ea3c48d3cc63a2384cbe2fc5bb909270              774 main/binary-all/Packages
+ 03652502cf82cdd506c626a6f3f882f90cb127c2062f0bf9513590bcfaa1e5a1              520 main/binary-all/Packages.gz
+ 5ab280c420fd5a47e699f7e215818679ea3c48d3cc63a2384cbe2fc5bb909270              774 main/binary-amd64/Packages
+ 03652502cf82cdd506c626a6f3f882f90cb127c2062f0bf9513590bcfaa1e5a1              520 main/binary-amd64/Packages.gz
+SHA512:
+ facfe6f1e397d15e905ca990f5c96dc4d8cb2f58352fa89fc1135c5ddbf060be7c81519f62a234d92769e6588cc42b2a64943d50ab9c82ed0b7511a97bbb2cc6              774 main/binary-all/Packages
+ 630a5a17da700dfa3dcbdfc7c59f31ec26a8443efdb3eba2f2fb975de5251ccb4c14c57c7e65c8f7ca8d3538e96e5cb71f7bc457a55077e175dfc3a17b2ff442              520 main/binary-all/Packages.gz
+ facfe6f1e397d15e905ca990f5c96dc4d8cb2f58352fa89fc1135c5ddbf060be7c81519f62a234d92769e6588cc42b2a64943d50ab9c82ed0b7511a97bbb2cc6              774 main/binary-amd64/Packages
+ 630a5a17da700dfa3dcbdfc7c59f31ec26a8443efdb3eba2f2fb975de5251ccb4c14c57c7e65c8f7ca8d3538e96e5cb71f7bc457a55077e175dfc3a17b2ff442              520 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQSA8HGtmV/Xks/tV1wTUcRLWxbeQQUCaU7oFgAKCRATUcRLWxbe
+QctKAQDrIuYCWcryHlaPIXPuWCuf06s3ai6PIDV5hAnlvjaK1AD+IsvvpQfOysil
+Wj8iJhUkYuK0kLXnoT+6d6yLZgzfJwY=
+=XMV2
+-----END PGP SIGNATURE-----
