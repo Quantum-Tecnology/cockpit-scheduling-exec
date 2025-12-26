@@ -9,7 +9,7 @@ function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.0.14";
+  const fallbackVersion = "1.0.15";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -128,7 +128,43 @@ function showError(message) {
   errorDiv.style.display = "block";
   setTimeout(() => {
     errorDiv.style.display = "none";
-  }, 5000);
+  }, 15000);
+}
+
+function formatCockpitError(error) {
+  if (error == null) return "(sem detalhes)";
+  if (typeof error === "string") return error;
+  if (error instanceof Error && error.message) return error.message;
+
+  const parts = [];
+  if (typeof error.message === "string" && error.message.trim()) {
+    parts.push(error.message.trim());
+  }
+  if (typeof error.problem === "string" && error.problem.trim()) {
+    parts.push(`problem=${error.problem.trim()}`);
+  }
+  if (typeof error.exit_status !== "undefined") {
+    parts.push(`exit_status=${String(error.exit_status)}`);
+  }
+  if (typeof error.signal !== "undefined") {
+    parts.push(`signal=${String(error.signal)}`);
+  }
+
+  if (parts.length > 0) return parts.join(" | ");
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 // Função para mostrar loading
@@ -211,6 +247,9 @@ function renderScripts(scripts) {
     const row = document.createElement("tr");
     row.setAttribute("role", "row");
 
+    const scriptName = script.name;
+    const scriptPath = script.path || `~/scripts/${scriptName}`;
+
     const successRate =
       script.total_executions > 0
         ? (
@@ -221,7 +260,8 @@ function renderScripts(scripts) {
 
     row.innerHTML = `
       <td role="cell" data-label="Nome do Script">
-        <strong>${script.name}</strong>
+        <strong>${escapeHtml(scriptName)}</strong>
+        <div><small><code>${escapeHtml(scriptPath)}</code></small></div>
       </td>
       <td role="cell" data-label="Próxima Execução">
         ${getNextCronExecution(script.cron_expression)}
@@ -447,14 +487,34 @@ function executeScript(scriptName) {
       "/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh",
       scriptName,
     ])
-    .then((output) => {
+    .then((raw) => {
       showLoading(false);
-      alert("Script executado com sucesso!\n\nSaída:\n" + output);
+
+      let result = null;
+      try {
+        result = JSON.parse(raw);
+      } catch {
+        // Fallback: caso algo fora do esperado chegue aqui
+        alert("Saída:\n" + raw);
+        loadScripts();
+        return;
+      }
+
+      const exitCode = Number(result.exit_code ?? 0);
+      const output = typeof result.output === "string" ? result.output : "";
+
+      if (exitCode === 0) {
+        alert("Script executado com sucesso!\n\nSaída:\n" + output);
+      } else {
+        alert(
+          `Script finalizou com erro (exit ${exitCode}).\n\nSaída:\n${output}`
+        );
+      }
       loadScripts(); // Recarregar para atualizar estatísticas
     })
     .catch((error) => {
       showLoading(false);
-      showError("Erro ao executar script: " + error.message);
+      showError("Erro ao executar script: " + formatCockpitError(error));
     });
 }
 

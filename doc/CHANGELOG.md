@@ -7,11 +7,6 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [1.0.13] - 2025-12-25
 
-## [1.0.14] - 2025-12-25
-
-### Alterado
-- Bump de versão para 1.0.14
-
 ### Adicionado
 - Footer com versão do plugin e autor no canto inferior
 
@@ -20,6 +15,18 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - CSP explicitado para permitir CSS/fontes do unpkg (e `data:`) quando necessário
 - Corrigido bind de eventos para salvar/criar script e salvar cron (evita falha ao clicar em "Salvar")
 - Corrigido scanner do modal de importação (volta a listar scripts .sh elegíveis no HOME)
+
+## [1.0.14] - 2025-12-25
+
+### Alterado
+- Bump de versão para 1.0.14
+
+## [1.0.15] - 2025-12-26
+
+### Alterado
+- Bump de versão para 1.0.15
+- Exibição do caminho do script (ex.: `~/scripts/meu-script.sh`) na tabela
+- Execução passa a exibir saída completa mesmo em caso de erro
 
 ## [1.0.12] - 2025-12-25
 

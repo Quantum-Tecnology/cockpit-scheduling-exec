@@ -37,6 +37,16 @@ cd "$SCRIPTS_DIR"
 output=$("$SCRIPT_PATH" 2>&1)
 exit_code=$?
 
+json_escape() {
+    local s="$1"
+    s=${s//\\/\\\\}
+    s=${s//\"/\\\"}
+    s=${s//$'\n'/\\n}
+    s=${s//$'\r'/\\r}
+    s=${s//$'\t'/\\t}
+    printf '%s' "$s"
+}
+
 # Atualizar metadata
 timestamp=$(date +%s)
 metadata=$(cat "$METADATA_FILE")
@@ -70,6 +80,7 @@ cat > "$METADATA_FILE" << EOF
 }
 EOF
 
-# Retornar output do script
-echo "$output"
-exit $exit_code
+# Retornar output + exit_code em JSON, sem falhar o comando do Cockpit.
+# Assim a UI consegue exibir a saída mesmo quando o script retorna erro.
+printf '{"exit_code":%s,"output":"%s"}\n' "$exit_code" "$(json_escape "$output")"
+exit 0
