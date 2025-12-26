@@ -52,6 +52,13 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Importação de CSS refatorada para seguir o padrão do Cockpit (links estáticos em vez de JS dinâmico)
 - CSP simplificada (removido fallback externo unpkg e unsafe-eval desnecessário)
 - Adicionado atributo `lang="pt-BR"` no HTML
+## [1.2.10] – 2025-12-26
+
+### Corrigido
+
+- **BUG CRÍTICO**: Variáveis de ambiente específicas do script (.env.<script>) não eram carregadas (SCRIPT_ENV_FILE definido antes de SCRIPT_NAME)
+- Scripts com `set -u` falhavam com "unbound variable" ao referenciar variáveis do arquivo .env.<script>
+
 ## [1.2.9] – 2025-12-26
 
 ### Corrigido
