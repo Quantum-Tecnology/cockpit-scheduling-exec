@@ -8,6 +8,219 @@ let currentSudoScript = null;
 let currentScriptEnv = null;
 let cronModalMode = "script";
 let openRowActionsMenuId = null;
+let scriptModalGlobalEnv = "";
+let scriptModalScriptEnv = "";
+let scriptModalEnvLoading = false;
+let scriptModalEnvLoadedFor = null;
+
+function parseEnvKeys(envContent) {
+  const keys = new Set();
+  if (!envContent) return keys;
+
+  String(envContent)
+    .split(/\r?\n/)
+    .forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) return;
+      const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=/);
+      if (match && match[1]) keys.add(match[1]);
+    });
+
+  return keys;
+}
+
+function extractReferencedVars(scriptContent) {
+  const vars = new Set();
+  if (!scriptContent) return vars;
+
+  const text = String(scriptContent);
+  const regex = /\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?/g;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    const name = match[1];
+    if (!name) continue;
+    vars.add(name);
+  }
+
+  // Remove variáveis especiais mais comuns que não são "env vars"
+  [
+    "IFS",
+    "PWD",
+    "OLDPWD",
+    "SHLVL",
+    "RANDOM",
+    "SECONDS",
+    "LINENO",
+  ].forEach((v) => vars.delete(v));
+
+  return vars;
+}
+
+function setScriptModalPath(scriptName) {
+  const pathInput = document.getElementById("script-path");
+  if (!pathInput) return;
+  if (!scriptName) {
+    pathInput.value = "~/scripts/<script>.sh";
+    return;
+  }
+  pathInput.value = `~/scripts/${scriptName}`;
+}
+
+function setScriptModalEnvTextareas() {
+  const globalTa = document.getElementById("script-modal-global-env");
+  if (globalTa) globalTa.value = scriptModalGlobalEnv || "";
+  const scriptTa = document.getElementById("script-modal-script-env");
+  if (scriptTa) scriptTa.value = scriptModalScriptEnv || "";
+}
+
+function refreshScriptModalVarsSummary() {
+  const summary = document.getElementById("script-vars-summary");
+  if (!summary) return;
+
+  const contentEl = document.getElementById("script-content");
+  const content = contentEl ? contentEl.value : "";
+  const referenced = Array.from(extractReferencedVars(content)).sort();
+
+  if (referenced.length === 0) {
+    summary.innerHTML = `Variáveis referenciadas detectadas: <code>-</code>`;
+    return;
+  }
+
+  const envKeys = new Set([
+    ...parseEnvKeys(scriptModalGlobalEnv),
+    ...parseEnvKeys(scriptModalScriptEnv),
+  ]);
+
+  const defined = [];
+  const missing = [];
+  referenced.forEach((v) => {
+    if (envKeys.has(v)) defined.push(v);
+    else missing.push(v);
+  });
+
+  const fmt = (arr) => (arr.length ? `<code>${escapeHtml(arr.join(", "))}</code>` : "<code>-</code>");
+
+  summary.innerHTML =
+    `Variáveis referenciadas detectadas: ` +
+    `definidas ${fmt(defined)}; não definidas ${fmt(missing)}`;
+}
+
+function loadScriptModalEnvs(scriptName) {
+  if (scriptModalEnvLoading) return Promise.resolve();
+
+  // Evita recarregar desnecessariamente no mesmo script
+  if (scriptName && scriptModalEnvLoadedFor === scriptName) {
+    setScriptModalEnvTextareas();
+    refreshScriptModalVarsSummary();
+    return Promise.resolve();
+  }
+
+  scriptModalEnvLoading = true;
+
+  const globalTa = document.getElementById("script-modal-global-env");
+  if (globalTa) globalTa.value = "Carregando...";
+  const scriptTa = document.getElementById("script-modal-script-env");
+  if (scriptTa) scriptTa.value = scriptName ? "Carregando..." : "";
+
+  const pGlobal = cockpit
+    .spawn(["/usr/share/cockpit/scheduling_exec/scripts/get-env.sh"], {
+      err: "message",
+    })
+    .then((content) => {
+      scriptModalGlobalEnv = content || "";
+    })
+    .catch(() => {
+      scriptModalGlobalEnv = "";
+    });
+
+  const pScript = scriptName
+    ? cockpit
+        .spawn(
+          [
+            "/usr/share/cockpit/scheduling_exec/scripts/get-script-env.sh",
+            scriptName,
+          ],
+          { err: "message" }
+        )
+        .then((content) => {
+          scriptModalScriptEnv = content || "";
+        })
+        .catch(() => {
+          scriptModalScriptEnv = "";
+        })
+    : Promise.resolve().then(() => {
+        scriptModalScriptEnv = "";
+      });
+
+  return Promise.all([pGlobal, pScript])
+    .then(() => {
+      scriptModalEnvLoadedFor = scriptName || null;
+      setScriptModalEnvTextareas();
+      refreshScriptModalVarsSummary();
+    })
+    .finally(() => {
+      scriptModalEnvLoading = false;
+    });
+}
+
+function resetScriptModalEnvState() {
+  scriptModalGlobalEnv = "";
+  scriptModalScriptEnv = "";
+  scriptModalEnvLoadedFor = null;
+  scriptModalEnvLoading = false;
+
+  const globalTa = document.getElementById("script-modal-global-env");
+  if (globalTa) globalTa.value = "";
+  const scriptTa = document.getElementById("script-modal-script-env");
+  if (scriptTa) scriptTa.value = "";
+
+  refreshScriptModalVarsSummary();
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const tmp = document.createElement("textarea");
+  tmp.value = text;
+  tmp.setAttribute("readonly", "true");
+  tmp.style.position = "fixed";
+  tmp.style.top = "-1000px";
+  tmp.style.left = "-1000px";
+  document.body.appendChild(tmp);
+  tmp.focus();
+  tmp.select();
+  document.execCommand("copy");
+  document.body.removeChild(tmp);
+}
+
+async function copyScriptWithVariables() {
+  const nameEl = document.getElementById("script-name");
+  const contentEl = document.getElementById("script-content");
+  const scriptName = nameEl ? nameEl.value.trim() : "";
+  const scriptContent = contentEl ? contentEl.value : "";
+
+  try {
+    // Garante que os .env foram carregados antes de copiar
+    await loadScriptModalEnvs(scriptName || null);
+
+    const text =
+      `# Script: ${scriptName || "(sem nome)"}\n` +
+      `# Path: ~/scripts/${scriptName || "<script>.sh"}\n` +
+      `# Global env: ~/scripts/.env\n` +
+      `# Script env: ~/scripts/.env.${scriptName || "<script>"}\n\n` +
+      `### Global env (.env)\n${scriptModalGlobalEnv || "(vazio)"}\n\n` +
+      `### Script env (.env.<script>)\n${scriptModalScriptEnv || "(vazio)"}\n\n` +
+      `### Script content\n${scriptContent || "(vazio)"}\n`;
+
+    await copyTextToClipboard(text);
+    alert("Copiado para a área de transferência (script + variáveis).");
+  } catch (e) {
+    showError("Não foi possível copiar: " + formatCockpitError(e));
+  }
+}
 
 function makeSafeId(value) {
   return String(value || "")
@@ -57,7 +270,7 @@ function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.4";
+  const fallbackVersion = "1.2.5";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -273,6 +486,28 @@ function initEventHandlers() {
       event.target.closest(".js-row-actions");
     if (!insideRowActions) closeAllRowActionsMenus();
   });
+
+  // Atualiza preview de variáveis no modal de script
+  const scriptNameInput = document.getElementById("script-name");
+  if (scriptNameInput) {
+    let t = null;
+    scriptNameInput.addEventListener("input", function () {
+      setScriptModalPath(scriptNameInput.value.trim());
+      if (t) clearTimeout(t);
+      t = setTimeout(() => {
+        const name = scriptNameInput.value.trim();
+        if (name && name.endsWith(".sh")) loadScriptModalEnvs(name);
+        else loadScriptModalEnvs(null);
+      }, 250);
+    });
+  }
+
+  const scriptContentInput = document.getElementById("script-content");
+  if (scriptContentInput) {
+    scriptContentInput.addEventListener("input", function () {
+      refreshScriptModalVarsSummary();
+    });
+  }
 }
 
 function setCronScriptSelectVisible(visible) {
@@ -947,13 +1182,19 @@ function openCreateModal() {
   document.getElementById("script-name").disabled = false;
   document.getElementById("script-content").value =
     '#!/bin/bash\n\n# Seu script aqui\necho "Executando script..."\n';
+  resetScriptModalEnvState();
+  setScriptModalPath(null);
   document.getElementById("scriptModal").style.display = "block";
+
+  // Carrega o .env global para referência mesmo no modo criação
+  loadScriptModalEnvs(null);
 }
 
 // Fechar modal de script
 function closeScriptModal() {
   document.getElementById("scriptModal").style.display = "none";
   currentEditingScript = null;
+  resetScriptModalEnvState();
 }
 
 // Editar script
@@ -973,7 +1214,11 @@ function editScript(scriptName) {
       document.getElementById("script-name").value = scriptName;
       document.getElementById("script-name").disabled = true;
       document.getElementById("script-content").value = content;
+      resetScriptModalEnvState();
+      setScriptModalPath(scriptName);
       document.getElementById("scriptModal").style.display = "block";
+
+      loadScriptModalEnvs(scriptName);
     })
     .catch((error) => {
       showLoading(false);

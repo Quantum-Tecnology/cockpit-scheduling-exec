@@ -329,6 +329,18 @@
         <div class="pf-c-modal-box__body">
           <form id="script-form">
             <div class="pf-c-form">
+              <div
+                class="pf-c-alert pf-m-info pf-m-inline"
+                style="margin-bottom: var(--pf-global--spacer--md)"
+              >
+                <p class="pf-c-alert__title">
+                  <span class="pf-screen-reader">Informação: </span>
+                  Ao executar/agendar, este plugin carrega as variáveis de
+                  <code>~/scripts/.env</code> e também de
+                  <code>~/scripts/.env.&lt;script&gt;</code> (se existir).
+                </p>
+              </div>
+
               <div class="pf-c-form__group">
                 <div class="pf-c-form__group-label">
                   <label class="pf-c-form__label" for="script-name">
@@ -359,6 +371,30 @@
 
               <div class="pf-c-form__group">
                 <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="script-path">
+                    <span class="pf-c-form__label-text">Caminho</span>
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="script-path"
+                    name="script-path"
+                    readonly
+                    aria-readonly="true"
+                  />
+                  <p class="pf-c-form__helper-text">
+                    <span class="pf-c-form__helper-text-icon">
+                      <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    </span>
+                    Informação (somente leitura).
+                  </p>
+                </div>
+              </div>
+
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
                   <label class="pf-c-form__label" for="script-content">
                     <span class="pf-c-form__label-text"
                       >Conteúdo do Script</span
@@ -380,6 +416,56 @@
                     "
                     placeholder="#!/bin/bash&#10;&#10;echo 'Olá Mundo'"
                   ></textarea>
+                  <p class="pf-c-form__helper-text" id="script-vars-summary">
+                    Variáveis referenciadas detectadas: <code>-</code>
+                  </p>
+                </div>
+              </div>
+
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="script-modal-global-env">
+                    <span class="pf-c-form__label-text"
+                      >Variáveis globais carregadas (~/.env)</span
+                    >
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <textarea
+                    class="pf-c-form-control"
+                    id="script-modal-global-env"
+                    name="script-modal-global-env"
+                    readonly
+                    aria-readonly="true"
+                    rows="6"
+                    style="font-family: 'Red Hat Mono', 'Courier New', monospace; background: var(--pf-global--BackgroundColor--200);"
+                    placeholder="Carregando..."
+                  ></textarea>
+                  <p class="pf-c-form__helper-text">
+                    Informação (somente leitura). Use o botão de copiar para enviar tudo junto.
+                  </p>
+                </div>
+              </div>
+
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="script-modal-script-env">
+                    <span class="pf-c-form__label-text"
+                      >Variáveis do script (~/.env.&lt;script&gt;)</span
+                    >
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <textarea
+                    class="pf-c-form-control"
+                    id="script-modal-script-env"
+                    name="script-modal-script-env"
+                    readonly
+                    aria-readonly="true"
+                    rows="6"
+                    style="font-family: 'Red Hat Mono', 'Courier New', monospace; background: var(--pf-global--BackgroundColor--200);"
+                    placeholder="(vazio)"
+                  ></textarea>
                 </div>
               </div>
             </div>
@@ -387,6 +473,13 @@
         </div>
 
         <div class="pf-c-modal-box__footer">
+          <button
+            type="button"
+            class="pf-c-button pf-m-secondary"
+            onclick="copyScriptWithVariables()"
+          >
+            Copiar (script + variáveis)
+          </button>
           <button
             type="button"
             class="pf-c-button pf-m-secondary"
@@ -406,7 +499,7 @@
     </div>
 
     <div id="plugin-footer" class="plugin-footer">
-      v1.2.4 — Luis Gustavo Santarosa Pinto
+      v1.2.5 — Luis Gustavo Santarosa Pinto
     </div>
 
     <!-- Modal Variáveis de Ambiente (.env) -->
