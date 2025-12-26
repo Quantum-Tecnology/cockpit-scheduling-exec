@@ -9,7 +9,7 @@ function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.1.0";
+  const fallbackVersion = "1.2.0";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -138,11 +138,13 @@ function initEventHandlers() {
     const cronModal = document.getElementById("cronModal");
     const importModal = document.getElementById("importModal");
     const envModal = document.getElementById("envModal");
+    const logModal = document.getElementById("logModal");
 
     if (event.target === scriptModal) closeScriptModal();
     if (event.target === cronModal) closeCronModal();
     if (event.target === importModal) closeImportModal();
     if (event.target === envModal) closeEnvModal();
+    if (event.target === logModal) closeLogModal();
   });
 }
 
@@ -342,6 +344,9 @@ function renderScripts(scripts) {
           <button class="pf-c-button pf-m-primary pf-m-small" type="button" onclick="executeScript('${
             script.name
           }')">Executar</button>
+          <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="openLogModal('${
+            script.name
+          }')">Logs</button>
           <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="editScript('${
             script.name
           }')">Editar</button>
@@ -422,6 +427,58 @@ function openEnvModal() {
   const modal = document.getElementById("envModal");
   if (modal) modal.style.display = "block";
   loadEnvFile();
+}
+
+function showLogLoading(show) {
+  const el = document.getElementById("log-loading");
+  if (el) el.style.display = show ? "block" : "none";
+}
+let currentLogScript = null;
+
+function openLogModal(scriptName) {
+  currentLogScript = scriptName;
+
+  const title = document.getElementById("log-title");
+  if (title) title.textContent = `Logs: ${scriptName}`;
+
+  const textarea = document.getElementById("log-content");
+  if (textarea) textarea.value = "";
+
+  const modal = document.getElementById("logModal");
+  if (modal) modal.style.display = "block";
+
+  loadScriptLog(scriptName);
+}
+
+function closeLogModal() {
+  const modal = document.getElementById("logModal");
+  if (modal) modal.style.display = "none";
+  currentLogScript = null;
+
+  const textarea = document.getElementById("log-content");
+  if (textarea) textarea.value = "";
+}
+
+function loadScriptLog(scriptName) {
+  const textarea = document.getElementById("log-content");
+  if (!textarea) return;
+
+  showLogLoading(true);
+  cockpit
+    .spawn([
+      "/usr/share/cockpit/scheduling_exec/scripts/get-script-log.sh",
+      scriptName,
+      "400",
+    ])
+    .then((content) => {
+      showLogLoading(false);
+      textarea.value = content || "";
+    })
+    .catch((error) => {
+      showLogLoading(false);
+      showError("Erro ao carregar logs: " + formatCockpitError(error));
+      textarea.value = "";
+    });
 }
 
 function closeEnvModal() {

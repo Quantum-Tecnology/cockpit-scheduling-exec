@@ -13,6 +13,7 @@ fi
 
 SCRIPT_PATH="$SCRIPTS_DIR/$SCRIPT_NAME"
 METADATA_FILE="$METADATA_DIR/$SCRIPT_NAME.json"
+LOG_FILE="$METADATA_DIR/$SCRIPT_NAME.log"
 
 if [ ! -f "$SCRIPT_PATH" ]; then
     echo "Erro: Script não encontrado" >&2
@@ -66,6 +67,13 @@ if [ $exit_code -eq 0 ]; then
     output=$("$SCRIPT_PATH" 2>&1)
     exit_code=$?
 fi
+
+# Registrar log (mesmo arquivo usado no cron)
+mkdir -p "$METADATA_DIR"
+{
+    printf '\n===== %s | %s | exit %s =====\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$SCRIPT_NAME" "$exit_code"
+    printf '%s\n' "$output"
+} >> "$LOG_FILE" 2>/dev/null || true
 
 json_escape() {
     local s="$1"
