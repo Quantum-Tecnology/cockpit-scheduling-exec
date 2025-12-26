@@ -220,6 +220,13 @@
                   Buscar scripts
                 </button>
                 <button
+                  class="pf-c-button pf-m-secondary"
+                  type="button"
+                  onclick="openCronManagerModal()"
+                >
+                  Agendamentos
+                </button>
+                <button
                   class="pf-c-button pf-m-tertiary"
                   type="button"
                   onclick="openEnvModal()"
@@ -399,7 +406,7 @@
     </div>
 
     <div id="plugin-footer" class="plugin-footer">
-      v1.2.2 — Luis Gustavo Santarosa Pinto
+      v1.2.3 — Luis Gustavo Santarosa Pinto
     </div>
 
     <!-- Modal Variáveis de Ambiente (.env) -->
@@ -785,6 +792,68 @@
             />
 
             <div class="pf-c-form">
+              <div
+                class="pf-c-form__group"
+                id="cron-script-select-group"
+                style="display: none"
+              >
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="cron-script-select">
+                    <span class="pf-c-form__label-text">Script</span>
+                    <span class="pf-c-form__label-required" aria-hidden="true"
+                      >*</span
+                    >
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <select
+                    class="pf-c-form-control"
+                    id="cron-script-select"
+                    onchange="onCronScriptSelectChange()"
+                  >
+                    <option value="">-- Selecione um script --</option>
+                  </select>
+                  <p class="pf-c-form__helper-text">
+                    No modo global, selecione um script para criar um novo
+                    agendamento.
+                  </p>
+                </div>
+              </div>
+
+              <div class="cron-helper" style="margin-top: 0">
+                <strong>Agendamentos existentes</strong>
+                <div id="cron-existing-empty" style="margin-top: 6px">
+                  Nenhum agendamento encontrado para este filtro.
+                </div>
+                <div
+                  id="cron-existing-table-wrap"
+                  style="display: none; margin-top: 10px"
+                >
+                  <table
+                    class="pf-c-table pf-m-compact pf-m-grid-md"
+                    role="grid"
+                  >
+                    <thead>
+                      <tr role="row">
+                        <th role="columnheader" scope="col">Script</th>
+                        <th role="columnheader" scope="col">Expressão</th>
+                        <th role="columnheader" scope="col">Comando</th>
+                      </tr>
+                    </thead>
+                    <tbody role="rowgroup" id="cron-existing-body"></tbody>
+                  </table>
+                </div>
+                <p class="pf-c-form__helper-text" style="margin-top: 10px">
+                  Observação: o botão “Remover” remove <strong>todos</strong> os
+                  agendamentos do script selecionado.
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="pf-c-form"
+              style="margin-top: var(--pf-global--spacer--md)"
+            >
               <div class="pf-c-form__group">
                 <div class="pf-c-form__group-label">
                   <label class="pf-c-form__label">
@@ -946,7 +1015,7 @@
             class="pf-c-button pf-m-warning"
             onclick="removeCron()"
           >
-            Remover Agendamento
+            Remover Agendamentos
           </button>
           <button
             type="button"

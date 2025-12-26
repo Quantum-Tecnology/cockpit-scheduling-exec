@@ -21,8 +21,17 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [1.2.2] - 2025-12-26
 
+### Adicionado
+- Listagem de agendamentos no modal do script (suporta múltiplos por script)
+- Botão global “Agendamentos” para visualizar agendamentos e criar novos via select
+
+### Corrigido
+- Detecção/extração de agendamentos no crontab (linhas do wrapper `execute-script.sh`)
+
+## [1.2.3] - 2025-12-26
+
 ### Alterado
-- Bump de versão para 1.2.2
+- Bump de versão para 1.2.3
 
 ## [1.1.0] - 2025-12-26
 

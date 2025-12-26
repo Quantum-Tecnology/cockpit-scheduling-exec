@@ -3,6 +3,7 @@
 
 SCRIPTS_DIR="$HOME/scripts"
 METADATA_DIR="$HOME/.scripts-metadata"
+EXECUTE_SCRIPT="/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh"
 
 # Criar diretórios se não existirem
 mkdir -p "$SCRIPTS_DIR"
@@ -36,9 +37,20 @@ EOF
         # Ler metadata
         metadata=$(cat "$metadata_file")
 
-        # Obter expressão cron se existir
-        cron_expression=$(crontab -l 2>/dev/null | grep "$SCRIPTS_DIR/$basename" | grep -v "^#" | head -n1 | sed "s|.*\(.*\) $SCRIPTS_DIR/$basename.*|\1|" | awk '{for(i=1;i<=5;i++) printf $i" "; print ""}')
-        cron_expression=$(echo "$cron_expression" | xargs)
+                # Obter expressão cron (primeira entrada encontrada)
+                cron_line=$(crontab -l 2>/dev/null | grep -v "^#" | awk -v exec="$EXECUTE_SCRIPT" -v script="$basename" -v scripts_dir="$SCRIPTS_DIR" '
+                {
+                    line=$0
+                    if (index(line, "scheduling_exec:" script) > 0) { print line; exit }
+                    n=split(line,a,/[ \t]+/)
+                    for (i=6; i<=n; i++) {
+                        if (a[i]==exec && (i+1)<=n && a[i+1]==script) { print line; exit }
+                    }
+                    if (index(line, scripts_dir "/" script) > 0) { print line; exit }
+                }
+                ')
+
+                cron_expression=$(echo "$cron_line" | awk '{for(i=1;i<=5;i++) printf $i" "; print ""}' | xargs)
 
         # Adicionar vírgula entre objetos JSON
         if [ "$first" = false ]; then

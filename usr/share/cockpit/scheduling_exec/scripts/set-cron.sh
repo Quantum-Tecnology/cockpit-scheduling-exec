@@ -19,14 +19,21 @@ if [ ! -f "$SCRIPT_PATH" ]; then
     exit 1
 fi
 
-# Remover agendamento anterior se existir
-current_cron=$(crontab -l 2>/dev/null | grep -v "$SCRIPTS_DIR/$SCRIPT_NAME")
+mkdir -p "$METADATA_DIR"
 
-# Adicionar novo agendamento
+# Adicionar novo agendamento (permite múltiplos agendamentos por script)
 # O comando chama execute-script.sh que atualiza as estatísticas
-new_line="$CRON_EXPRESSION $EXECUTE_SCRIPT $SCRIPT_NAME >> $HOME/.scripts-metadata/$SCRIPT_NAME.log 2>&1"
+# Marcamos a linha para facilitar listagem/remoção.
+new_line="$CRON_EXPRESSION $EXECUTE_SCRIPT $SCRIPT_NAME >> $HOME/.scripts-metadata/$SCRIPT_NAME.log 2>&1 # scheduling_exec:$SCRIPT_NAME"
 
-# Combinar cron existente com novo agendamento
+current_cron=$(crontab -l 2>/dev/null || true)
+
+# Evita duplicar a mesma linha
+if echo "$current_cron" | grep -Fx "$new_line" >/dev/null 2>&1; then
+    echo "Agendamento já existe"
+    exit 0
+fi
+
 echo "$current_cron" | cat - <(echo "$new_line") | crontab -
 
 echo "Agendamento configurado com sucesso"

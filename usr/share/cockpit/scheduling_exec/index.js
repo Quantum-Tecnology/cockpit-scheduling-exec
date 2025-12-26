@@ -6,12 +6,13 @@ let importCandidates = [];
 let eventHandlersBound = false;
 let currentSudoScript = null;
 let currentScriptEnv = null;
+let cronModalMode = "script";
 
 function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.2";
+  const fallbackVersion = "1.2.3";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -82,6 +83,11 @@ function initEventHandlers() {
       e.preventDefault();
 
       const scriptName = document.getElementById("cron-script-name").value;
+      if (!scriptName) {
+        showError("Selecione um script para criar o agendamento");
+        return;
+      }
+
       const minute = document.getElementById("cron-minute").value;
       const hour = document.getElementById("cron-hour").value;
       const day = document.getElementById("cron-day").value;
@@ -100,8 +106,8 @@ function initEventHandlers() {
         ])
         .then(() => {
           showLoading(false);
-          closeCronModal();
           loadScripts();
+          loadCronSchedules(scriptName);
         })
         .catch((error) => {
           showLoading(false);
@@ -215,6 +221,153 @@ function initEventHandlers() {
     if (event.target === sudoModal) closeSudoModal();
     if (event.target === scriptEnvModal) closeScriptEnvModal();
   });
+}
+
+function setCronScriptSelectVisible(visible) {
+  const group = document.getElementById("cron-script-select-group");
+  if (group) group.style.display = visible ? "block" : "none";
+}
+
+function clearCronExistingList() {
+  const tbody = document.getElementById("cron-existing-body");
+  if (tbody) tbody.innerHTML = "";
+  const empty = document.getElementById("cron-existing-empty");
+  if (empty) empty.style.display = "block";
+  const wrap = document.getElementById("cron-existing-table-wrap");
+  if (wrap) wrap.style.display = "none";
+}
+
+function renderCronExistingList(items) {
+  const tbody = document.getElementById("cron-existing-body");
+  const empty = document.getElementById("cron-existing-empty");
+  const wrap = document.getElementById("cron-existing-table-wrap");
+  if (!tbody || !empty || !wrap) return;
+
+  tbody.innerHTML = "";
+
+  if (!items || items.length === 0) {
+    empty.style.display = "block";
+    wrap.style.display = "none";
+    return;
+  }
+
+  empty.style.display = "none";
+  wrap.style.display = "block";
+
+  items.forEach((item) => {
+    const tr = document.createElement("tr");
+    tr.setAttribute("role", "row");
+    tr.innerHTML = `
+      <td role="cell" data-label="Script"><strong>${escapeHtml(
+        item.script || "-"
+      )}</strong></td>
+      <td role="cell" data-label="Expressão"><code>${escapeHtml(
+        item.expression || ""
+      )}</code></td>
+      <td role="cell" data-label="Comando"><small><code>${escapeHtml(
+        item.command || ""
+      )}</code></small></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function loadCronSchedules(scriptName) {
+  clearCronExistingList();
+
+  const args = ["/usr/share/cockpit/scheduling_exec/scripts/list-cron.sh"];
+  if (scriptName) args.push(scriptName);
+
+  return cockpit
+    .spawn(args, { err: "message" })
+    .then((raw) => {
+      let items = [];
+      try {
+        items = JSON.parse(raw || "[]");
+      } catch {
+        items = [];
+      }
+      renderCronExistingList(items);
+      return items;
+    })
+    .catch((error) => {
+      showError("Erro ao carregar agendamentos: " + formatCockpitError(error));
+      renderCronExistingList([]);
+      return [];
+    });
+}
+
+function loadCronScriptsSelect() {
+  const select = document.getElementById("cron-script-select");
+  if (!select) return Promise.resolve();
+
+  // Mantém a primeira option (placeholder)
+  select.innerHTML = '<option value="">-- Selecione um script --</option>';
+
+  return cockpit
+    .spawn(["/usr/share/cockpit/scheduling_exec/scripts/list-scripts.sh"], {
+      err: "message",
+    })
+    .then((output) => {
+      let scripts = [];
+      try {
+        scripts = JSON.parse(output || "[]");
+      } catch {
+        scripts = [];
+      }
+
+      scripts.forEach((s) => {
+        const opt = document.createElement("option");
+        opt.value = s.name;
+        opt.textContent = s.name;
+        select.appendChild(opt);
+      });
+    })
+    .catch((error) => {
+      showError("Erro ao carregar scripts: " + formatCockpitError(error));
+    });
+}
+
+function onCronScriptSelectChange() {
+  const select = document.getElementById("cron-script-select");
+  const hidden = document.getElementById("cron-script-name");
+  const scriptName = select ? select.value : "";
+
+  if (hidden) hidden.value = scriptName;
+
+  if (!scriptName) {
+    loadCronSchedules(null);
+    return;
+  }
+
+  loadCronSchedules(scriptName);
+}
+
+function openCronManagerModal() {
+  cronModalMode = "global";
+
+  const hidden = document.getElementById("cron-script-name");
+  if (hidden) hidden.value = "";
+
+  setCronScriptSelectVisible(true);
+
+  document.getElementById("cron-minute").value = "*";
+  document.getElementById("cron-hour").value = "*";
+  document.getElementById("cron-day").value = "*";
+  document.getElementById("cron-month").value = "*";
+  document.getElementById("cron-weekday").value = "*";
+
+  const select = document.getElementById("cron-script-select");
+  if (select) select.value = "";
+
+  document.getElementById("cronModal").style.display = "block";
+
+  loadCronScriptsSelect().then(() => {
+    const select2 = document.getElementById("cron-script-select");
+    if (select2) select2.value = "";
+  });
+
+  loadCronSchedules(null);
 }
 
 // Função para mostrar mensagens de erro
@@ -837,48 +990,52 @@ function executeScript(scriptName, options) {
 
 // Abrir modal de configuração de cron
 function openCronModal(scriptName) {
+  cronModalMode = "script";
+
   document.getElementById("cron-script-name").value = scriptName;
 
-  // Buscar configuração atual do cron
-  cockpit
-    .spawn([
-      "/usr/share/cockpit/scheduling_exec/scripts/get-cron.sh",
-      scriptName,
-    ])
-    .then((cronExpression) => {
-      if (cronExpression.trim()) {
-        const parts = cronExpression.trim().split(" ");
-        if (parts.length >= 5) {
-          document.getElementById("cron-minute").value = parts[0];
-          document.getElementById("cron-hour").value = parts[1];
-          document.getElementById("cron-day").value = parts[2];
-          document.getElementById("cron-month").value = parts[3];
-          document.getElementById("cron-weekday").value = parts[4];
-        }
-      } else {
-        // Valores padrão
-        document.getElementById("cron-minute").value = "*";
-        document.getElementById("cron-hour").value = "*";
-        document.getElementById("cron-day").value = "*";
-        document.getElementById("cron-month").value = "*";
-        document.getElementById("cron-weekday").value = "*";
-      }
-      document.getElementById("cronModal").style.display = "block";
-    })
-    .catch(() => {
-      // Se não encontrar, usar valores padrão
-      document.getElementById("cron-minute").value = "*";
-      document.getElementById("cron-hour").value = "*";
-      document.getElementById("cron-day").value = "*";
-      document.getElementById("cron-month").value = "*";
-      document.getElementById("cron-weekday").value = "*";
-      document.getElementById("cronModal").style.display = "block";
-    });
+  setCronScriptSelectVisible(false);
+
+  // Defaults
+  document.getElementById("cron-minute").value = "*";
+  document.getElementById("cron-hour").value = "*";
+  document.getElementById("cron-day").value = "*";
+  document.getElementById("cron-month").value = "*";
+  document.getElementById("cron-weekday").value = "*";
+
+  document.getElementById("cronModal").style.display = "block";
+
+  // Lista agendamentos existentes e preenche com o primeiro, se houver
+  loadCronSchedules(scriptName).then((items) => {
+    if (!items || items.length === 0) return;
+
+    const expr = String(items[0].expression || "").trim();
+    if (!expr) return;
+
+    const parts = expr.split(" ");
+    if (parts.length >= 5) {
+      document.getElementById("cron-minute").value = parts[0];
+      document.getElementById("cron-hour").value = parts[1];
+      document.getElementById("cron-day").value = parts[2];
+      document.getElementById("cron-month").value = parts[3];
+      document.getElementById("cron-weekday").value = parts[4];
+    }
+  });
 }
 
 // Fechar modal de cron
 function closeCronModal() {
   document.getElementById("cronModal").style.display = "none";
+  cronModalMode = "script";
+
+  const hidden = document.getElementById("cron-script-name");
+  if (hidden) hidden.value = "";
+
+  const select = document.getElementById("cron-script-select");
+  if (select) select.value = "";
+
+  setCronScriptSelectVisible(false);
+  clearCronExistingList();
 }
 
 // Aplicar preset de cron
@@ -898,7 +1055,12 @@ function applyCronPreset() {
 function removeCron() {
   const scriptName = document.getElementById("cron-script-name").value;
 
-  if (!confirm(`Remover agendamento do script "${scriptName}"?`)) {
+  if (!scriptName) {
+    showError("Selecione um script para remover agendamentos");
+    return;
+  }
+
+  if (!confirm(`Remover TODOS os agendamentos do script "${scriptName}"?`)) {
     return;
   }
 
@@ -911,8 +1073,8 @@ function removeCron() {
     ])
     .then(() => {
       showLoading(false);
-      closeCronModal();
       loadScripts();
+      loadCronSchedules(scriptName);
     })
     .catch((error) => {
       showLoading(false);
