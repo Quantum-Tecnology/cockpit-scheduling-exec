@@ -5,14 +5,60 @@
     <title>Scripts & Agendamentos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Cockpit standard CSS imports (padrão do Cockpit) -->
-    <link rel="stylesheet" href="../base1/patternfly.css" />
-    <link rel="stylesheet" href="../base1/patternfly-addons.css" />
-    <link rel="stylesheet" href="../base1/cockpit.css" />
+    <!-- Branding -->
     <link rel="stylesheet" href="../../static/branding.css" />
 
     <!-- Cockpit JS API -->
     <script src="../base1/cockpit.js"></script>
+
+    <!-- CSS loader: usa fetch para verificar disponibilidade -->
+    <script>
+      (function () {
+        function loadCss(href) {
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = href;
+          document.head.appendChild(link);
+        }
+
+        function tryLoadFirst(paths) {
+          if (!paths || paths.length === 0) return;
+
+          function attempt(idx) {
+            if (idx >= paths.length) return;
+            var url = paths[idx];
+
+            fetch(url, { method: "HEAD" })
+              .then(function (res) {
+                var ct = res.headers.get("content-type") || "";
+                if (res.ok && ct.indexOf("text/css") !== -1) {
+                  loadCss(url);
+                } else {
+                  attempt(idx + 1);
+                }
+              })
+              .catch(function () {
+                attempt(idx + 1);
+              });
+          }
+
+          attempt(0);
+        }
+
+        // PatternFly base
+        tryLoadFirst([
+          "../base1/patternfly.css",
+          "../base1/patternfly-4-cockpit.css",
+        ]);
+
+        // PatternFly addons
+        tryLoadFirst(["../base1/patternfly-addons.css"]);
+
+        // Cockpit base
+        tryLoadFirst(["../base1/cockpit.css"]);
+      })();
+    </script>
+
     <script src="index.js" defer></script>
     <style>
       html,
