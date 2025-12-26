@@ -4,6 +4,7 @@
 SCRIPTS_DIR="$HOME/scripts"
 METADATA_DIR="$HOME/.scripts-metadata"
 ENV_FILE="$SCRIPTS_DIR/.env"
+SCRIPT_ENV_FILE="$SCRIPTS_DIR/.env.$SCRIPT_NAME"
 RUN_AS_SUDO=0
 
 if [ "$1" = "--sudo" ]; then
@@ -62,6 +63,29 @@ if [ -f "$ENV_FILE" ]; then
 
     if [ $env_rc -ne 0 ]; then
         output="Erro ao carregar variáveis de ambiente ($ENV_FILE):\n$(cat "$err_file")"
+        exit_code=$env_rc
+    fi
+
+    rm -f "$err_file" 2>/dev/null || true
+fi
+
+# Carregar variáveis específicas do script (se existir).
+if [ $exit_code -eq 0 ] && [ -f "$SCRIPT_ENV_FILE" ]; then
+    err_file=""
+    if command -v mktemp >/dev/null 2>&1; then
+        err_file="$(mktemp)"
+    else
+        err_file="/tmp/scheduling_exec_script_env_err.$$"
+        : > "$err_file"
+    fi
+
+    set -a
+    . "$SCRIPT_ENV_FILE" 2>"$err_file"
+    env_rc=$?
+    set +a
+
+    if [ $env_rc -ne 0 ]; then
+        output="Erro ao carregar variáveis do script ($SCRIPT_ENV_FILE):\n$(cat "$err_file")"
         exit_code=$env_rc
     fi
 

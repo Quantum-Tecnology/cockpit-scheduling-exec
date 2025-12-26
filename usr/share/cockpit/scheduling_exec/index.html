@@ -224,7 +224,7 @@
                   type="button"
                   onclick="openEnvModal()"
                 >
-                  Variáveis (.env)
+                  Variáveis globais (.env)
                 </button>
                 <button
                   class="pf-c-button pf-m-primary"
@@ -399,7 +399,7 @@
     </div>
 
     <div id="plugin-footer" class="plugin-footer">
-      v1.2.1 — Luis Gustavo Santarosa Pinto
+      v1.2.2 — Luis Gustavo Santarosa Pinto
     </div>
 
     <!-- Modal Variáveis de Ambiente (.env) -->
@@ -407,7 +407,7 @@
       <div class="modal-content">
         <div class="pf-c-modal-box__header">
           <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">
-            Variáveis de ambiente (.env)
+            Variáveis globais de ambiente (.env)
           </h2>
           <button class="close" onclick="closeEnvModal()" aria-label="Fechar">
             &times;
@@ -417,6 +417,15 @@
         <div class="pf-c-modal-box__body">
           <form id="env-form">
             <div class="pf-c-form">
+              <div class="cron-helper" style="margin-top: 0">
+                <strong>Como funciona</strong>
+                <div style="margin-top: 6px">
+                  Estas variáveis são carregadas
+                  <strong>para todos os scripts</strong>. Você também pode
+                  definir <strong>variáveis por script</strong> no botão
+                  “Variáveis (script)” na linha do script.
+                </div>
+              </div>
               <div class="pf-c-form__group">
                 <div class="pf-c-form__group-label">
                   <label class="pf-c-form__label" for="env-content">
@@ -434,6 +443,9 @@
                     placeholder="MINHA_VARIAVEL=valor\nOUTRA_VARIAVEL=123"
                     style="
                       font-family: 'Red Hat Mono', 'Courier New', monospace;
+                      background-color: var(
+                        --pf-global--BackgroundColor--light-300
+                      );
                     "
                   ></textarea>
                   <p class="pf-c-form__helper-text">
@@ -458,6 +470,85 @@
             type="button"
             class="pf-c-button pf-m-primary"
             onclick="document.getElementById('env-form').requestSubmit()"
+          >
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Variáveis do Script -->
+    <div id="scriptEnvModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2
+            class="pf-c-modal-box__title pf-c-title pf-m-2xl"
+            id="script-env-title"
+          >
+            Variáveis do script
+          </h2>
+          <button
+            class="close"
+            onclick="closeScriptEnvModal()"
+            aria-label="Fechar"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="pf-c-modal-box__body">
+          <form id="script-env-form">
+            <div class="pf-c-form">
+              <div class="cron-helper" style="margin-top: 0">
+                <strong>Escopo</strong>
+                <div style="margin-top: 6px">
+                  Estas variáveis são carregadas <strong>somente</strong> para
+                  este script, após as variáveis globais.
+                </div>
+              </div>
+
+              <div class="pf-c-form__group">
+                <div class="pf-c-form__group-label">
+                  <label class="pf-c-form__label" for="script-env-content">
+                    <span class="pf-c-form__label-text">Conteúdo</span>
+                  </label>
+                </div>
+                <div class="pf-c-form__group-control">
+                  <textarea
+                    class="pf-c-form-control"
+                    id="script-env-content"
+                    name="script-env-content"
+                    rows="12"
+                    placeholder="CHAVE=VALOR\nOUTRA=123"
+                    style="
+                      font-family: 'Red Hat Mono', 'Courier New', monospace;
+                      background-color: var(
+                        --pf-global--BackgroundColor--light-300
+                      );
+                    "
+                  ></textarea>
+                  <p class="pf-c-form__helper-text">
+                    Use o formato <code>CHAVE=VALOR</code>. Comentários
+                    (<code>#</code>) são permitidos.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="pf-c-modal-box__footer">
+          <button
+            type="button"
+            class="pf-c-button pf-m-secondary"
+            onclick="closeScriptEnvModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="pf-c-button pf-m-primary"
+            onclick="document.getElementById('script-env-form').requestSubmit()"
           >
             Salvar
           </button>

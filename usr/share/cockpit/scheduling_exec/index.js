@@ -5,12 +5,13 @@ let currentEditingScript = null;
 let importCandidates = [];
 let eventHandlersBound = false;
 let currentSudoScript = null;
+let currentScriptEnv = null;
 
 function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.1";
+  const fallbackVersion = "1.2.2";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -133,6 +134,45 @@ function initEventHandlers() {
     });
   }
 
+  const scriptEnvForm = document.getElementById("script-env-form");
+  if (scriptEnvForm) {
+    scriptEnvForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const scriptName = currentScriptEnv;
+      const envContent = document.getElementById("script-env-content").value;
+
+      if (!scriptName) {
+        showError("Nenhum script selecionado para variáveis");
+        return;
+      }
+
+      showLoading(true);
+
+      cockpit
+        .spawn(
+          [
+            "/usr/share/cockpit/scheduling_exec/scripts/save-script-env.sh",
+            scriptName,
+          ],
+          {
+            err: "message",
+          }
+        )
+        .input(envContent)
+        .then(() => {
+          showLoading(false);
+          closeScriptEnvModal();
+        })
+        .catch((error) => {
+          showLoading(false);
+          showError(
+            "Erro ao salvar variáveis do script: " + formatCockpitError(error)
+          );
+        });
+    });
+  }
+
   const sudoForm = document.getElementById("sudo-form");
   if (sudoForm) {
     sudoForm.addEventListener("submit", function (e) {
@@ -165,6 +205,7 @@ function initEventHandlers() {
     const envModal = document.getElementById("envModal");
     const logModal = document.getElementById("logModal");
     const sudoModal = document.getElementById("sudoModal");
+    const scriptEnvModal = document.getElementById("scriptEnvModal");
 
     if (event.target === scriptModal) closeScriptModal();
     if (event.target === cronModal) closeCronModal();
@@ -172,6 +213,7 @@ function initEventHandlers() {
     if (event.target === envModal) closeEnvModal();
     if (event.target === logModal) closeLogModal();
     if (event.target === sudoModal) closeSudoModal();
+    if (event.target === scriptEnvModal) closeScriptEnvModal();
   });
 }
 
@@ -374,6 +416,9 @@ function renderScripts(scripts) {
           <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="openSudoModal('${
             script.name
           }')">Executar (admin)</button>
+          <button class="pf-c-button pf-m-tertiary pf-m-small" type="button" onclick="openScriptEnvModal('${
+            script.name
+          }')">Variáveis (script)</button>
           <button class="pf-c-button pf-m-secondary pf-m-small" type="button" onclick="openLogModal('${
             script.name
           }')">Logs</button>
@@ -392,6 +437,58 @@ function renderScripts(scripts) {
 
     tbody.appendChild(row);
   });
+}
+
+function openScriptEnvModal(scriptName) {
+  currentScriptEnv = scriptName;
+
+  const title = document.getElementById("script-env-title");
+  if (title) title.textContent = `Variáveis do script: ${scriptName}`;
+
+  const textarea = document.getElementById("script-env-content");
+  if (textarea) textarea.value = "";
+
+  const modal = document.getElementById("scriptEnvModal");
+  if (modal) modal.style.display = "block";
+
+  loadScriptEnvFile(scriptName);
+}
+
+function closeScriptEnvModal() {
+  const modal = document.getElementById("scriptEnvModal");
+  if (modal) modal.style.display = "none";
+  currentScriptEnv = null;
+
+  const textarea = document.getElementById("script-env-content");
+  if (textarea) textarea.value = "";
+}
+
+function loadScriptEnvFile(scriptName) {
+  const textarea = document.getElementById("script-env-content");
+  if (!textarea) return;
+
+  showLoading(true);
+  cockpit
+    .spawn(
+      [
+        "/usr/share/cockpit/scheduling_exec/scripts/get-script-env.sh",
+        scriptName,
+      ],
+      {
+        err: "message",
+      }
+    )
+    .then((content) => {
+      showLoading(false);
+      textarea.value = content || "";
+    })
+    .catch((error) => {
+      showLoading(false);
+      showError(
+        "Erro ao carregar variáveis do script: " + formatCockpitError(error)
+      );
+      textarea.value = "";
+    });
 }
 
 function openSudoModal(scriptName) {
