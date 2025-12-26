@@ -52,6 +52,12 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Importação de CSS refatorada para seguir o padrão do Cockpit (links estáticos em vez de JS dinâmico)
 - CSP simplificada (removido fallback externo unpkg e unsafe-eval desnecessário)
 - Adicionado atributo `lang="pt-BR"` no HTML
+## [1.2.9] – 2025-12-26
+
+### Corrigido
+
+- Erro JavaScript "expected expression, got '}'" ao clicar no dropdown (aspas conflitantes no onclick corrigidas)
+
 ## [1.2.8] – 2025-12-26
 
 ### Corrigido

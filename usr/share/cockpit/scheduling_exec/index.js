@@ -269,7 +269,7 @@ function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.8";
+  const fallbackVersion = "1.2.9";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;
@@ -858,7 +858,7 @@ function renderScripts(scripts) {
               aria-label="Ações"
               aria-expanded="false"
               data-menu-id="${escapeHtml(menuId)}"
-              onclick="toggleRowActionsMenu(${JSON.stringify(menuId)})"
+              onclick="toggleRowActionsMenu('${escapeHtml(menuId)}')"
               title="Ações"
             >
               &#8942;
@@ -869,39 +869,39 @@ function renderScripts(scripts) {
               hidden
             >
               <li>
-                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); executeScript(${JSON.stringify(
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); executeScript('${escapeHtml(
                   scriptName
-                )});">Executar</button>
+                )}');">Executar</button>
               </li>
               <li>
-                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openSudoModal(${JSON.stringify(
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openSudoModal('${escapeHtml(
                   scriptName
-                )});">Executar (admin)</button>
+                )}');">Executar (admin)</button>
               </li>
               <li>
-                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openScriptEnvModal(${JSON.stringify(
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openScriptEnvModal('${escapeHtml(
                   scriptName
-                )});">Variáveis (script)</button>
+                )}');">Variáveis (script)</button>
               </li>
               <li>
-                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openLogModal(${JSON.stringify(
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openLogModal('${escapeHtml(
                   scriptName
-                )});">Logs</button>
+                )}');">Logs</button>
               </li>
               <li>
-                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); editScript(${JSON.stringify(
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); editScript('${escapeHtml(
                   scriptName
-                )});">Editar</button>
+                )}');">Editar</button>
               </li>
               <li>
-                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openCronModal(${JSON.stringify(
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); openCronModal('${escapeHtml(
                   scriptName
-                )});">Agendar</button>
+                )}');">Agendar</button>
               </li>
               <li>
-                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); deleteScript(${JSON.stringify(
+                <button class="pf-c-dropdown__menu-item" type="button" onclick="closeAllRowActionsMenus(); deleteScript('${escapeHtml(
                   scriptName
-                )});">Excluir</button>
+                )}');">Excluir</button>
               </li>
             </ul>
           </div>
