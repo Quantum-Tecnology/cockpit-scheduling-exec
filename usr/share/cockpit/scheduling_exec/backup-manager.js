@@ -11,14 +11,31 @@ let emailConfig = {
   subject: "Backup do Sistema - {{date}}",
   maxSize: 25,
 };
+let userHome = null;
+let configFile = null;
 
 // Constantes
-const CONFIG_FILE = `${cockpit.user().home}/.backup-manager/config.json`;
 const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
 
 // Inicialização
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   console.log("Backup Manager: Inicializando...");
+
+  // Obter home do usuário
+  try {
+    const result = await cockpit.spawn(["echo", "$HOME"], {
+      err: "message",
+      environ: ["HOME=" + (process.env.HOME || "")],
+    });
+    userHome = result.trim() || "/root";
+    configFile = `${userHome}/.backup-manager/config.json`;
+    console.log("Backup Manager: Home do usuário:", userHome);
+    console.log("Backup Manager: Arquivo de configuração:", configFile);
+  } catch (error) {
+    console.error("Backup Manager: Erro ao obter home, usando /root");
+    userHome = "/root";
+    configFile = "/root/.backup-manager/config.json";
+  }
 
   // Garantir que as abas estejam sempre visíveis
   const tabsContainer = document.getElementById("backup-tabs");
@@ -46,9 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================================================================
 
 async function loadConfiguration() {
-  console.log("Backup Manager: Carregando configuração de", CONFIG_FILE);
+  console.log("Backup Manager: Carregando configuração de", configFile);
   try {
-    const result = await cockpit.spawn(["cat", CONFIG_FILE], {
+    const result = await cockpit.spawn(["cat", configFile], {
       err: "message",
     });
     const config = JSON.parse(result);
@@ -90,9 +107,10 @@ async function saveConfiguration() {
   );
 
   try {
-    const configDir = `${cockpit.user().home}/.backup-manager`;
+    const configDir = `${userHome}/.backup-manager`;
     const configJson = JSON.stringify(config, null, 2);
 
+    console.log("Backup Manager: Home do usuário:", userHome);
     console.log("Backup Manager: Criando diretório:", configDir);
 
     // Criar diretório se não existir
@@ -110,19 +128,19 @@ async function saveConfiguration() {
     console.log("Backup Manager: Salvando arquivo usando tee...");
 
     // Usar tee em vez de cat > para melhor tratamento de erros
-    const process = cockpit.spawn(["tee", CONFIG_FILE], {
+    const process = cockpit.spawn(["tee", configFile], {
       err: "message",
       superuser: "try",
     });
     process.input(configJson);
     await process;
 
-    console.log("Backup Manager: Configuração salva em", CONFIG_FILE);
+    console.log("Backup Manager: Configuração salva em", configFile);
     showAlert("success", "✅ Configuração salva com sucesso!");
 
     // Verificar se foi salvo corretamente
     console.log("Backup Manager: Verificando arquivo salvo...");
-    const verify = await cockpit.spawn(["cat", CONFIG_FILE], {
+    const verify = await cockpit.spawn(["cat", configFile], {
       err: "message",
     });
     console.log(
@@ -157,7 +175,7 @@ function closeAddDirectoryModal() {
 
 async function browseDirectory() {
   const pathInput = document.getElementById("directory-path");
-  const currentPath = pathInput.value || cockpit.user().home;
+  const currentPath = pathInput.value || userHome;
 
   // Abrir modal de navegação de diretórios
   document.getElementById("directory-browser-modal").style.display = "block";
@@ -236,7 +254,7 @@ function navigateToParent() {
 }
 
 function navigateToHome() {
-  loadDirectoryContents(cockpit.user().home);
+  loadDirectoryContents(userHome);
 }
 
 function navigateToRoot() {
@@ -246,7 +264,7 @@ function navigateToRoot() {
 function showCommonDirectories() {
   const container = document.getElementById("directory-list");
   const commonDirs = [
-    { path: cockpit.user().home, icon: "🏠", label: "Home" },
+    { path: userHome, icon: "🏠", label: "Home" },
     { path: "/var/backups", icon: "💾", label: "Sistema - /var/backups" },
     { path: "/home", icon: "👥", label: "Usuários - /home" },
     { path: "/tmp", icon: "📦", label: "Temporário - /tmp" },
@@ -923,9 +941,7 @@ async function exportSelectedBackups() {
     allBackups.find((b) => b.id === id)
   );
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outputFile = `${
-    cockpit.user().home
-  }/backups-export-${timestamp}.tar.gz`;
+  const outputFile = `${userHome}/backups-export-${timestamp}.tar.gz`;
 
   try {
     showAlert("info", "📦 Criando arquivo de exportação...", 0);
