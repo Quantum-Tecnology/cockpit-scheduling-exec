@@ -421,12 +421,23 @@
       .pf-c-table tbody tr {
         transition: all 0.2s;
         border-bottom: 1px solid #f1f3f5;
+        position: relative;
       }
 
       .pf-c-table tbody tr:hover {
         background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);
-        transform: scale(1.01);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        z-index: 1;
+      }
+
+      .pf-c-table tbody td {
+        position: relative;
+        z-index: 2;
+      }
+
+      .pf-c-table tbody td:last-child {
+        position: relative;
+        z-index: auto;
       }
 
       /* Badges melhoradas com efeitos */
@@ -457,6 +468,7 @@
       .js-row-actions {
         position: relative;
         display: inline-block;
+        z-index: 10;
       }
 
       .js-row-actions-toggle {
@@ -473,6 +485,8 @@
         cursor: pointer;
         font-size: 1.1rem;
         padding: 0;
+        position: relative;
+        z-index: 11;
       }
 
       .js-row-actions-toggle:hover {
@@ -480,11 +494,16 @@
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
       }
 
+      .js-row-actions-toggle:focus {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+      }
+
       .js-row-actions-menu {
         position: absolute;
-        top: calc(100% + 4px);
+        top: calc(100% + 8px);
         right: 0;
-        z-index: 1000;
+        z-index: 9999;
         min-width: 12rem;
         margin: 0;
         padding: 0.5rem 0;
@@ -492,12 +511,15 @@
         background-color: white;
         border: none;
         border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25),
+          0 0 0 1px rgba(0, 0, 0, 0.05);
         animation: dropDown 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        pointer-events: auto;
       }
 
       .js-row-actions-menu[hidden] {
         display: none;
+        pointer-events: none;
       }
 
       .js-row-actions-menu li {
@@ -519,7 +541,7 @@
       .js-row-actions-menu .pf-c-dropdown__menu-item {
         display: block;
         width: 100%;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
         padding: 0.75rem 1.25rem;
         text-align: left;
         background: none;
@@ -528,12 +550,17 @@
         font-size: 0.9rem;
         color: var(--pf-global--Color--100);
         white-space: nowrap;
+        position: relative;
       }
 
       .js-row-actions-menu .pf-c-dropdown__menu-item:hover {
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         color: white;
         transform: translateX(4px);
+      }
+
+      .js-row-actions-menu .pf-c-dropdown__menu-item:active {
+        transform: translateX(2px) scale(0.98);
       }
 
       /* Inputs com ícones e efeitos */

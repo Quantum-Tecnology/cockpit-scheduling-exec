@@ -21,20 +21,30 @@ const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("Backup Manager: Inicializando...");
 
-  // Obter home do usuário
+  // Obter home do usuário usando getent ou whoami
   try {
-    const result = await cockpit.spawn(["echo", "$HOME"], {
+    // Tentar obter usuário atual
+    const user = await cockpit.spawn(["whoami"], { err: "message" });
+    const username = user.trim();
+
+    // Obter home do passwd
+    const passwdEntry = await cockpit.spawn(["getent", "passwd", username], {
       err: "message",
-      environ: ["HOME=" + (process.env.HOME || "")],
     });
-    userHome = result.trim() || "/root";
+    const homePath = passwdEntry.trim().split(":")[5];
+
+    userHome = homePath || `/home/${username}`;
     configFile = `${userHome}/.backup-manager/config.json`;
+
+    console.log("Backup Manager: Usuário:", username);
     console.log("Backup Manager: Home do usuário:", userHome);
     console.log("Backup Manager: Arquivo de configuração:", configFile);
   } catch (error) {
-    console.error("Backup Manager: Erro ao obter home, usando /root");
-    userHome = "/root";
-    configFile = "/root/.backup-manager/config.json";
+    console.error("Backup Manager: Erro ao obter home:", error);
+    // Fallback: usar /tmp para evitar problemas de permissão
+    userHome = "/tmp";
+    configFile = "/tmp/.backup-manager-config.json";
+    console.log("Backup Manager: Usando /tmp como fallback");
   }
 
   // Garantir que as abas estejam sempre visíveis
@@ -107,40 +117,66 @@ async function saveConfiguration() {
   );
 
   try {
-    const configDir = `${userHome}/.backup-manager`;
-    const configJson = JSON.stringify(config, null, 2);
+    // Se userHome for /tmp, usar arquivo direto sem subdiretório
+    let targetFile;
+    if (userHome === "/tmp") {
+      targetFile = configFile;
+    } else {
+      const configDir = `${userHome}/.backup-manager`;
+      targetFile = configFile;
 
-    console.log("Backup Manager: Home do usuário:", userHome);
-    console.log("Backup Manager: Criando diretório:", configDir);
+      console.log("Backup Manager: Home do usuário:", userHome);
+      console.log("Backup Manager: Criando diretório:", configDir);
 
-    // Criar diretório se não existir
-    await cockpit.spawn(["mkdir", "-p", configDir], { err: "message" });
+      // Verificar se o diretório já existe
+      try {
+        await cockpit.spawn(["test", "-d", configDir], { err: "ignore" });
+        console.log("Backup Manager: Diretório já existe");
+      } catch (e) {
+        // Diretório não existe, tentar criar
+        console.log("Backup Manager: Criando diretório...");
+        try {
+          await cockpit.spawn(["mkdir", "-p", configDir], {
+            err: "message",
+            superuser: "try",
+          });
+        } catch (mkdirError) {
+          console.error("Backup Manager: Erro ao criar diretório:", mkdirError);
+          throw new Error(
+            `Não foi possível criar ${configDir}. Use outro local ou execute como root.`
+          );
+        }
+      }
 
-    console.log("Backup Manager: Verificando permissões...");
+      console.log("Backup Manager: Verificando permissões...");
 
-    // Verificar se temos permissão para escrever
-    try {
-      await cockpit.spawn(["test", "-w", configDir], { err: "message" });
-    } catch (e) {
-      throw new Error(`Sem permissão de escrita em ${configDir}`);
+      // Verificar se temos permissão para escrever
+      try {
+        await cockpit.spawn(["test", "-w", configDir], { err: "message" });
+      } catch (e) {
+        throw new Error(
+          `Sem permissão de escrita em ${configDir}. Execute como root ou use outro diretório.`
+        );
+      }
     }
 
-    console.log("Backup Manager: Salvando arquivo usando tee...");
+    console.log("Backup Manager: Salvando arquivo em:", targetFile);
+    const configJson = JSON.stringify(config, null, 2);
 
     // Usar tee em vez de cat > para melhor tratamento de erros
-    const process = cockpit.spawn(["tee", configFile], {
+    const process = cockpit.spawn(["tee", targetFile], {
       err: "message",
       superuser: "try",
     });
     process.input(configJson);
     await process;
 
-    console.log("Backup Manager: Configuração salva em", configFile);
+    console.log("Backup Manager: Configuração salva em", targetFile);
     showAlert("success", "✅ Configuração salva com sucesso!");
 
     // Verificar se foi salvo corretamente
     console.log("Backup Manager: Verificando arquivo salvo...");
-    const verify = await cockpit.spawn(["cat", configFile], {
+    const verify = await cockpit.spawn(["cat", targetFile], {
       err: "message",
     });
     console.log(
