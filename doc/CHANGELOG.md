@@ -5,6 +5,26 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.3.2] - 2024-12-28
+
+### 🐛 Corrigido
+- **Erro ao salvar configuração**: Corrigido problema onde mensagens de erro não eram exibidas corretamente devido a `error.message` undefined
+- **Tratamento de erros**: Implementado tratamento robusto com `error?.message || error?.toString()` em todas as operações
+- **Visibilidade das abas**: Garantida visibilidade permanente das abas com `!important` no CSS e inicialização explícita
+- **Navegação de abas**: Adicionada chamada `switchTab("backups")` na inicialização para garantir estado consistente
+
+### 🎨 Melhorias de UI
+- **Menu de Scripts**: Redesenhado com o mesmo padrão visual do backup manager
+- **Cards de estatísticas**: Total Scripts, Agendados, Em Execução, Últimas Falhas
+- **Seção de filtros**: Busca por nome, ordenação (6 opções), filtro de status
+- **Visual aprimorado**: Hover effects, animações suaves, badges melhoradas
+- **Responsividade**: Layout totalmente responsivo em todos os dispositivos
+
+### ⚙️ Técnico
+- Cache de scripts em `allScripts[]` para melhor performance
+- Funções `updateStatCards()` e `applyFilters()` para gestão dinâmica de estado
+- Consistência visual entre módulos de scripts e backups
+
 ## [1.3.1] - 2024-12-28
 
 ### 🐛 Corrigido

@@ -26,7 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabsContainer = document.getElementById("backup-tabs");
   if (tabsContainer) {
     tabsContainer.style.display = "block";
+    tabsContainer.style.visibility = "visible";
   }
+
+  // Garantir que a aba de backups esteja visível inicialmente
+  switchTab("backups");
 });
 
 // ============================================================================
@@ -73,7 +77,8 @@ async function saveConfiguration() {
 
     showAlert("success", "Configuração salva com sucesso!");
   } catch (error) {
-    showAlert("danger", `Erro ao salvar configuração: ${error.message}`);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `Erro ao salvar configuração: ${errorMsg}`);
   }
 }
 
@@ -577,7 +582,8 @@ async function downloadBackup(id) {
 
     showAlert("success", `Download de "${backup.name}" iniciado!`);
   } catch (error) {
-    showAlert("danger", `Erro ao fazer download: ${error.message}`);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `Erro ao fazer download: ${errorMsg}`);
   }
 }
 
@@ -667,7 +673,8 @@ async function sendEmail() {
     showAlert("success", `✅ Email enviado com sucesso para ${emailTo}!`);
     closeEmailModal();
   } catch (error) {
-    showAlert("danger", `Erro ao enviar email: ${error.message}`);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `Erro ao enviar email: ${errorMsg}`);
   }
 }
 
@@ -745,7 +752,8 @@ async function confirmDelete() {
 
     closeDeleteModal();
   } catch (error) {
-    showAlert("danger", `Erro ao deletar: ${error.message}`);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `Erro ao deletar: ${errorMsg}`);
   }
 }
 
@@ -771,7 +779,8 @@ async function exportSelectedBackups() {
 
     showAlert("success", `✅ Backups exportados para: ${outputFile}`);
   } catch (error) {
-    showAlert("danger", `Erro ao exportar: ${error.message}`);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `Erro ao exportar: ${errorMsg}`);
   }
 }
 

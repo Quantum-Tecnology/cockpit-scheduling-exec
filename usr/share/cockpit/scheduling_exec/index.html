@@ -118,6 +118,62 @@
         margin-bottom: var(--pf-global--spacer--lg);
       }
 
+      .pf-c-card {
+        transition: all 0.2s ease;
+      }
+
+      .pf-c-card:hover {
+        box-shadow: var(--pf-global--BoxShadow--md);
+      }
+
+      /* Melhorias na tabela */
+      .pf-c-table {
+        background-color: white;
+      }
+
+      .pf-c-table thead {
+        background-color: var(--pf-global--BackgroundColor--light-200);
+      }
+
+      .pf-c-table tbody tr {
+        transition: background-color 0.2s;
+      }
+
+      .pf-c-table tbody tr:hover {
+        background-color: var(--pf-global--BackgroundColor--light-100);
+      }
+
+      /* Badges melhoradas */
+      .pf-c-badge {
+        font-weight: var(--pf-global--FontWeight--bold);
+        padding: 0.25rem 0.5rem;
+      }
+
+      .pf-c-badge.pf-m-success {
+        background-color: var(--pf-global--success-color--100);
+        color: white;
+      }
+
+      /* Dropdown de ações com transição */
+      .js-row-actions-toggle {
+        transition: all 0.2s;
+      }
+
+      .js-row-actions-menu {
+        animation: fadeIn 0.2s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
       .plugin-footer {
         position: fixed;
         right: var(--pf-global--spacer--md);
@@ -268,6 +324,237 @@
               <span class="pf-screen-reader">Erro: </span>
               <span id="error-text"></span>
             </p>
+          </div>
+        </section>
+
+        <!-- Cards de Estatísticas -->
+        <section class="pf-c-page__main-section" style="padding-top: 0">
+          <div class="stats-grid">
+            <!-- Total Scripts -->
+            <div class="pf-c-card">
+              <div class="pf-c-card__body">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: var(--pf-global--spacer--md);
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 2rem;
+                      color: var(--pf-global--primary-color--100);
+                    "
+                  >
+                    📜
+                  </div>
+                  <div>
+                    <h3
+                      id="stat-total-scripts"
+                      class="pf-c-title pf-m-2xl"
+                      style="margin: 0; font-weight: bold"
+                    >
+                      0
+                    </h3>
+                    <p
+                      style="
+                        margin: 0;
+                        color: var(--pf-global--Color--200);
+                        font-size: var(--pf-global--FontSize--sm);
+                      "
+                    >
+                      Total de Scripts
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scripts Agendados -->
+            <div class="pf-c-card">
+              <div class="pf-c-card__body">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: var(--pf-global--spacer--md);
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 2rem;
+                      color: var(--pf-global--info-color--100);
+                    "
+                  >
+                    ⏰
+                  </div>
+                  <div>
+                    <h3
+                      id="stat-scheduled"
+                      class="pf-c-title pf-m-2xl"
+                      style="margin: 0; font-weight: bold"
+                    >
+                      0
+                    </h3>
+                    <p
+                      style="
+                        margin: 0;
+                        color: var(--pf-global--Color--200);
+                        font-size: var(--pf-global--FontSize--sm);
+                      "
+                    >
+                      Agendados
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Executando -->
+            <div class="pf-c-card">
+              <div class="pf-c-card__body">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: var(--pf-global--spacer--md);
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 2rem;
+                      color: var(--pf-global--success-color--100);
+                    "
+                  >
+                    🔄
+                  </div>
+                  <div>
+                    <h3
+                      id="stat-running"
+                      class="pf-c-title pf-m-2xl"
+                      style="margin: 0; font-weight: bold"
+                    >
+                      0
+                    </h3>
+                    <p
+                      style="
+                        margin: 0;
+                        color: var(--pf-global--Color--200);
+                        font-size: var(--pf-global--FontSize--sm);
+                      "
+                    >
+                      Em Execução
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Últimas Falhas -->
+            <div class="pf-c-card">
+              <div class="pf-c-card__body">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: var(--pf-global--spacer--md);
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 2rem;
+                      color: var(--pf-global--danger-color--100);
+                    "
+                  >
+                    ❌
+                  </div>
+                  <div>
+                    <h3
+                      id="stat-failures"
+                      class="pf-c-title pf-m-2xl"
+                      style="margin: 0; font-weight: bold"
+                    >
+                      0
+                    </h3>
+                    <p
+                      style="
+                        margin: 0;
+                        color: var(--pf-global--Color--200);
+                        font-size: var(--pf-global--FontSize--sm);
+                      "
+                    >
+                      Últimas Falhas
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Filtros -->
+        <section class="pf-c-page__main-section" style="padding-top: 0">
+          <div class="pf-c-card">
+            <div class="pf-c-card__body">
+              <div class="pf-l-grid pf-m-gutter">
+                <!-- Busca -->
+                <div class="pf-l-grid__item pf-m-6-col-on-md pf-m-12-col">
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="filter-search">
+                      <span class="pf-c-form__label-text">🔍 Buscar</span>
+                    </label>
+                    <input
+                      class="pf-c-form-control"
+                      type="text"
+                      id="filter-search"
+                      placeholder="Buscar por nome do script..."
+                      onkeyup="applyFilters()"
+                    />
+                  </div>
+                </div>
+
+                <!-- Ordenar por -->
+                <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="filter-sort">
+                      <span class="pf-c-form__label-text">↕️ Ordenar</span>
+                    </label>
+                    <select
+                      class="pf-c-form-control"
+                      id="filter-sort"
+                      onchange="applyFilters()"
+                    >
+                      <option value="name-asc">Nome (A-Z)</option>
+                      <option value="name-desc">Nome (Z-A)</option>
+                      <option value="created-desc">Mais Recente</option>
+                      <option value="created-asc">Mais Antigo</option>
+                      <option value="executions-desc">Mais Executado</option>
+                      <option value="next-asc">Próxima Execução</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Filtrar por Status -->
+                <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="filter-status">
+                      <span class="pf-c-form__label-text">📊 Status</span>
+                    </label>
+                    <select
+                      class="pf-c-form-control"
+                      id="filter-status"
+                      onchange="applyFilters()"
+                    >
+                      <option value="all">Todos</option>
+                      <option value="scheduled">Agendados</option>
+                      <option value="not-scheduled">Sem Agendamento</option>
+                      <option value="running">Em Execução</option>
+                      <option value="failed">Com Falhas</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

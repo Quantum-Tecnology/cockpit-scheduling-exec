@@ -12,6 +12,115 @@ let scriptModalGlobalEnv = "";
 let scriptModalScriptEnv = "";
 let scriptModalEnvLoading = false;
 let scriptModalEnvLoadedFor = null;
+let allScripts = []; // Cache de todos os scripts carregados
+
+// Atualizar cards de estatísticas
+function updateStatCards(scripts) {
+  const totalEl = document.getElementById("stat-total-scripts");
+  const scheduledEl = document.getElementById("stat-scheduled");
+  const runningEl = document.getElementById("stat-running");
+  const failuresEl = document.getElementById("stat-failures");
+
+  if (!totalEl || !scheduledEl || !runningEl || !failuresEl) return;
+
+  const total = scripts.length;
+  const scheduled = scripts.filter(
+    (s) => s.cron_expression && s.cron_expression !== ""
+  ).length;
+  const running = 0; // TODO: Implementar detecção de scripts em execução
+  const failures = scripts.filter((s) => {
+    const failureRate =
+      s.total_executions > 0
+        ? (s.total_executions - s.successful_executions) / s.total_executions
+        : 0;
+    return failureRate > 0.1; // Scripts com mais de 10% de falha
+  }).length;
+
+  totalEl.textContent = total;
+  scheduledEl.textContent = scheduled;
+  runningEl.textContent = running;
+  failuresEl.textContent = failures;
+}
+
+// Aplicar filtros e ordenação
+function applyFilters() {
+  const searchValue =
+    document.getElementById("filter-search")?.value.toLowerCase() || "";
+  const sortValue = document.getElementById("filter-sort")?.value || "name-asc";
+  const statusValue = document.getElementById("filter-status")?.value || "all";
+
+  let filtered = [...allScripts];
+
+  // Aplicar busca
+  if (searchValue) {
+    filtered = filtered.filter((script) =>
+      script.name.toLowerCase().includes(searchValue)
+    );
+  }
+
+  // Aplicar filtro de status
+  if (statusValue !== "all") {
+    switch (statusValue) {
+      case "scheduled":
+        filtered = filtered.filter(
+          (s) => s.cron_expression && s.cron_expression !== ""
+        );
+        break;
+      case "not-scheduled":
+        filtered = filtered.filter(
+          (s) => !s.cron_expression || s.cron_expression === ""
+        );
+        break;
+      case "running":
+        // TODO: Implementar detecção de scripts em execução
+        filtered = [];
+        break;
+      case "failed":
+        filtered = filtered.filter((s) => {
+          const failureRate =
+            s.total_executions > 0
+              ? (s.total_executions - s.successful_executions) /
+                s.total_executions
+              : 0;
+          return failureRate > 0.1;
+        });
+        break;
+    }
+  }
+
+  // Aplicar ordenação
+  switch (sortValue) {
+    case "name-asc":
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case "name-desc":
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+    case "created-desc":
+      filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    case "created-asc":
+      filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      break;
+    case "executions-desc":
+      filtered.sort((a, b) => b.total_executions - a.total_executions);
+      break;
+    case "next-asc":
+      // Ordenar por próxima execução (scripts sem agendamento vão para o fim)
+      filtered.sort((a, b) => {
+        const aHasCron = a.cron_expression && a.cron_expression !== "";
+        const bHasCron = b.cron_expression && b.cron_expression !== "";
+        if (!aHasCron && !bHasCron) return 0;
+        if (!aHasCron) return 1;
+        if (!bHasCron) return -1;
+        // Ambos têm cron - ordenar alfabeticamente por enquanto
+        return a.cron_expression.localeCompare(b.cron_expression);
+      });
+      break;
+  }
+
+  renderScripts(filtered);
+}
 
 function parseEnvKeys(envContent) {
   const keys = new Set();
@@ -769,7 +878,9 @@ function loadScripts() {
     .then((output) => {
       showLoading(false);
       const scripts = JSON.parse(output);
-      renderScripts(scripts);
+      allScripts = scripts; // Atualizar cache global
+      updateStatCards(scripts); // Atualizar cards de estatísticas
+      applyFilters(); // Aplicar filtros e renderizar
     })
     .catch((error) => {
       showLoading(false);
