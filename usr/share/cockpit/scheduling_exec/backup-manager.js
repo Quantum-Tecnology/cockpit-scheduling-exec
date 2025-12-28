@@ -1,0 +1,971 @@
+// Inicializar conexão com Cockpit
+const cockpit = window.cockpit;
+
+// Estado da aplicação
+let backupDirectories = [];
+let allBackups = [];
+let selectedBackups = new Set();
+let currentDeleteTarget = null;
+let emailConfig = {
+  recipient: "",
+  subject: "Backup do Sistema - {{date}}",
+  maxSize: 25,
+};
+
+// Constantes
+const CONFIG_FILE = `${cockpit.user().home}/.backup-manager/config.json`;
+const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
+
+// Inicialização
+document.addEventListener("DOMContentLoaded", () => {
+  loadConfiguration();
+  loadBackups();
+  setupEventListeners();
+});
+
+// ============================================================================
+// CONFIGURAÇÃO
+// ============================================================================
+
+async function loadConfiguration() {
+  try {
+    const result = await cockpit.spawn(["cat", CONFIG_FILE], { err: "ignore" });
+    const config = JSON.parse(result);
+    backupDirectories = config.directories || [];
+    emailConfig = { ...emailConfig, ...config.email };
+
+    updateUI();
+    updateDirectoriesList();
+    updateDirectoryFilter();
+    updateEmailForm();
+  } catch (error) {
+    // Se o arquivo não existir, criar configuração padrão
+    backupDirectories = [];
+    saveConfiguration();
+  }
+}
+
+async function saveConfiguration() {
+  const config = {
+    directories: backupDirectories,
+    email: emailConfig,
+    version: "1.0.0",
+    lastUpdated: new Date().toISOString(),
+  };
+
+  try {
+    // Criar diretório se não existir
+    await cockpit.spawn(
+      ["mkdir", "-p", `${cockpit.user().home}/.backup-manager`],
+      { err: "ignore" }
+    );
+
+    // Salvar configuração
+    await cockpit
+      .spawn(["tee", CONFIG_FILE], { err: "message" })
+      .input(JSON.stringify(config, null, 2));
+
+    showAlert("success", "Configuração salva com sucesso!");
+  } catch (error) {
+    showAlert("danger", `Erro ao salvar configuração: ${error.message}`);
+  }
+}
+
+// ============================================================================
+// DIRETÓRIOS
+// ============================================================================
+
+function openAddDirectoryModal() {
+  document.getElementById("add-directory-modal").style.display = "block";
+  document.getElementById("directory-path").focus();
+}
+
+function closeAddDirectoryModal() {
+  document.getElementById("add-directory-modal").style.display = "none";
+  document.getElementById("add-directory-form").reset();
+}
+
+async function browseDirectory() {
+  // Usar cockpit file browser
+  const pathInput = document.getElementById("directory-path");
+  const currentPath = pathInput.value || cockpit.user().home;
+
+  try {
+    const result = await cockpit.spawn([
+      "zenity",
+      "--file-selection",
+      "--directory",
+      "--filename=" + currentPath,
+    ]);
+    if (result.trim()) {
+      pathInput.value = result.trim();
+    }
+  } catch (error) {
+    // Zenity pode não estar disponível, usar input manual
+    showAlert(
+      "info",
+      "Digite o caminho manualmente ou instale o zenity para navegação visual."
+    );
+  }
+}
+
+async function addDirectory() {
+  const path = document.getElementById("directory-path").value.trim();
+  const label = document.getElementById("directory-label").value.trim();
+  const pattern = document.getElementById("file-pattern").value.trim() || "*";
+
+  if (!path) {
+    showAlert("warning", "Por favor, informe o caminho do diretório.");
+    return;
+  }
+
+  // Verificar se o diretório existe
+  try {
+    await cockpit.spawn(["test", "-d", path]);
+  } catch (error) {
+    showAlert("danger", `Diretório não encontrado: ${path}`);
+    return;
+  }
+
+  // Verificar se já existe
+  if (backupDirectories.some((d) => d.path === path)) {
+    showAlert("warning", "Este diretório já está na lista.");
+    return;
+  }
+
+  // Adicionar diretório
+  backupDirectories.push({
+    id: Date.now().toString(),
+    path: path,
+    label: label || path.split("/").pop(),
+    pattern: pattern,
+    addedAt: new Date().toISOString(),
+  });
+
+  await saveConfiguration();
+  updateDirectoriesList();
+  updateDirectoryFilter();
+  closeAddDirectoryModal();
+
+  // Recarregar backups
+  loadBackups();
+}
+
+async function removeDirectory(id) {
+  const directory = backupDirectories.find((d) => d.id === id);
+  if (!directory) return;
+
+  currentDeleteTarget = { type: "directory", id: id, name: directory.path };
+  document.getElementById(
+    "delete-message"
+  ).textContent = `Você está prestes a remover o diretório "${directory.label}" da lista de monitoramento. Os arquivos não serão deletados.`;
+  document.getElementById("delete-confirm-modal").style.display = "block";
+}
+
+function updateDirectoriesList() {
+  const container = document.getElementById("directories-list");
+
+  if (backupDirectories.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding: var(--pf-global--spacer--lg);">
+        <p style="color: var(--pf-global--Color--200); text-align: center;">
+          Nenhum diretório configurado ainda.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = backupDirectories
+    .map(
+      (dir) => `
+    <div class="directory-item">
+      <div style="display: flex; align-items: center; flex: 1;">
+        <span class="directory-icon">📁</span>
+        <div>
+          <div style="font-weight: bold;">${escapeHtml(dir.label)}</div>
+          <div class="directory-path">${escapeHtml(dir.path)}</div>
+          <small style="color: var(--pf-global--Color--200);">
+            Padrão: ${escapeHtml(dir.pattern)} |
+            Adicionado em: ${formatDate(dir.addedAt)}
+          </small>
+        </div>
+      </div>
+      <button class="pf-c-button pf-m-danger pf-m-small" onclick="removeDirectory('${
+        dir.id
+      }')">
+        🗑️ Remover
+      </button>
+    </div>
+  `
+    )
+    .join("");
+}
+
+function updateDirectoryFilter() {
+  const select = document.getElementById("directory-filter");
+  const currentValue = select.value;
+
+  select.innerHTML =
+    '<option value="">Todos os diretórios</option>' +
+    backupDirectories
+      .map(
+        (dir) =>
+          `<option value="${escapeHtml(dir.path)}">${escapeHtml(
+            dir.label
+          )}</option>`
+      )
+      .join("");
+
+  if (currentValue) {
+    select.value = currentValue;
+  }
+}
+
+// ============================================================================
+// BACKUPS
+// ============================================================================
+
+async function loadBackups() {
+  allBackups = [];
+
+  if (backupDirectories.length === 0) {
+    updateBackupsTable();
+    updateStats();
+    return;
+  }
+
+  showAlert("info", "🔄 Carregando lista de backups...", 2000);
+
+  for (const dir of backupDirectories) {
+    try {
+      await loadBackupsFromDirectory(dir);
+    } catch (error) {
+      console.error(`Erro ao carregar backups de ${dir.path}:`, error);
+    }
+  }
+
+  updateBackupsTable();
+  updateStats();
+  showAlert(
+    "success",
+    `✅ ${allBackups.length} backup(s) encontrado(s)!`,
+    3000
+  );
+}
+
+async function loadBackupsFromDirectory(directory) {
+  try {
+    // Listar arquivos do diretório
+    const patterns = directory.pattern.split(",").map((p) => p.trim());
+    const files = [];
+
+    for (const pattern of patterns) {
+      try {
+        const command =
+          pattern === "*"
+            ? ["find", directory.path, "-maxdepth", "1", "-type", "f"]
+            : [
+                "find",
+                directory.path,
+                "-maxdepth",
+                "1",
+                "-type",
+                "f",
+                "-name",
+                pattern,
+              ];
+
+        const result = await cockpit.spawn(command, { err: "ignore" });
+        const foundFiles = result
+          .trim()
+          .split("\n")
+          .filter((f) => f);
+        files.push(...foundFiles);
+      } catch (error) {
+        // Padrão não encontrou arquivos
+      }
+    }
+
+    // Obter informações detalhadas de cada arquivo
+    for (const file of files) {
+      try {
+        const stat = await cockpit.spawn(["stat", "-c", "%s|%Y|%n", file]);
+        const [size, mtime, name] = stat.trim().split("|");
+
+        allBackups.push({
+          id: `${directory.id}-${name}`,
+          name: name.split("/").pop(),
+          fullPath: name,
+          directory: directory,
+          directoryLabel: directory.label,
+          directoryPath: directory.path,
+          size: parseInt(size),
+          createdAt: new Date(parseInt(mtime) * 1000).toISOString(),
+          selected: false,
+        });
+      } catch (error) {
+        console.error(`Erro ao obter info de ${file}:`, error);
+      }
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+function updateBackupsTable() {
+  const tbody = document.getElementById("backups-table-body");
+  const emptyState = document.getElementById("empty-state");
+
+  if (allBackups.length === 0) {
+    tbody.innerHTML = "";
+    emptyState.style.display = "block";
+    document.querySelector(".backup-table-wrapper").style.display = "none";
+    return;
+  }
+
+  emptyState.style.display = "none";
+  document.querySelector(".backup-table-wrapper").style.display = "block";
+
+  const filteredBackups = getFilteredBackups();
+
+  tbody.innerHTML = filteredBackups
+    .map(
+      (backup) => `
+    <tr>
+      <td>
+        <input
+          type="checkbox"
+          class="custom-checkbox backup-checkbox"
+          data-backup-id="${backup.id}"
+          ${selectedBackups.has(backup.id) ? "checked" : ""}
+          onchange="toggleBackupSelection('${backup.id}', this.checked)"
+        >
+      </td>
+      <td>
+        <div style="display: flex; align-items: center;">
+          <span style="margin-right: var(--pf-global--spacer--sm);">
+            ${getFileIcon(backup.name)}
+          </span>
+          <span style="font-family: monospace; font-size: 0.9rem;">
+            ${escapeHtml(backup.name)}
+          </span>
+        </div>
+      </td>
+      <td>
+        <div>
+          ${formatDate(backup.createdAt)}
+        </div>
+        <small style="color: var(--pf-global--Color--200);">
+          ${formatRelativeTime(backup.createdAt)}
+        </small>
+      </td>
+      <td>
+        <div style="font-weight: bold;">${escapeHtml(
+          backup.directoryLabel
+        )}</div>
+        <small style="font-family: monospace; color: var(--pf-global--Color--200);">
+          ${escapeHtml(backup.directoryPath)}
+        </small>
+      </td>
+      <td>
+        <span class="size-badge ${getSizeClass(backup.size)}">
+          ${formatSize(backup.size)}
+        </span>
+      </td>
+      <td style="text-align: right;">
+        <div class="action-buttons">
+          <button
+            class="pf-c-button pf-m-secondary btn-icon"
+            onclick="downloadBackup('${backup.id}')"
+            data-tooltip="Download"
+          >
+            ⬇️
+          </button>
+          <button
+            class="pf-c-button pf-m-secondary btn-icon"
+            onclick="openEmailModalForBackup('${backup.id}')"
+            data-tooltip="Enviar por email"
+          >
+            📧
+          </button>
+          <button
+            class="pf-c-button pf-m-danger btn-icon"
+            onclick="deleteBackup('${backup.id}')"
+            data-tooltip="Deletar"
+          >
+            🗑️
+          </button>
+        </div>
+      </td>
+    </tr>
+  `
+    )
+    .join("");
+
+  updateSelectionButtons();
+}
+
+function getFilteredBackups() {
+  let filtered = [...allBackups];
+
+  // Filtro de busca
+  const searchTerm = document
+    .getElementById("search-input")
+    .value.toLowerCase();
+  if (searchTerm) {
+    filtered = filtered.filter((b) =>
+      b.name.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  // Filtro de diretório
+  const directoryFilter = document.getElementById("directory-filter").value;
+  if (directoryFilter) {
+    filtered = filtered.filter((b) => b.directoryPath === directoryFilter);
+  }
+
+  // Ordenação
+  const sortBy = document.getElementById("sort-by").value;
+  filtered.sort((a, b) => {
+    switch (sortBy) {
+      case "date-desc":
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      case "date-asc":
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      case "size-desc":
+        return b.size - a.size;
+      case "size-asc":
+        return a.size - b.size;
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      default:
+        return 0;
+    }
+  });
+
+  return filtered;
+}
+
+function filterBackups() {
+  updateBackupsTable();
+}
+
+// ============================================================================
+// SELEÇÃO
+// ============================================================================
+
+function toggleBackupSelection(id, checked) {
+  if (checked) {
+    selectedBackups.add(id);
+  } else {
+    selectedBackups.delete(id);
+  }
+  updateSelectionButtons();
+  updateSelectAllCheckbox();
+}
+
+function toggleSelectAll(checkbox) {
+  const filteredBackups = getFilteredBackups();
+  filteredBackups.forEach((backup) => {
+    if (checkbox.checked) {
+      selectedBackups.add(backup.id);
+    } else {
+      selectedBackups.delete(backup.id);
+    }
+  });
+  updateBackupsTable();
+}
+
+function selectAllBackups() {
+  const filteredBackups = getFilteredBackups();
+  filteredBackups.forEach((backup) => selectedBackups.add(backup.id));
+  updateBackupsTable();
+}
+
+function deselectAllBackups() {
+  selectedBackups.clear();
+  updateBackupsTable();
+}
+
+function updateSelectAllCheckbox() {
+  const checkbox = document.getElementById("select-all-checkbox");
+  const filteredBackups = getFilteredBackups();
+  const allSelected =
+    filteredBackups.length > 0 &&
+    filteredBackups.every((b) => selectedBackups.has(b.id));
+  checkbox.checked = allSelected;
+}
+
+function updateSelectionButtons() {
+  const hasSelection = selectedBackups.size > 0;
+  document.getElementById("export-selected-btn").disabled = !hasSelection;
+  document.getElementById("delete-selected-btn").disabled = !hasSelection;
+}
+
+// ============================================================================
+// AÇÕES DE BACKUP
+// ============================================================================
+
+async function downloadBackup(id) {
+  const backup = allBackups.find((b) => b.id === id);
+  if (!backup) return;
+
+  try {
+    // Usar o recurso de download do Cockpit
+    const file = cockpit.file(backup.fullPath, { binary: true });
+    const content = await file.read();
+
+    // Criar download
+    const blob = new Blob([content], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = backup.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showAlert("success", `Download de "${backup.name}" iniciado!`);
+  } catch (error) {
+    showAlert("danger", `Erro ao fazer download: ${error.message}`);
+  }
+}
+
+function openEmailModalForBackup(id) {
+  selectedBackups.clear();
+  selectedBackups.add(id);
+  openEmailModal();
+}
+
+function openEmailModal() {
+  if (selectedBackups.size === 0) {
+    showAlert("warning", "Selecione pelo menos um backup para enviar.");
+    return;
+  }
+
+  const modal = document.getElementById("email-modal");
+  const filesList = document.getElementById("email-files-list");
+  const emailTo = document.getElementById("email-to");
+
+  // Preencher lista de arquivos
+  const backups = Array.from(selectedBackups).map((id) =>
+    allBackups.find((b) => b.id === id)
+  );
+  filesList.innerHTML = backups
+    .map(
+      (b) => `
+    <div style="padding: var(--pf-global--spacer--xs); border-bottom: 1px solid var(--pf-global--BorderColor--100);">
+      ${getFileIcon(b.name)} ${escapeHtml(b.name)} (${formatSize(b.size)})
+    </div>
+  `
+    )
+    .join("");
+
+  // Preencher email do destinatário
+  emailTo.value = emailConfig.recipient;
+
+  modal.style.display = "block";
+}
+
+function closeEmailModal() {
+  document.getElementById("email-modal").style.display = "none";
+  document.getElementById("send-email-form").reset();
+}
+
+async function sendEmail() {
+  const emailTo = document.getElementById("email-to").value.trim();
+  const message = document.getElementById("email-message").value.trim();
+
+  if (!emailTo) {
+    showAlert("warning", "Por favor, informe o email do destinatário.");
+    return;
+  }
+
+  const backups = Array.from(selectedBackups).map((id) =>
+    allBackups.find((b) => b.id === id)
+  );
+  const totalSize = backups.reduce((sum, b) => sum + b.size, 0);
+  const maxSize = emailConfig.maxSize * 1024 * 1024;
+
+  if (totalSize > maxSize) {
+    showAlert(
+      "warning",
+      `O tamanho total dos arquivos (${formatSize(
+        totalSize
+      )}) excede o limite de ${formatSize(maxSize)}.`
+    );
+    return;
+  }
+
+  try {
+    showAlert("info", "📧 Enviando email...", 0);
+
+    const files = backups.map((b) => b.fullPath).join(",");
+    const subject = emailConfig.subject.replace(
+      "{{date}}",
+      formatDate(new Date().toISOString())
+    );
+
+    await cockpit.spawn([
+      "/usr/share/cockpit/scheduling_exec/scripts/backup/send-backup-email.sh",
+      emailTo,
+      subject,
+      files,
+      message,
+    ]);
+
+    showAlert("success", `✅ Email enviado com sucesso para ${emailTo}!`);
+    closeEmailModal();
+  } catch (error) {
+    showAlert("danger", `Erro ao enviar email: ${error.message}`);
+  }
+}
+
+function deleteBackup(id) {
+  const backup = allBackups.find((b) => b.id === id);
+  if (!backup) return;
+
+  currentDeleteTarget = {
+    type: "backup",
+    id: id,
+    name: backup.name,
+    path: backup.fullPath,
+  };
+  document.getElementById(
+    "delete-message"
+  ).textContent = `Você está prestes a deletar o arquivo "${backup.name}". Esta ação não pode ser desfeita.`;
+  document.getElementById("delete-confirm-modal").style.display = "block";
+}
+
+async function deleteSelectedBackups() {
+  if (selectedBackups.size === 0) return;
+
+  const backups = Array.from(selectedBackups).map((id) =>
+    allBackups.find((b) => b.id === id)
+  );
+  currentDeleteTarget = {
+    type: "multiple",
+    backups: backups,
+    names: backups.map((b) => b.name),
+  };
+
+  document.getElementById(
+    "delete-message"
+  ).textContent = `Você está prestes a deletar ${backups.length} arquivo(s). Esta ação não pode ser desfeita.`;
+  document.getElementById("delete-confirm-modal").style.display = "block";
+}
+
+function closeDeleteModal() {
+  document.getElementById("delete-confirm-modal").style.display = "none";
+  currentDeleteTarget = null;
+}
+
+async function confirmDelete() {
+  if (!currentDeleteTarget) return;
+
+  try {
+    if (currentDeleteTarget.type === "directory") {
+      // Remover diretório da configuração
+      backupDirectories = backupDirectories.filter(
+        (d) => d.id !== currentDeleteTarget.id
+      );
+      await saveConfiguration();
+      updateDirectoriesList();
+      updateDirectoryFilter();
+      await loadBackups();
+    } else if (currentDeleteTarget.type === "backup") {
+      // Deletar arquivo único
+      await cockpit.spawn(["rm", "-f", currentDeleteTarget.path]);
+      await loadBackups();
+      showAlert(
+        "success",
+        `Backup "${currentDeleteTarget.name}" deletado com sucesso!`
+      );
+    } else if (currentDeleteTarget.type === "multiple") {
+      // Deletar múltiplos arquivos
+      const paths = currentDeleteTarget.backups.map((b) => b.fullPath);
+      await cockpit.spawn(["rm", "-f", ...paths]);
+      selectedBackups.clear();
+      await loadBackups();
+      showAlert(
+        "success",
+        `${currentDeleteTarget.backups.length} backup(s) deletado(s) com sucesso!`
+      );
+    }
+
+    closeDeleteModal();
+  } catch (error) {
+    showAlert("danger", `Erro ao deletar: ${error.message}`);
+  }
+}
+
+async function exportSelectedBackups() {
+  if (selectedBackups.size === 0) {
+    showAlert("warning", "Selecione pelo menos um backup para exportar.");
+    return;
+  }
+
+  const backups = Array.from(selectedBackups).map((id) =>
+    allBackups.find((b) => b.id === id)
+  );
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const outputFile = `${
+    cockpit.user().home
+  }/backups-export-${timestamp}.tar.gz`;
+
+  try {
+    showAlert("info", "📦 Criando arquivo de exportação...", 0);
+
+    const files = backups.map((b) => b.fullPath);
+    await cockpit.spawn(["tar", "-czf", outputFile, ...files]);
+
+    showAlert("success", `✅ Backups exportados para: ${outputFile}`);
+  } catch (error) {
+    showAlert("danger", `Erro ao exportar: ${error.message}`);
+  }
+}
+
+async function exportAllBackups() {
+  if (allBackups.length === 0) {
+    showAlert("warning", "Não há backups para exportar.");
+    return;
+  }
+
+  // Selecionar todos e exportar
+  allBackups.forEach((b) => selectedBackups.add(b.id));
+  await exportSelectedBackups();
+  selectedBackups.clear();
+  updateBackupsTable();
+}
+
+async function refreshBackupList() {
+  selectedBackups.clear();
+  await loadBackups();
+}
+
+async function cleanOldBackups() {
+  // Modal para confirmar limpeza de backups antigos
+  const days = prompt(
+    "Deletar backups com mais de quantos dias? (Digite um número)",
+    "30"
+  );
+
+  if (!days || isNaN(days)) return;
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
+
+  const oldBackups = allBackups.filter(
+    (b) => new Date(b.createdAt) < cutoffDate
+  );
+
+  if (oldBackups.length === 0) {
+    showAlert("info", `Não há backups com mais de ${days} dias.`);
+    return;
+  }
+
+  currentDeleteTarget = {
+    type: "multiple",
+    backups: oldBackups,
+    names: oldBackups.map((b) => b.name),
+  };
+
+  document.getElementById(
+    "delete-message"
+  ).textContent = `Você está prestes a deletar ${oldBackups.length} backup(s) com mais de ${days} dias.`;
+  document.getElementById("delete-confirm-modal").style.display = "block";
+}
+
+// ============================================================================
+// EMAIL CONFIGURATION
+// ============================================================================
+
+function updateEmailForm() {
+  document.getElementById("email-recipient").value = emailConfig.recipient;
+  document.getElementById("email-subject").value = emailConfig.subject;
+  document.getElementById("max-email-size").value = emailConfig.maxSize;
+}
+
+function setupEventListeners() {
+  document
+    .getElementById("email-config-form")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      emailConfig.recipient = document
+        .getElementById("email-recipient")
+        .value.trim();
+      emailConfig.subject = document
+        .getElementById("email-subject")
+        .value.trim();
+      emailConfig.maxSize = parseInt(
+        document.getElementById("max-email-size").value
+      );
+
+      await saveConfiguration();
+    });
+}
+
+// ============================================================================
+// UI HELPERS
+// ============================================================================
+
+function switchTab(tab) {
+  // Atualizar abas
+  document.querySelectorAll(".pf-c-tabs__item").forEach((item) => {
+    item.classList.remove("pf-m-current");
+  });
+  document
+    .getElementById(`tab-${tab}`)
+    .parentElement.classList.add("pf-m-current");
+
+  // Atualizar conteúdo
+  document.getElementById("backups-tab-content").style.display =
+    tab === "backups" ? "block" : "none";
+  document.getElementById("config-tab-content").style.display =
+    tab === "config" ? "block" : "none";
+}
+
+function updateStats() {
+  const totalBackups = allBackups.length;
+  const totalDirectories = backupDirectories.length;
+  const totalSize = allBackups.reduce((sum, b) => sum + b.size, 0);
+  const lastBackup =
+    allBackups.length > 0
+      ? allBackups.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        )[0]
+      : null;
+
+  document.getElementById("total-backups").textContent = totalBackups;
+  document.getElementById("total-directories").textContent = totalDirectories;
+  document.getElementById("total-size").textContent = formatSize(totalSize);
+  document.getElementById("last-backup").textContent = lastBackup
+    ? formatRelativeTime(lastBackup.createdAt)
+    : "Nunca";
+}
+
+function updateUI() {
+  updateStats();
+  updateDirectoriesList();
+  updateBackupsTable();
+}
+
+function showAlert(type, message, timeout = 5000) {
+  const container = document.getElementById("alerts-container");
+  const id = "alert-" + Date.now();
+
+  const alertHTML = `
+    <div class="pf-c-alert pf-m-${type}" id="${id}">
+      <div class="pf-c-alert__icon">
+        <i class="fas fa-${getAlertIcon(type)}"></i>
+      </div>
+      <h4 class="pf-c-alert__title">${message}</h4>
+      <div class="pf-c-alert__action">
+        <button class="pf-c-button pf-m-plain" onclick="document.getElementById('${id}').remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  `;
+
+  container.insertAdjacentHTML("beforeend", alertHTML);
+
+  if (timeout > 0) {
+    setTimeout(() => {
+      const alert = document.getElementById(id);
+      if (alert) alert.remove();
+    }, timeout);
+  }
+}
+
+function getAlertIcon(type) {
+  const icons = {
+    success: "check-circle",
+    danger: "exclamation-circle",
+    warning: "exclamation-triangle",
+    info: "info-circle",
+  };
+  return icons[type] || "info-circle";
+}
+
+// ============================================================================
+// FORMATTERS
+// ============================================================================
+
+function formatSize(bytes) {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+}
+
+function getSizeClass(bytes) {
+  const mb = bytes / (1024 * 1024);
+  if (mb < 10) return "size-small";
+  if (mb < 100) return "size-medium";
+  return "size-large";
+}
+
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatRelativeTime(isoString) {
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Agora mesmo";
+  if (diffMins < 60)
+    return `${diffMins} minuto${diffMins > 1 ? "s" : ""} atrás`;
+  if (diffHours < 24)
+    return `${diffHours} hora${diffHours > 1 ? "s" : ""} atrás`;
+  if (diffDays < 30) return `${diffDays} dia${diffDays > 1 ? "s" : ""} atrás`;
+  if (diffDays < 365)
+    return `${Math.floor(diffDays / 30)} mês${
+      diffDays >= 60 ? "es" : ""
+    } atrás`;
+  return `${Math.floor(diffDays / 365)} ano${diffDays >= 730 ? "s" : ""} atrás`;
+}
+
+function getFileIcon(filename) {
+  const ext = filename.split(".").pop().toLowerCase();
+  const icons = {
+    zip: "📦",
+    tar: "📦",
+    gz: "📦",
+    rar: "📦",
+    "7z": "📦",
+    sql: "🗄️",
+    db: "🗄️",
+    bak: "💾",
+    backup: "💾",
+    img: "💿",
+    iso: "💿",
+    txt: "📄",
+    log: "📋",
+  };
+  return icons[ext] || "📁";
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}

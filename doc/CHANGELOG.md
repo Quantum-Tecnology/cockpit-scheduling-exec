@@ -5,6 +5,64 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2024-12-28
+
+### 🎉 Adicionado - Gerenciador de Backups
+- **Novo módulo completo de gerenciamento de backups**
+- Interface dedicada para organização e gerenciamento de backups
+- Configuração de múltiplos diretórios de monitoramento
+- Suporte a padrões de arquivo personalizados (*.zip, *.tar.gz, etc.)
+- Listagem completa de backups com informações detalhadas:
+  - Nome do arquivo
+  - Data de criação
+  - Diretório de origem
+  - Tamanho do arquivo
+- Dashboard com estatísticas em tempo real:
+  - Total de backups
+  - Diretórios monitorados
+  - Tamanho total ocupado
+  - Data do último backup
+- Sistema de busca e filtros avançados:
+  - Busca por nome de arquivo
+  - Filtro por diretório
+  - 6 opções de ordenação (data, tamanho, nome)
+- Seleção múltipla de backups com checkbox
+- Ações disponíveis:
+  - Download direto de backups
+  - Envio por email (individual ou em lote)
+  - Exclusão (individual ou em lote)
+  - Exportação de múltiplos backups em tar.gz
+- Configurações de email:
+  - Email do destinatário padrão
+  - Assunto personalizável com variáveis
+  - Limite de tamanho para anexos
+- Scripts utilitários incluídos:
+  - `send-backup-email.sh` - Envio de backups por email
+  - `create-backup.sh` - Criação de backups compactados
+  - `restore-backup.sh` - Restauração de backups
+  - `verify-backup.sh` - Verificação de integridade
+  - `cleanup-old-backups.sh` - Limpeza de backups antigos
+- Script de instalação automatizada
+- Documentação completa em português:
+  - Guia de uso detalhado
+  - Guia de início rápido
+  - Schema JSON de configuração
+  - Exemplos práticos
+
+### 🎨 Melhorado
+- Interface com PatternFly 4 consistente
+- Cards coloridos para estatísticas
+- Animações suaves e feedback visual
+- Design responsivo para mobile/tablet
+- Sistema de alertas contextual
+- Tooltips informativos
+
+### 📝 Documentação
+- Adicionado [BACKUP-MANAGER.md](BACKUP-MANAGER.md)
+- Adicionado [BACKUP-QUICKSTART.md](BACKUP-QUICKSTART.md)
+- Adicionado [config.schema.json](config.schema.json)
+- Atualizado README.md principal
+
 ## [1.2.0] - 2025-12-26
 
 ### Adicionado

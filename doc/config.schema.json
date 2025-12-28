@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backup Manager Configuration",
+  "description": "Arquivo de configuração do Gerenciador de Backups",
+  "type": "object",
+  "properties": {
+    "directories": {
+      "type": "array",
+      "description": "Lista de diretórios monitorados",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador único do diretório"
+          },
+          "path": {
+            "type": "string",
+            "description": "Caminho absoluto do diretório"
+          },
+          "label": {
+            "type": "string",
+            "description": "Rótulo amigável para o diretório"
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Padrão de arquivos a serem monitorados (ex: *.zip, *.tar.gz)",
+            "default": "*"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora em que o diretório foi adicionado"
+          }
+        },
+        "required": ["id", "path", "label", "pattern", "addedAt"]
+      }
+    },
+    "email": {
+      "type": "object",
+      "description": "Configurações de email",
+      "properties": {
+        "recipient": {
+          "type": "string",
+          "format": "email",
+          "description": "Email do destinatário padrão"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Assunto do email (use {{date}} para incluir a data)",
+          "default": "Backup do Sistema - {{date}}"
+        },
+        "maxSize": {
+          "type": "integer",
+          "description": "Tamanho máximo de anexo em MB",
+          "default": 25,
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": ["recipient", "subject", "maxSize"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Versão do arquivo de configuração"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data da última atualização"
+    }
+  },
+  "required": ["directories", "email", "version"],
+  "example": {
+    "directories": [
+      {
+        "id": "1703778000000",
+        "path": "/home/user/backups/database",
+        "label": "Backups do Banco de Dados",
+        "pattern": "*.sql.gz, *.sql",
+        "addedAt": "2024-12-28T15:00:00.000Z"
+      },
+      {
+        "id": "1703778100000",
+        "path": "/var/backups/system",
+        "label": "Backups do Sistema",
+        "pattern": "*.tar.gz",
+        "addedAt": "2024-12-28T15:05:00.000Z"
+      }
+    ],
+    "email": {
+      "recipient": "admin@example.com",
+      "subject": "Backup do Sistema - {{date}}",
+      "maxSize": 25
+    },
+    "version": "1.0.0",
+    "lastUpdated": "2024-12-28T15:30:00.000Z"
+  }
+}

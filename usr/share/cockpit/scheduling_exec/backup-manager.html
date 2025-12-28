@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gerenciador de Backups</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- PatternFly 4 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@patternfly/patternfly@4.224.5/patternfly.min.css"
+      crossorigin="anonymous"
+    />
+
+    <!-- Branding do Cockpit -->
+    <link rel="stylesheet" href="../../static/branding.css" />
+
+    <!-- Cockpit JS API -->
+    <script src="../base1/cockpit.js"></script>
+    <script src="backup-manager.js" defer></script>
+
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--pf-global--BackgroundColor--light-300);
+      }
+
+      .pf-c-page {
+        min-height: 100vh;
+        background-color: var(--pf-global--BackgroundColor--light-300);
+      }
+
+      .pf-c-page__main {
+        padding: var(--pf-global--spacer--md);
+        background-color: var(--pf-global--BackgroundColor--light-300);
+      }
+
+      /* Modal personalizada */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.2s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .modal-content {
+        background-color: var(--pf-global--BackgroundColor--light-100);
+        margin: 5% auto;
+        padding: 0;
+        border: none;
+        width: 90%;
+        max-width: 700px;
+        border-radius: var(--pf-global--BorderRadius--sm);
+        box-shadow: var(--pf-global--BoxShadow--xl);
+        animation: slideDown 0.3s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .pf-c-modal-box__header {
+        padding: var(--pf-global--spacer--lg);
+        border-bottom: 1px solid var(--pf-global--BorderColor--100);
+        background-color: var(--pf-global--BackgroundColor--light-100);
+      }
+
+      .pf-c-modal-box__title {
+        font-size: var(--pf-global--FontSize--xl);
+        font-weight: var(--pf-global--FontWeight--bold);
+        color: var(--pf-global--Color--100);
+        margin: 0;
+      }
+
+      .pf-c-modal-box__body {
+        padding: var(--pf-global--spacer--lg);
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+
+      .pf-c-modal-box__footer {
+        padding: var(--pf-global--spacer--lg);
+        border-top: 1px solid var(--pf-global--BorderColor--100);
+        display: flex;
+        gap: var(--pf-global--spacer--sm);
+        justify-content: flex-end;
+        background-color: var(--pf-global--BackgroundColor--light-200);
+      }
+
+      .close {
+        color: var(--pf-global--Color--200);
+        float: right;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        line-height: 1;
+        transition: color 0.2s;
+      }
+
+      .close:hover {
+        color: var(--pf-global--danger-color--100);
+      }
+
+      /* Cards de estatísticas */
+      .stats-card {
+        background: linear-gradient(
+          135deg,
+          var(--pf-global--primary-color--100) 0%,
+          var(--pf-global--primary-color--200) 100%
+        );
+        color: white;
+        padding: var(--pf-global--spacer--lg);
+        border-radius: var(--pf-global--BorderRadius--sm);
+        box-shadow: var(--pf-global--BoxShadow--md);
+      }
+
+      .stats-card h3 {
+        font-size: var(--pf-global--FontSize--2xl);
+        margin: 0;
+        font-weight: var(--pf-global--FontWeight--bold);
+      }
+
+      .stats-card p {
+        margin: var(--pf-global--spacer--xs) 0 0 0;
+        opacity: 0.9;
+        font-size: var(--pf-global--FontSize--sm);
+      }
+
+      /* Lista de diretórios configurados */
+      .directory-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--pf-global--spacer--md);
+        background-color: var(--pf-global--BackgroundColor--light-100);
+        border: 1px solid var(--pf-global--BorderColor--100);
+        border-radius: var(--pf-global--BorderRadius--sm);
+        margin-bottom: var(--pf-global--spacer--sm);
+        transition: all 0.2s;
+      }
+
+      .directory-item:hover {
+        background-color: var(--pf-global--BackgroundColor--light-200);
+        box-shadow: var(--pf-global--BoxShadow--sm);
+      }
+
+      .directory-path {
+        font-family: monospace;
+        font-size: var(--pf-global--FontSize--sm);
+        color: var(--pf-global--Color--200);
+        flex: 1;
+        margin-right: var(--pf-global--spacer--md);
+      }
+
+      .directory-icon {
+        margin-right: var(--pf-global--spacer--sm);
+        color: var(--pf-global--primary-color--100);
+      }
+
+      /* Badges personalizadas */
+      .size-badge {
+        font-size: var(--pf-global--FontSize--xs);
+        padding: 2px 8px;
+        border-radius: var(--pf-global--BorderRadius--sm);
+        font-weight: var(--pf-global--FontWeight--bold);
+      }
+
+      .size-small {
+        background-color: var(--pf-global--success-color--200);
+        color: var(--pf-global--success-color--100);
+      }
+
+      .size-medium {
+        background-color: var(--pf-global--warning-color--200);
+        color: var(--pf-global--warning-color--100);
+      }
+
+      .size-large {
+        background-color: var(--pf-global--danger-color--200);
+        color: var(--pf-global--danger-color--100);
+      }
+
+      /* Tabela responsiva */
+      .backup-table-wrapper {
+        overflow-x: auto;
+        background-color: white;
+        border-radius: var(--pf-global--BorderRadius--sm);
+        box-shadow: var(--pf-global--BoxShadow--sm);
+      }
+
+      .pf-c-table tr:hover {
+        background-color: var(--pf-global--BackgroundColor--light-200);
+      }
+
+      /* Filtros e busca */
+      .filters-section {
+        background-color: white;
+        padding: var(--pf-global--spacer--md);
+        border-radius: var(--pf-global--BorderRadius--sm);
+        box-shadow: var(--pf-global--BoxShadow--sm);
+        margin-bottom: var(--pf-global--spacer--md);
+      }
+
+      /* Animação de loading */
+      .loading-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid var(--pf-global--BorderColor--100);
+        border-top-color: var(--pf-global--primary-color--100);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Empty state */
+      .empty-state {
+        text-align: center;
+        padding: var(--pf-global--spacer--2xl);
+        color: var(--pf-global--Color--200);
+      }
+
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: var(--pf-global--spacer--md);
+        opacity: 0.5;
+      }
+
+      /* Tooltip */
+      [data-tooltip] {
+        position: relative;
+        cursor: help;
+      }
+
+      [data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: var(--pf-global--spacer--xs) var(--pf-global--spacer--sm);
+        background-color: var(--pf-global--Color--100);
+        color: white;
+        font-size: var(--pf-global--FontSize--xs);
+        white-space: nowrap;
+        border-radius: var(--pf-global--BorderRadius--sm);
+        z-index: 1000;
+        margin-bottom: 5px;
+      }
+
+      /* Checkbox customizado */
+      .custom-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+
+      /* Alertas */
+      .pf-c-alert {
+        margin-bottom: var(--pf-global--spacer--md);
+      }
+
+      /* Botões de ação */
+      .action-buttons {
+        display: flex;
+        gap: var(--pf-global--spacer--xs);
+      }
+
+      .btn-icon {
+        padding: var(--pf-global--spacer--xs) var(--pf-global--spacer--sm);
+        font-size: var(--pf-global--FontSize--sm);
+      }
+
+      /* Navegação de abas */
+      .pf-c-tabs {
+        margin-bottom: var(--pf-global--spacer--md);
+      }
+
+      /* Responsividade */
+      @media (max-width: 768px) {
+        .modal-content {
+          width: 95%;
+          margin: 10% auto;
+        }
+
+        .stats-card h3 {
+          font-size: var(--pf-global--FontSize--xl);
+        }
+
+        .directory-item {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .directory-path {
+          margin-bottom: var(--pf-global--spacer--sm);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="pf-c-page">
+      <!-- Header -->
+      <header class="pf-c-page__header">
+        <div class="pf-c-page__header-brand">
+          <div class="pf-c-page__header-brand-toggle"></div>
+          <a class="pf-c-page__header-brand-link">
+            <div class="pf-c-brand">
+              <h1 style="margin: 0; color: white; font-size: 1.5rem">
+                🗄️ Gerenciador de Backups
+              </h1>
+            </div>
+          </a>
+        </div>
+      </header>
+
+      <!-- Main content -->
+      <main class="pf-c-page__main">
+        <!-- Alertas -->
+        <div id="alerts-container"></div>
+
+        <!-- Estatísticas -->
+        <div
+          class="pf-l-grid pf-m-gutter"
+          style="margin-bottom: var(--pf-global--spacer--lg)"
+        >
+          <div
+            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+          >
+            <div
+              class="stats-card"
+              style="
+                background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+              "
+            >
+              <h3 id="total-backups">0</h3>
+              <p>Total de Backups</p>
+            </div>
+          </div>
+          <div
+            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+          >
+            <div
+              class="stats-card"
+              style="
+                background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+              "
+            >
+              <h3 id="total-directories">0</h3>
+              <p>Diretórios Monitorados</p>
+            </div>
+          </div>
+          <div
+            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+          >
+            <div
+              class="stats-card"
+              style="
+                background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+              "
+            >
+              <h3 id="total-size">0 MB</h3>
+              <p>Tamanho Total</p>
+            </div>
+          </div>
+          <div
+            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+          >
+            <div
+              class="stats-card"
+              style="
+                background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+              "
+            >
+              <h3 id="last-backup">Nunca</h3>
+              <p>Último Backup</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="pf-c-tabs" id="backup-tabs">
+          <ul class="pf-c-tabs__list">
+            <li class="pf-c-tabs__item pf-m-current">
+              <button
+                class="pf-c-tabs__link"
+                id="tab-backups"
+                onclick="switchTab('backups')"
+              >
+                <span class="pf-c-tabs__item-text">📦 Lista de Backups</span>
+              </button>
+            </li>
+            <li class="pf-c-tabs__item">
+              <button
+                class="pf-c-tabs__link"
+                id="tab-config"
+                onclick="switchTab('config')"
+              >
+                <span class="pf-c-tabs__item-text">⚙️ Configurações</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Tab: Lista de Backups -->
+        <div id="backups-tab-content" class="tab-content">
+          <!-- Filtros e busca -->
+          <div class="filters-section">
+            <div class="pf-l-grid pf-m-gutter">
+              <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+                <div class="pf-c-form__group">
+                  <label class="pf-c-form__label" for="search-input">
+                    <span class="pf-c-form__label-text">🔍 Buscar backup</span>
+                  </label>
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="search-input"
+                    placeholder="Digite o nome do arquivo..."
+                    onkeyup="filterBackups()"
+                  />
+                </div>
+              </div>
+              <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                <div class="pf-c-form__group">
+                  <label class="pf-c-form__label" for="directory-filter">
+                    <span class="pf-c-form__label-text">📁 Diretório</span>
+                  </label>
+                  <select
+                    class="pf-c-form-control"
+                    id="directory-filter"
+                    onchange="filterBackups()"
+                  >
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                <div class="pf-c-form__group">
+                  <label class="pf-c-form__label" for="sort-by">
+                    <span class="pf-c-form__label-text">🔄 Ordenar por</span>
+                  </label>
+                  <select
+                    class="pf-c-form-control"
+                    id="sort-by"
+                    onchange="filterBackups()"
+                  >
+                    <option value="date-desc">Mais recentes</option>
+                    <option value="date-asc">Mais antigos</option>
+                    <option value="size-desc">Maior tamanho</option>
+                    <option value="size-asc">Menor tamanho</option>
+                    <option value="name-asc">Nome (A-Z)</option>
+                    <option value="name-desc">Nome (Z-A)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div
+              style="
+                margin-top: var(--pf-global--spacer--md);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <div>
+                <button
+                  class="pf-c-button pf-m-link"
+                  onclick="selectAllBackups()"
+                >
+                  ☑️ Selecionar todos
+                </button>
+                <button
+                  class="pf-c-button pf-m-link"
+                  onclick="deselectAllBackups()"
+                >
+                  ☐ Desmarcar todos
+                </button>
+              </div>
+              <div>
+                <button
+                  class="pf-c-button pf-m-secondary"
+                  onclick="exportSelectedBackups()"
+                  id="export-selected-btn"
+                  disabled
+                >
+                  📤 Exportar selecionados
+                </button>
+                <button
+                  class="pf-c-button pf-m-danger"
+                  onclick="deleteSelectedBackups()"
+                  id="delete-selected-btn"
+                  disabled
+                >
+                  🗑️ Deletar selecionados
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de backups -->
+          <div class="backup-table-wrapper">
+            <table
+              class="pf-c-table pf-m-grid-md"
+              role="grid"
+              id="backups-table"
+            >
+              <thead>
+                <tr>
+                  <th role="columnheader" style="width: 50px">
+                    <input
+                      type="checkbox"
+                      class="custom-checkbox"
+                      id="select-all-checkbox"
+                      onchange="toggleSelectAll(this)"
+                    />
+                  </th>
+                  <th role="columnheader">📄 Nome do Arquivo</th>
+                  <th role="columnheader">📅 Data de Criação</th>
+                  <th role="columnheader">📁 Diretório</th>
+                  <th role="columnheader">💾 Tamanho</th>
+                  <th role="columnheader" style="text-align: right">
+                    ⚡ Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="backups-table-body">
+                <!-- Será preenchido dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty state -->
+          <div id="empty-state" class="empty-state" style="display: none">
+            <div class="empty-state-icon">📦</div>
+            <h2>Nenhum backup encontrado</h2>
+            <p>
+              Configure os diretórios na aba "Configurações" para começar a
+              monitorar seus backups.
+            </p>
+            <button
+              class="pf-c-button pf-m-primary"
+              onclick="switchTab('config')"
+            >
+              Ir para Configurações
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab: Configurações -->
+        <div id="config-tab-content" class="tab-content" style="display: none">
+          <div class="pf-l-grid pf-m-gutter">
+            <!-- Diretórios configurados -->
+            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+              <div class="pf-c-card">
+                <div class="pf-c-card__header">
+                  <div class="pf-c-card__header-main">
+                    <h2 class="pf-c-card__title">📁 Diretórios Monitorados</h2>
+                  </div>
+                </div>
+                <div class="pf-c-card__body">
+                  <p
+                    style="
+                      color: var(--pf-global--Color--200);
+                      margin-bottom: var(--pf-global--spacer--md);
+                    "
+                  >
+                    Adicione os diretórios onde seus backups estão armazenados.
+                  </p>
+                  <button
+                    class="pf-c-button pf-m-primary pf-m-block"
+                    onclick="openAddDirectoryModal()"
+                  >
+                    ➕ Adicionar Diretório
+                  </button>
+                  <div
+                    id="directories-list"
+                    style="margin-top: var(--pf-global--spacer--md)"
+                  >
+                    <!-- Lista de diretórios será preenchida aqui -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Configurações de email -->
+            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+              <div class="pf-c-card">
+                <div class="pf-c-card__header">
+                  <div class="pf-c-card__header-main">
+                    <h2 class="pf-c-card__title">📧 Configurações de Email</h2>
+                  </div>
+                </div>
+                <div class="pf-c-card__body">
+                  <form id="email-config-form">
+                    <div class="pf-c-form__group">
+                      <label class="pf-c-form__label" for="email-recipient">
+                        <span class="pf-c-form__label-text"
+                          >Email do Destinatário</span
+                        >
+                        <span
+                          class="pf-c-form__label-required"
+                          aria-hidden="true"
+                          >*</span
+                        >
+                      </label>
+                      <input
+                        class="pf-c-form-control"
+                        type="email"
+                        id="email-recipient"
+                        placeholder="exemplo@dominio.com"
+                        required
+                      />
+                      <p class="pf-c-form__helper-text">
+                        Email para onde os backups serão enviados
+                      </p>
+                    </div>
+
+                    <div class="pf-c-form__group">
+                      <label class="pf-c-form__label" for="email-subject">
+                        <span class="pf-c-form__label-text"
+                          >Assunto do Email</span
+                        >
+                      </label>
+                      <input
+                        class="pf-c-form-control"
+                        type="text"
+                        id="email-subject"
+                        value="Backup do Sistema - {{date}}"
+                      />
+                      <p class="pf-c-form__helper-text">
+                        Use {{date}} para incluir a data atual
+                      </p>
+                    </div>
+
+                    <div class="pf-c-form__group">
+                      <label class="pf-c-form__label" for="max-email-size">
+                        <span class="pf-c-form__label-text"
+                          >Tamanho Máximo (MB)</span
+                        >
+                      </label>
+                      <input
+                        class="pf-c-form-control"
+                        type="number"
+                        id="max-email-size"
+                        value="25"
+                        min="1"
+                        max="100"
+                      />
+                      <p class="pf-c-form__helper-text">
+                        Tamanho máximo de anexo permitido para envio por email
+                      </p>
+                    </div>
+
+                    <button
+                      class="pf-c-button pf-m-primary pf-m-block"
+                      type="submit"
+                    >
+                      💾 Salvar Configurações
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ações em lote -->
+            <div class="pf-l-grid__item pf-m-12-col">
+              <div class="pf-c-card">
+                <div class="pf-c-card__header">
+                  <div class="pf-c-card__header-main">
+                    <h2 class="pf-c-card__title">🛠️ Ações em Lote</h2>
+                  </div>
+                </div>
+                <div class="pf-c-card__body">
+                  <div class="pf-l-grid pf-m-gutter">
+                    <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+                      <button
+                        class="pf-c-button pf-m-secondary pf-m-block"
+                        onclick="refreshBackupList()"
+                      >
+                        🔄 Atualizar Lista de Backups
+                      </button>
+                    </div>
+                    <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+                      <button
+                        class="pf-c-button pf-m-secondary pf-m-block"
+                        onclick="exportAllBackups()"
+                      >
+                        📦 Exportar Todos os Backups
+                      </button>
+                    </div>
+                    <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+                      <button
+                        class="pf-c-button pf-m-danger pf-m-block"
+                        onclick="cleanOldBackups()"
+                      >
+                        🗑️ Limpar Backups Antigos
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal: Adicionar Diretório -->
+    <div id="add-directory-modal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">
+            📁 Adicionar Diretório de Backup
+          </h2>
+          <button class="close" onclick="closeAddDirectoryModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <form id="add-directory-form">
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="directory-path">
+                <span class="pf-c-form__label-text">Caminho do Diretório</span>
+                <span class="pf-c-form__label-required" aria-hidden="true"
+                  >*</span
+                >
+              </label>
+              <div style="display: flex; gap: var(--pf-global--spacer--sm)">
+                <input
+                  class="pf-c-form-control"
+                  type="text"
+                  id="directory-path"
+                  placeholder="/home/user/backups"
+                  required
+                  style="flex: 1"
+                />
+                <button
+                  class="pf-c-button pf-m-secondary"
+                  type="button"
+                  onclick="browseDirectory()"
+                >
+                  📂 Navegar
+                </button>
+              </div>
+              <p class="pf-c-form__helper-text">
+                Caminho completo do diretório onde os backups estão armazenados
+              </p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="directory-label">
+                <span class="pf-c-form__label-text">Rótulo (opcional)</span>
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="text"
+                id="directory-label"
+                placeholder="Ex: Backups do Banco de Dados"
+              />
+              <p class="pf-c-form__helper-text">
+                Nome amigável para identificar este diretório
+              </p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="file-pattern">
+                <span class="pf-c-form__label-text"
+                  >Padrão de Arquivo (opcional)</span
+                >
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="text"
+                id="file-pattern"
+                placeholder="*.zip, *.tar.gz, *.sql"
+                value="*"
+              />
+              <p class="pf-c-form__helper-text">
+                Use * para todos os arquivos ou especifique extensões separadas
+                por vírgula
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="closeAddDirectoryModal()"
+          >
+            Cancelar
+          </button>
+          <button class="pf-c-button pf-m-primary" onclick="addDirectory()">
+            ➕ Adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Confirmação de Exclusão -->
+    <div id="delete-confirm-modal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">⚠️ Confirmar Exclusão</h2>
+          <button class="close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <div
+            class="pf-c-alert pf-m-warning"
+            style="margin-bottom: var(--pf-global--spacer--md)"
+          >
+            <div class="pf-c-alert__icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h4 class="pf-c-alert__title">Atenção!</h4>
+            <div class="pf-c-alert__description">
+              <p id="delete-message">Esta ação não pode ser desfeita.</p>
+            </div>
+          </div>
+          <p>Tem certeza que deseja prosseguir?</p>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="closeDeleteModal()"
+          >
+            Cancelar
+          </button>
+          <button class="pf-c-button pf-m-danger" onclick="confirmDelete()">
+            🗑️ Sim, Deletar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Enviar por Email -->
+    <div id="email-modal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">📧 Enviar Backup por Email</h2>
+          <button class="close" onclick="closeEmailModal()">&times;</button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <form id="send-email-form">
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label">
+                <span class="pf-c-form__label-text"
+                  >Arquivo(s) selecionado(s)</span
+                >
+              </label>
+              <div
+                id="email-files-list"
+                style="
+                  padding: var(--pf-global--spacer--sm);
+                  background-color: var(
+                    --pf-global--BackgroundColor--light-200
+                  );
+                  border-radius: var(--pf-global--BorderRadius--sm);
+                  max-height: 150px;
+                  overflow-y: auto;
+                "
+              >
+                <!-- Lista de arquivos será preenchida aqui -->
+              </div>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="email-to">
+                <span class="pf-c-form__label-text">Para</span>
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="email"
+                id="email-to"
+                required
+              />
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="email-message">
+                <span class="pf-c-form__label-text">Mensagem (opcional)</span>
+              </label>
+              <textarea
+                class="pf-c-form-control"
+                id="email-message"
+                rows="4"
+                placeholder="Adicione uma mensagem personalizada..."
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="closeEmailModal()"
+          >
+            Cancelar
+          </button>
+          <button class="pf-c-button pf-m-primary" onclick="sendEmail()">
+            📨 Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

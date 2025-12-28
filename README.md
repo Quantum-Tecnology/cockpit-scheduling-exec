@@ -3,11 +3,13 @@
 ![Build Status](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/build-debian.yml/badge.svg)
 ![Release](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/release.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.8-green.svg)
+![Version](https://img.shields.io/badge/version-1.3.0-green.svg)
 
-Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva.
+Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva. Agora com **Gerenciador de Backups** integrado!
 
 ## 🚀 Funcionalidades
+
+### 📜 Scripts & Agendamentos
 
 - ✅ **Criar Scripts Personalizados**: Interface amigável para criar scripts shell
 - ✏️ **Editar Scripts**: Modal de edição com syntax highlighting
@@ -22,6 +24,21 @@ Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell 
   - Próxima execução agendada
 - 🗑️ **Remover Scripts**: Exclua scripts e seus agendamentos
 - 📁 **Armazenamento Organizado**: Scripts salvos em `$HOME/scripts`
+
+### 🗄️ Gerenciador de Backups (NOVO!)
+
+- 📁 **Múltiplos Diretórios**: Monitore vários diretórios de backup
+- 📦 **Listagem Inteligente**: Veja todos os backups com data, tamanho e diretório
+- 🔍 **Busca e Filtros**: Encontre backups rapidamente
+- ⬇️ **Download**: Baixe backups diretamente
+- 📧 **Envio por Email**: Envie backups para emails pré-configurados
+- 🗑️ **Gerenciamento**: Delete backups individuais ou em lote
+- 📤 **Exportação**: Crie arquivos tar.gz com múltiplos backups
+- 🧹 **Limpeza Automática**: Remove backups antigos com base em dias
+- 📊 **Dashboard**: Estatísticas de backups em tempo real
+
+👉 [**Documentação Completa do Gerenciador de Backups**](doc/BACKUP-MANAGER.md)
+👉 [**Guia de Início Rápido**](doc/BACKUP-QUICKSTART.md)
 
 ## 📦 Instalação
 
