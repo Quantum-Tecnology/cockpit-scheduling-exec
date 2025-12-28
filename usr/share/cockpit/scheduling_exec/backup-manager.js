@@ -18,19 +18,27 @@ const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
 
 // Inicialização
 document.addEventListener("DOMContentLoaded", () => {
-  loadConfiguration();
-  loadBackups();
-  setupEventListeners();
+  console.log("Backup Manager: Inicializando...");
 
   // Garantir que as abas estejam sempre visíveis
   const tabsContainer = document.getElementById("backup-tabs");
   if (tabsContainer) {
     tabsContainer.style.display = "block";
     tabsContainer.style.visibility = "visible";
+    tabsContainer.style.opacity = "1";
+    console.log("Backup Manager: Abas configuradas");
+  } else {
+    console.error("Backup Manager: Elemento #backup-tabs não encontrado!");
   }
+
+  loadConfiguration();
+  loadBackups();
+  setupEventListeners();
 
   // Garantir que a aba de backups esteja visível inicialmente
   switchTab("backups");
+
+  console.log("Backup Manager: Inicialização completa");
 });
 
 // ============================================================================
@@ -64,20 +72,25 @@ async function saveConfiguration() {
   };
 
   try {
-    // Criar diretório se não existir
-    await cockpit.spawn(
-      ["mkdir", "-p", `${cockpit.user().home}/.backup-manager`],
-      { err: "ignore" }
-    );
+    const configDir = `${cockpit.user().home}/.backup-manager`;
 
-    // Salvar configuração
+    // Criar diretório se não existir
+    await cockpit.spawn(["mkdir", "-p", configDir], { err: "ignore" });
+
+    // Salvar configuração usando sh -c para garantir que funcione
+    const configJson = JSON.stringify(config, null, 2);
     await cockpit
-      .spawn(["tee", CONFIG_FILE], { err: "message" })
-      .input(JSON.stringify(config, null, 2));
+      .spawn(["sh", "-c", `cat > ${CONFIG_FILE}`], { err: "message" })
+      .input(configJson);
 
     showAlert("success", "Configuração salva com sucesso!");
   } catch (error) {
-    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    console.error("Erro ao salvar configuração:", error);
+    const errorMsg =
+      error?.message ||
+      error?.toString() ||
+      JSON.stringify(error) ||
+      "Erro desconhecido";
     showAlert("danger", `Erro ao salvar configuração: ${errorMsg}`);
   }
 }
@@ -97,25 +110,35 @@ function closeAddDirectoryModal() {
 }
 
 async function browseDirectory() {
-  // Usar cockpit file browser
   const pathInput = document.getElementById("directory-path");
   const currentPath = pathInput.value || cockpit.user().home;
 
   try {
-    const result = await cockpit.spawn([
-      "zenity",
-      "--file-selection",
-      "--directory",
-      "--filename=" + currentPath,
-    ]);
-    if (result.trim()) {
-      pathInput.value = result.trim();
+    // Verificar se zenity está disponível
+    await cockpit.spawn(["which", "zenity"], { err: "ignore" });
+
+    // Zenity está disponível, usar para seleção de diretório
+    try {
+      const result = await cockpit.spawn([
+        "zenity",
+        "--file-selection",
+        "--directory",
+        "--filename=" + currentPath,
+      ]);
+
+      if (result.trim()) {
+        pathInput.value = result.trim();
+      }
+    } catch (error) {
+      // Usuário cancelou a seleção ou outro erro do zenity
+      // Não mostrar erro, apenas manter o valor atual
+      console.log("Seleção de diretório cancelada ou erro no zenity:", error);
     }
   } catch (error) {
-    // Zenity pode não estar disponível, usar input manual
+    // Zenity não está instalado
     showAlert(
       "info",
-      "Digite o caminho manualmente ou instale o zenity para navegação visual."
+      "Digite o caminho manualmente ou instale o zenity para navegação visual: sudo apt-get install zenity"
     );
   }
 }
@@ -870,10 +893,18 @@ function setupEventListeners() {
 // ============================================================================
 
 function switchTab(tab) {
+  console.log(`Backup Manager: Mudando para aba ${tab}`);
+
   // Garantir que as abas estejam visíveis
   const tabsContainer = document.getElementById("backup-tabs");
   if (tabsContainer) {
     tabsContainer.style.display = "block";
+    tabsContainer.style.visibility = "visible";
+    tabsContainer.style.opacity = "1";
+  } else {
+    console.error(
+      "Backup Manager: Elemento #backup-tabs não encontrado em switchTab!"
+    );
   }
 
   // Atualizar abas
@@ -884,6 +915,9 @@ function switchTab(tab) {
   const tabElement = document.getElementById(`tab-${tab}`);
   if (tabElement && tabElement.parentElement) {
     tabElement.parentElement.classList.add("pf-m-current");
+    console.log(`Backup Manager: Aba ${tab} marcada como ativa`);
+  } else {
+    console.error(`Backup Manager: Elemento #tab-${tab} não encontrado!`);
   }
 
   // Atualizar conteúdo
@@ -896,6 +930,8 @@ function switchTab(tab) {
   if (configTab) {
     configTab.style.display = tab === "config" ? "block" : "none";
   }
+
+  console.log(`Backup Manager: Conteúdo da aba ${tab} exibido`);
 }
 
 function updateStats() {

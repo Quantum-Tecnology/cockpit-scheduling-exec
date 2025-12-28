@@ -38,7 +38,13 @@
 
       .pf-c-page__main {
         padding: var(--pf-global--spacer--md);
+        padding-top: calc(var(--pf-global--spacer--md) + 60px);
         background-color: var(--pf-global--BackgroundColor--light-300);
+      }
+
+      .pf-c-page__header {
+        position: relative;
+        z-index: 100;
       }
 
       /* Modal personalizada */
@@ -309,12 +315,64 @@
       /* Navegação de abas */
       .pf-c-tabs {
         margin-bottom: var(--pf-global--spacer--md);
+        margin-top: var(--pf-global--spacer--md);
         display: block !important;
         visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 10 !important;
+        background-color: white;
+        padding: var(--pf-global--spacer--sm) 0;
+        border-bottom: 2px solid var(--pf-global--BorderColor--100);
+        min-height: 50px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .pf-c-tabs__list {
         display: flex !important;
+        list-style: none;
+        margin: 0 !important;
+        padding: 0 var(--pf-global--spacer--md) !important;
+        min-height: 40px;
+        align-items: center;
+      }
+
+      .pf-c-tabs__item {
+        margin-right: var(--pf-global--spacer--sm);
+        display: list-item !important;
+      }
+
+      .pf-c-tabs__link {
+        display: inline-block !important;
+        padding: var(--pf-global--spacer--sm) var(--pf-global--spacer--lg) !important;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-size: var(--pf-global--FontSize--md);
+        color: var(--pf-global--Color--200);
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+
+      .pf-c-tabs__item-text {
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      .pf-c-tabs__item.pf-m-current .pf-c-tabs__link {
+        color: var(--pf-global--primary-color--100);
+        border-bottom-color: var(--pf-global--primary-color--100);
+        font-weight: bold;
+      }
+
+      .pf-c-tabs__link:hover {
+        background-color: var(--pf-global--BackgroundColor--light-200);
+        color: var(--pf-global--primary-color--100);
+      }
+
+      .tab-content {
+        padding: var(--pf-global--spacer--md) 0;
       }
 
       /* Responsividade */
