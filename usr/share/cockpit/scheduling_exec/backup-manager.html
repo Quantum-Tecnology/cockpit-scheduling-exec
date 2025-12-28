@@ -833,7 +833,7 @@
                   class="pf-c-form-control"
                   type="text"
                   id="directory-path"
-                  placeholder="/home/user/backups"
+                  placeholder="/home/user/backups ou /var/backups"
                   required
                   style="flex: 1"
                 />
@@ -841,6 +841,7 @@
                   class="pf-c-button pf-m-secondary"
                   type="button"
                   onclick="browseDirectory()"
+                  title="Navegar pelos diretórios do sistema"
                 >
                   📂 Navegar
                 </button>
@@ -1021,6 +1022,110 @@
           </button>
           <button class="pf-c-button pf-m-primary" onclick="sendEmail()">
             📨 Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Navegador de Diretórios -->
+    <div id="directory-browser-modal" class="modal">
+      <div class="modal-content" style="max-width: 800px">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">Navegar Diretórios</h2>
+          <button
+            class="pf-c-button pf-m-plain"
+            onclick="closeDirectoryBrowser()"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <!-- Barra de navegação -->
+          <div
+            style="
+              display: flex;
+              gap: var(--pf-global--spacer--sm);
+              margin-bottom: var(--pf-global--spacer--md);
+              padding: var(--pf-global--spacer--sm);
+              background: #f5f7fa;
+              border-radius: 8px;
+            "
+          >
+            <button
+              class="pf-c-button pf-m-secondary pf-m-small"
+              onclick="navigateToRoot()"
+              title="Ir para raiz (/)"
+            >
+              🏠 Raiz
+            </button>
+            <button
+              class="pf-c-button pf-m-secondary pf-m-small"
+              onclick="navigateToHome()"
+              title="Ir para home do usuário"
+            >
+              👤 Home
+            </button>
+            <button
+              class="pf-c-button pf-m-secondary pf-m-small"
+              onclick="navigateToParent()"
+              title="Voltar para diretório pai"
+            >
+              ⬆️ Voltar
+            </button>
+            <button
+              class="pf-c-button pf-m-secondary pf-m-small"
+              onclick="showCommonDirectories()"
+              title="Mostrar diretórios comuns"
+            >
+              ⭐ Comuns
+            </button>
+          </div>
+
+          <!-- Caminho atual -->
+          <div
+            style="
+              margin-bottom: var(--pf-global--spacer--md);
+              padding: var(--pf-global--spacer--sm);
+              background: #e9ecef;
+              border-radius: 6px;
+              font-family: monospace;
+              font-size: 0.9rem;
+            "
+          >
+            📂 <span id="current-path"></span>
+          </div>
+
+          <!-- Lista de diretórios -->
+          <div
+            id="directory-list"
+            style="
+              max-height: 400px;
+              overflow-y: auto;
+              border: 1px solid #e9ecef;
+              border-radius: 8px;
+              background: white;
+            "
+          >
+            <!-- Será preenchido dinamicamente -->
+          </div>
+
+          <p
+            style="
+              margin-top: var(--pf-global--spacer--md);
+              color: #6c757d;
+              font-size: 0.875rem;
+            "
+          >
+            💡 Dica: Clique em um diretório para navegar, ou use "Selecionar"
+            para escolhê-lo
+          </p>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="closeDirectoryBrowser()"
+          >
+            Cancelar
           </button>
         </div>
       </div>

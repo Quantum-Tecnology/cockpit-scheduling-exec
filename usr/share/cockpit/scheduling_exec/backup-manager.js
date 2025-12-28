@@ -91,39 +91,53 @@ async function saveConfiguration() {
 
   try {
     const configDir = `${cockpit.user().home}/.backup-manager`;
+    const configJson = JSON.stringify(config, null, 2);
+
+    console.log("Backup Manager: Criando diretório:", configDir);
 
     // Criar diretório se não existir
-    await cockpit.spawn(["mkdir", "-p", configDir], { err: "ignore" });
+    await cockpit.spawn(["mkdir", "-p", configDir], { err: "message" });
 
-    // Salvar configuração usando sh -c para garantir que funcione
-    const configJson = JSON.stringify(config, null, 2);
-    await cockpit
-      .spawn(["sh", "-c", `cat > ${CONFIG_FILE}`], { err: "message" })
-      .input(configJson);
+    console.log("Backup Manager: Verificando permissões...");
+
+    // Verificar se temos permissão para escrever
+    try {
+      await cockpit.spawn(["test", "-w", configDir], { err: "message" });
+    } catch (e) {
+      throw new Error(`Sem permissão de escrita em ${configDir}`);
+    }
+
+    console.log("Backup Manager: Salvando arquivo usando tee...");
+
+    // Usar tee em vez de cat > para melhor tratamento de erros
+    const process = cockpit.spawn(["tee", CONFIG_FILE], {
+      err: "message",
+      superuser: "try",
+    });
+    process.input(configJson);
+    await process;
 
     console.log("Backup Manager: Configuração salva em", CONFIG_FILE);
     showAlert("success", "✅ Configuração salva com sucesso!");
 
     // Verificar se foi salvo corretamente
-    try {
-      const verify = await cockpit.spawn(["cat", CONFIG_FILE], {
-        err: "ignore",
-      });
-      console.log(
-        "Backup Manager: Verificação - arquivo existe e contém:",
-        verify.substring(0, 100) + "..."
-      );
-    } catch (e) {
-      console.error("Backup Manager: ERRO - arquivo não foi criado!", e);
-    }
+    console.log("Backup Manager: Verificando arquivo salvo...");
+    const verify = await cockpit.spawn(["cat", CONFIG_FILE], {
+      err: "message",
+    });
+    console.log(
+      "Backup Manager: ✓ Arquivo existe e contém:",
+      verify.substring(0, 100) + "..."
+    );
   } catch (error) {
-    console.error("Backup Manager: Erro ao salvar configuração:", error);
+    console.error("Backup Manager: ✗ Erro ao salvar configuração:", error);
     const errorMsg =
       error?.message ||
       error?.toString() ||
       JSON.stringify(error) ||
       "Erro desconhecido";
     showAlert("danger", `❌ Erro ao salvar configuração: ${errorMsg}`);
+    throw error; // Re-lançar para debug
   }
 }
 
@@ -145,34 +159,121 @@ async function browseDirectory() {
   const pathInput = document.getElementById("directory-path");
   const currentPath = pathInput.value || cockpit.user().home;
 
+  // Abrir modal de navegação de diretórios
+  document.getElementById("directory-browser-modal").style.display = "block";
+  await loadDirectoryContents(currentPath);
+}
+
+function closeDirectoryBrowser() {
+  document.getElementById("directory-browser-modal").style.display = "none";
+}
+
+async function loadDirectoryContents(path) {
+  const container = document.getElementById("directory-list");
+  const currentPathSpan = document.getElementById("current-path");
+  const pathInput = document.getElementById("directory-path");
+
+  currentPathSpan.textContent = path;
+  container.innerHTML =
+    '<div style="text-align: center; padding: 2rem;">Carregando...</div>';
+
   try {
-    // Verificar se zenity está disponível
-    await cockpit.spawn(["which", "zenity"], { err: "ignore" });
-
-    // Zenity está disponível, usar para seleção de diretório
-    try {
-      const result = await cockpit.spawn([
-        "zenity",
-        "--file-selection",
-        "--directory",
-        "--filename=" + currentPath,
-      ]);
-
-      if (result.trim()) {
-        pathInput.value = result.trim();
-      }
-    } catch (error) {
-      // Usuário cancelou a seleção ou outro erro do zenity
-      // Não mostrar erro, apenas manter o valor atual
-      console.log("Seleção de diretório cancelada ou erro no zenity:", error);
-    }
-  } catch (error) {
-    // Zenity não está instalado
-    showAlert(
-      "info",
-      "Digite o caminho manualmente ou instale o zenity para navegação visual: sudo apt-get install zenity"
+    // Listar diretórios
+    const result = await cockpit.spawn(
+      ["find", path, "-maxdepth", "1", "-type", "d"],
+      { err: "message" }
     );
+
+    const dirs = result
+      .trim()
+      .split("\n")
+      .filter((d) => d && d !== path)
+      .sort();
+
+    if (dirs.length === 0) {
+      container.innerHTML =
+        '<div style="text-align: center; padding: 2rem; color: #999;">Nenhum subdiretório encontrado</div>';
+      return;
+    }
+
+    container.innerHTML = dirs
+      .map((dir) => {
+        const name = dir.split("/").pop();
+        return `
+          <div class="directory-item" style="padding: 0.75rem; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onmouseenter="this.style.backgroundColor='#f8f9fa'" onmouseleave="this.style.backgroundColor='white'">
+            <div style="display: flex; align-items: center; flex: 1;" onclick="loadDirectoryContents('${escapeHtml(
+              dir
+            )}')">
+              <span style="font-size: 1.5rem; margin-right: 0.75rem;">📁</span>
+              <span style="font-family: monospace;">${escapeHtml(name)}</span>
+            </div>
+            <button class="pf-c-button pf-m-primary pf-m-small" onclick="selectDirectory('${escapeHtml(
+              dir
+            )}')">Selecionar</button>
+          </div>
+        `;
+      })
+      .join("");
+  } catch (error) {
+    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #c9190b;">Erro ao listar diretórios: ${escapeHtml(
+      error?.message || "Caminho inválido"
+    )}</div>`;
   }
+}
+
+function selectDirectory(path) {
+  document.getElementById("directory-path").value = path;
+  closeDirectoryBrowser();
+  showAlert("success", `✅ Diretório selecionado: ${path}`);
+}
+
+function navigateToParent() {
+  const currentPath = document.getElementById("current-path").textContent;
+  if (currentPath === "/") return;
+
+  const parentPath = currentPath.split("/").slice(0, -1).join("/") || "/";
+  loadDirectoryContents(parentPath);
+}
+
+function navigateToHome() {
+  loadDirectoryContents(cockpit.user().home);
+}
+
+function navigateToRoot() {
+  loadDirectoryContents("/");
+}
+
+function showCommonDirectories() {
+  const container = document.getElementById("directory-list");
+  const commonDirs = [
+    { path: cockpit.user().home, icon: "🏠", label: "Home" },
+    { path: "/var/backups", icon: "💾", label: "Sistema - /var/backups" },
+    { path: "/home", icon: "👥", label: "Usuários - /home" },
+    { path: "/tmp", icon: "📦", label: "Temporário - /tmp" },
+    { path: "/opt", icon: "📁", label: "Aplicações - /opt" },
+    { path: "/srv", icon: "🖥️", label: "Serviços - /srv" },
+  ];
+
+  document.getElementById("current-path").textContent = "Diretórios Comuns";
+  container.innerHTML = commonDirs
+    .map(
+      (dir) => `
+      <div class="directory-item" style="padding: 0.75rem; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onmouseenter="this.style.backgroundColor='#f8f9fa'" onmouseleave="this.style.backgroundColor='white'">
+        <div style="display: flex; align-items: center; flex: 1;" onclick="loadDirectoryContents('${escapeHtml(
+          dir.path
+        )}')">
+          <span style="font-size: 1.5rem; margin-right: 0.75rem;">${
+            dir.icon
+          }</span>
+          <span>${escapeHtml(dir.label)}</span>
+        </div>
+        <button class="pf-c-button pf-m-primary pf-m-small" onclick="selectDirectory('${escapeHtml(
+          dir.path
+        )}')">Selecionar</button>
+      </div>
+    `
+    )
+    .join("");
 }
 
 async function addDirectory() {
