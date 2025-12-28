@@ -378,7 +378,7 @@ function updatePluginFooter() {
   const footer = document.getElementById("plugin-footer");
   if (!footer) return;
 
-  const fallbackVersion = "1.2.10";
+  const fallbackVersion = "1.3.3";
   const fallbackAuthor = "Luis Gustavo Santarosa Pinto";
 
   const format = (version, author) => `v${version} — ${author}`;

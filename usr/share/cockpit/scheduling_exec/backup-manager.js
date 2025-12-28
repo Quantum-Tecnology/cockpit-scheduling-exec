@@ -46,20 +46,32 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================================================================
 
 async function loadConfiguration() {
+  console.log("Backup Manager: Carregando configuração de", CONFIG_FILE);
   try {
-    const result = await cockpit.spawn(["cat", CONFIG_FILE], { err: "ignore" });
+    const result = await cockpit.spawn(["cat", CONFIG_FILE], {
+      err: "message",
+    });
     const config = JSON.parse(result);
     backupDirectories = config.directories || [];
     emailConfig = { ...emailConfig, ...config.email };
+
+    console.log(
+      "Backup Manager: Configuração carregada com sucesso!",
+      backupDirectories.length,
+      "diretório(s)"
+    );
 
     updateUI();
     updateDirectoriesList();
     updateDirectoryFilter();
     updateEmailForm();
   } catch (error) {
+    console.log(
+      "Backup Manager: Arquivo de configuração não encontrado, criando novo..."
+    );
     // Se o arquivo não existir, criar configuração padrão
     backupDirectories = [];
-    saveConfiguration();
+    await saveConfiguration();
   }
 }
 
@@ -70,6 +82,12 @@ async function saveConfiguration() {
     version: "1.0.0",
     lastUpdated: new Date().toISOString(),
   };
+
+  console.log(
+    "Backup Manager: Salvando configuração...",
+    backupDirectories.length,
+    "diretório(s)"
+  );
 
   try {
     const configDir = `${cockpit.user().home}/.backup-manager`;
@@ -83,15 +101,29 @@ async function saveConfiguration() {
       .spawn(["sh", "-c", `cat > ${CONFIG_FILE}`], { err: "message" })
       .input(configJson);
 
-    showAlert("success", "Configuração salva com sucesso!");
+    console.log("Backup Manager: Configuração salva em", CONFIG_FILE);
+    showAlert("success", "✅ Configuração salva com sucesso!");
+
+    // Verificar se foi salvo corretamente
+    try {
+      const verify = await cockpit.spawn(["cat", CONFIG_FILE], {
+        err: "ignore",
+      });
+      console.log(
+        "Backup Manager: Verificação - arquivo existe e contém:",
+        verify.substring(0, 100) + "..."
+      );
+    } catch (e) {
+      console.error("Backup Manager: ERRO - arquivo não foi criado!", e);
+    }
   } catch (error) {
-    console.error("Erro ao salvar configuração:", error);
+    console.error("Backup Manager: Erro ao salvar configuração:", error);
     const errorMsg =
       error?.message ||
       error?.toString() ||
       JSON.stringify(error) ||
       "Erro desconhecido";
-    showAlert("danger", `Erro ao salvar configuração: ${errorMsg}`);
+    showAlert("danger", `❌ Erro ao salvar configuração: ${errorMsg}`);
   }
 }
 
