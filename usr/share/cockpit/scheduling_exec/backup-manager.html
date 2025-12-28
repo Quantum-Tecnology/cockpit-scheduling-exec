@@ -303,13 +303,22 @@
 
       /* Botões de ação */
       .action-buttons {
-        display: flex;
-        gap: var(--pf-global--spacer--xs);
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: var(--pf-global--spacer--xs) !important;
+        flex-wrap: nowrap !important;
       }
 
       .btn-icon {
-        padding: var(--pf-global--spacer--xs) var(--pf-global--spacer--sm);
-        font-size: var(--pf-global--FontSize--sm);
+        padding: var(--pf-global--spacer--xs) var(--pf-global--spacer--sm) !important;
+        font-size: var(--pf-global--FontSize--sm) !important;
+        min-width: auto !important;
+        white-space: nowrap !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
 
       /* Navegação de abas */

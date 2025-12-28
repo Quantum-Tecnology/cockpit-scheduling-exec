@@ -405,12 +405,17 @@
         border-radius: 12px;
         overflow: visible;
         position: relative;
+        width: 100%;
+        border-collapse: collapse;
+        display: table !important;
+        visibility: visible !important;
       }
 
       .pf-c-table thead {
         background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
         position: relative;
         z-index: 1;
+        display: table-header-group !important;
       }
 
       .pf-c-table thead th {
@@ -419,6 +424,12 @@
         letter-spacing: 0.5px;
         font-size: 0.85rem;
         color: #495057;
+        padding: 1rem;
+        display: table-cell !important;
+      }
+
+      .pf-c-table tbody {
+        display: table-row-group !important;
       }
 
       .pf-c-table tbody tr {
@@ -426,6 +437,7 @@
         border-bottom: 1px solid #f1f3f5;
         position: relative;
         z-index: 1;
+        display: table-row !important;
       }
 
       .pf-c-table tbody tr:hover {
@@ -436,6 +448,9 @@
 
       .pf-c-table tbody td {
         position: relative;
+        padding: 1rem;
+        vertical-align: middle;
+        display: table-cell !important;
       }
 
       .pf-c-table tbody td:last-child {
