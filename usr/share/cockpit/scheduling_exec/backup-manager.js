@@ -73,14 +73,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ============================================================================
 
 async function loadConfiguration() {
-  console.log("Backup Manager: Carregando configuração de", configFile);
+  // Usar caminho do sistema
+  const systemConfigFile = "/var/lib/cockpit/backup-manager/config.json";
+
+  console.log("Backup Manager: Carregando configuração de", systemConfigFile);
   try {
-    const result = await cockpit.spawn(["cat", configFile], {
+    const result = await cockpit.spawn(["cat", systemConfigFile], {
       err: "message",
     });
     const config = JSON.parse(result);
     backupDirectories = config.directories || [];
     emailConfig = { ...emailConfig, ...config.email };
+
+    // Atualizar referência global
+    configFile = systemConfigFile;
 
     console.log(
       "Backup Manager: Configuração carregada com sucesso!",
@@ -97,6 +103,7 @@ async function loadConfiguration() {
       "Backup Manager: Arquivo de configuração não encontrado, criando novo..."
     );
     // Se o arquivo não existir, criar configuração padrão
+    configFile = systemConfigFile;
     backupDirectories = [];
     await saveConfiguration();
   }
@@ -117,62 +124,49 @@ async function saveConfiguration() {
   );
 
   try {
-    // Se userHome for /tmp, usar arquivo direto sem subdiretório
-    let targetFile;
-    if (userHome === "/tmp") {
-      targetFile = configFile;
-    } else {
-      const configDir = `${userHome}/.backup-manager`;
-      targetFile = configFile;
+    // Usar diretório do sistema acessível
+    const configDir = "/var/lib/cockpit/backup-manager";
+    const targetFile = `${configDir}/config.json`;
 
-      console.log("Backup Manager: Home do usuário:", userHome);
-      console.log("Backup Manager: Criando diretório:", configDir);
+    console.log("Backup Manager: Diretório de configuração:", configDir);
 
-      // Verificar se o diretório já existe
-      try {
-        await cockpit.spawn(["test", "-d", configDir], { err: "ignore" });
-        console.log("Backup Manager: Diretório já existe");
-      } catch (e) {
-        // Diretório não existe, tentar criar
-        console.log("Backup Manager: Criando diretório...");
-        try {
-          await cockpit.spawn(["mkdir", "-p", configDir], {
-            err: "message",
-            superuser: "try",
-          });
-        } catch (mkdirError) {
-          console.error("Backup Manager: Erro ao criar diretório:", mkdirError);
-          throw new Error(
-            `Não foi possível criar ${configDir}. Use outro local ou execute como root.`
-          );
-        }
-      }
-
-      console.log("Backup Manager: Verificando permissões...");
-
-      // Verificar se temos permissão para escrever
-      try {
-        await cockpit.spawn(["test", "-w", configDir], { err: "message" });
-      } catch (e) {
-        throw new Error(
-          `Sem permissão de escrita em ${configDir}. Execute como root ou use outro diretório.`
-        );
-      }
+    // Criar diretório se não existir (com sudo)
+    try {
+      await cockpit.spawn(["test", "-d", configDir], { err: "ignore" });
+      console.log("Backup Manager: Diretório já existe");
+    } catch (e) {
+      console.log(
+        "Backup Manager: Criando diretório (solicitando privilégios)..."
+      );
+      await cockpit.spawn(["mkdir", "-p", configDir], {
+        err: "message",
+        superuser: "require",
+      });
+      console.log("Backup Manager: Diretório criado com sucesso");
     }
 
     console.log("Backup Manager: Salvando arquivo em:", targetFile);
     const configJson = JSON.stringify(config, null, 2);
 
-    // Usar tee em vez de cat > para melhor tratamento de erros
+    // Salvar com privilégios de root
     const process = cockpit.spawn(["tee", targetFile], {
       err: "message",
-      superuser: "try",
+      superuser: "require",
     });
     process.input(configJson);
     await process;
 
-    console.log("Backup Manager: Configuração salva em", targetFile);
+    // Garantir permissões corretas no arquivo
+    await cockpit.spawn(["chmod", "644", targetFile], {
+      err: "ignore",
+      superuser: "require",
+    });
+
+    console.log("Backup Manager: ✓ Configuração salva em", targetFile);
     showAlert("success", "✅ Configuração salva com sucesso!");
+
+    // Atualizar referência global
+    configFile = targetFile;
 
     // Verificar se foi salvo corretamente
     console.log("Backup Manager: Verificando arquivo salvo...");
@@ -180,7 +174,7 @@ async function saveConfiguration() {
       err: "message",
     });
     console.log(
-      "Backup Manager: ✓ Arquivo existe e contém:",
+      "Backup Manager: ✓ Arquivo contém:",
       verify.substring(0, 100) + "..."
     );
   } catch (error) {

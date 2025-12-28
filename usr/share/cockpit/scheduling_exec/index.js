@@ -348,6 +348,14 @@ function closeAllRowActionsMenus() {
     toggle.setAttribute("aria-expanded", "false");
   });
 
+  const containers = document.querySelectorAll(".js-row-actions.is-open");
+  containers.forEach((container) => {
+    container.classList.remove('is-open');
+  });
+
+  openRowActionsMenuId = null;
+}
+
   openRowActionsMenuId = null;
 }
 
@@ -358,6 +366,7 @@ function toggleRowActionsMenu(menuId) {
   const toggle = document.querySelector(
     `.js-row-actions-toggle[data-menu-id="${menuId}"]`
   );
+  const container = toggle?.closest('.js-row-actions');
 
   // Fecha o que estiver aberto (inclusive o próprio)
   if (openRowActionsMenuId && openRowActionsMenuId !== menuId) {
@@ -368,9 +377,16 @@ function toggleRowActionsMenu(menuId) {
   closeAllRowActionsMenus();
 
   if (willOpen) {
-    menu.hidden = false;
-    if (toggle) toggle.setAttribute("aria-expanded", "true");
-    openRowActionsMenuId = menuId;
+    // Calcular posição do menu
+    if (toggle) {
+      const rect = toggle.getBoundingClientRect();
+      menu.style.top = `${rect.bottom + 8}px`;
+      menu.style.left = `${rect.right - 192}px`; // 192px = 12rem (min-width do menu)
+      menu.hidden = false;
+      toggle.setAttribute("aria-expanded", "true");
+      if (container) container.classList.add('is-open');
+      openRowActionsMenuId = menuId;
+    }
   }
 }
 

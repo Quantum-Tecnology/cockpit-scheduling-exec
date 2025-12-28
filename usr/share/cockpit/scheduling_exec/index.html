@@ -403,11 +403,14 @@
       .pf-c-table {
         background-color: white;
         border-radius: 12px;
-        overflow: hidden;
+        overflow: visible;
+        position: relative;
       }
 
       .pf-c-table thead {
         background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+        position: relative;
+        z-index: 1;
       }
 
       .pf-c-table thead th {
@@ -419,25 +422,25 @@
       }
 
       .pf-c-table tbody tr {
-        transition: all 0.2s;
+        transition: background 0.2s, box-shadow 0.2s;
         border-bottom: 1px solid #f1f3f5;
         position: relative;
+        z-index: 1;
       }
 
       .pf-c-table tbody tr:hover {
         background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        z-index: 1;
+        z-index: 2;
       }
 
       .pf-c-table tbody td {
         position: relative;
-        z-index: 2;
       }
 
       .pf-c-table tbody td:last-child {
+        overflow: visible;
         position: relative;
-        z-index: auto;
       }
 
       /* Badges melhoradas com efeitos */
@@ -468,7 +471,11 @@
       .js-row-actions {
         position: relative;
         display: inline-block;
-        z-index: 10;
+        z-index: 100;
+      }
+
+      .js-row-actions.is-open {
+        z-index: 10000;
       }
 
       .js-row-actions-toggle {
@@ -486,7 +493,7 @@
         font-size: 1.1rem;
         padding: 0;
         position: relative;
-        z-index: 11;
+        z-index: 101;
       }
 
       .js-row-actions-toggle:hover {
@@ -500,10 +507,8 @@
       }
 
       .js-row-actions-menu {
-        position: absolute;
-        top: calc(100% + 8px);
-        right: 0;
-        z-index: 9999;
+        position: fixed;
+        z-index: 10001;
         min-width: 12rem;
         margin: 0;
         padding: 0.5rem 0;
@@ -515,10 +520,11 @@
           0 0 0 1px rgba(0, 0, 0, 0.05);
         animation: dropDown 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         pointer-events: auto;
+        will-change: transform, opacity;
       }
 
       .js-row-actions-menu[hidden] {
-        display: none;
+        display: none !important;
         pointer-events: none;
       }
 
