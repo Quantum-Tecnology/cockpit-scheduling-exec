@@ -21,6 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
   loadConfiguration();
   loadBackups();
   setupEventListeners();
+
+  // Garantir que as abas estejam sempre visíveis
+  const tabsContainer = document.getElementById("backup-tabs");
+  if (tabsContainer) {
+    tabsContainer.style.display = "block";
+  }
 });
 
 // ============================================================================
@@ -113,6 +119,7 @@ async function addDirectory() {
   const path = document.getElementById("directory-path").value.trim();
   const label = document.getElementById("directory-label").value.trim();
   const pattern = document.getElementById("file-pattern").value.trim() || "*";
+  const maxDepth = document.getElementById("max-depth").value.trim() || "10";
 
   if (!path) {
     showAlert("warning", "Por favor, informe o caminho do diretório.");
@@ -139,6 +146,7 @@ async function addDirectory() {
     path: path,
     label: label || path.split("/").pop(),
     pattern: pattern,
+    maxDepth: parseInt(maxDepth),
     addedAt: new Date().toISOString(),
   });
 
@@ -187,6 +195,7 @@ function updateDirectoriesList() {
           <div class="directory-path">${escapeHtml(dir.path)}</div>
           <small style="color: var(--pf-global--Color--200);">
             Padrão: ${escapeHtml(dir.pattern)} |
+            Profundidade: ${dir.maxDepth || 1} |
             Adicionado em: ${formatDate(dir.addedAt)}
           </small>
         </div>
@@ -256,20 +265,28 @@ async function loadBackups() {
 
 async function loadBackupsFromDirectory(directory) {
   try {
-    // Listar arquivos do diretório
+    // Listar arquivos do diretório recursivamente
     const patterns = directory.pattern.split(",").map((p) => p.trim());
     const files = [];
+    const maxDepth = directory.maxDepth || 10;
 
     for (const pattern of patterns) {
       try {
         const command =
           pattern === "*"
-            ? ["find", directory.path, "-maxdepth", "1", "-type", "f"]
+            ? [
+                "find",
+                directory.path,
+                "-maxdepth",
+                maxDepth.toString(),
+                "-type",
+                "f",
+              ]
             : [
                 "find",
                 directory.path,
                 "-maxdepth",
-                "1",
+                maxDepth.toString(),
                 "-type",
                 "f",
                 "-name",
@@ -293,9 +310,19 @@ async function loadBackupsFromDirectory(directory) {
         const stat = await cockpit.spawn(["stat", "-c", "%s|%Y|%n", file]);
         const [size, mtime, name] = stat.trim().split("|");
 
+        // Calcular caminho relativo ao diretório base
+        const relativePath = name.replace(directory.path + "/", "");
+        const fileName = name.split("/").pop();
+        const subPath = relativePath.substring(
+          0,
+          relativePath.length - fileName.length
+        );
+
         allBackups.push({
           id: `${directory.id}-${name}`,
-          name: name.split("/").pop(),
+          name: fileName,
+          relativePath: relativePath,
+          subPath: subPath || "/",
           fullPath: name,
           directory: directory,
           directoryLabel: directory.label,
@@ -347,9 +374,18 @@ function updateBackupsTable() {
           <span style="margin-right: var(--pf-global--spacer--sm);">
             ${getFileIcon(backup.name)}
           </span>
-          <span style="font-family: monospace; font-size: 0.9rem;">
-            ${escapeHtml(backup.name)}
-          </span>
+          <div>
+            <div style="font-family: monospace; font-size: 0.9rem; font-weight: bold;">
+              ${escapeHtml(backup.name)}
+            </div>
+            ${
+              backup.subPath && backup.subPath !== "/"
+                ? `<small style="color: var(--pf-global--Color--200); font-family: monospace;">
+                📂 ${escapeHtml(backup.subPath)}
+              </small>`
+                : ""
+            }
+          </div>
         </div>
       </td>
       <td>
@@ -409,13 +445,15 @@ function updateBackupsTable() {
 function getFilteredBackups() {
   let filtered = [...allBackups];
 
-  // Filtro de busca
+  // Filtro de busca (agora busca também no caminho relativo)
   const searchTerm = document
     .getElementById("search-input")
     .value.toLowerCase();
   if (searchTerm) {
-    filtered = filtered.filter((b) =>
-      b.name.toLowerCase().includes(searchTerm)
+    filtered = filtered.filter(
+      (b) =>
+        b.name.toLowerCase().includes(searchTerm) ||
+        (b.relativePath && b.relativePath.toLowerCase().includes(searchTerm))
     );
   }
 
@@ -441,6 +479,14 @@ function getFilteredBackups() {
         return a.name.localeCompare(b.name);
       case "name-desc":
         return b.name.localeCompare(a.name);
+      case "path-asc":
+        return (a.relativePath || a.name).localeCompare(
+          b.relativePath || b.name
+        );
+      case "path-desc":
+        return (b.relativePath || b.name).localeCompare(
+          a.relativePath || a.name
+        );
       default:
         return 0;
     }
@@ -815,19 +861,32 @@ function setupEventListeners() {
 // ============================================================================
 
 function switchTab(tab) {
+  // Garantir que as abas estejam visíveis
+  const tabsContainer = document.getElementById("backup-tabs");
+  if (tabsContainer) {
+    tabsContainer.style.display = "block";
+  }
+
   // Atualizar abas
   document.querySelectorAll(".pf-c-tabs__item").forEach((item) => {
     item.classList.remove("pf-m-current");
   });
-  document
-    .getElementById(`tab-${tab}`)
-    .parentElement.classList.add("pf-m-current");
+
+  const tabElement = document.getElementById(`tab-${tab}`);
+  if (tabElement && tabElement.parentElement) {
+    tabElement.parentElement.classList.add("pf-m-current");
+  }
 
   // Atualizar conteúdo
-  document.getElementById("backups-tab-content").style.display =
-    tab === "backups" ? "block" : "none";
-  document.getElementById("config-tab-content").style.display =
-    tab === "config" ? "block" : "none";
+  const backupsTab = document.getElementById("backups-tab-content");
+  const configTab = document.getElementById("config-tab-content");
+
+  if (backupsTab) {
+    backupsTab.style.display = tab === "backups" ? "block" : "none";
+  }
+  if (configTab) {
+    configTab.style.display = tab === "config" ? "block" : "none";
+  }
 }
 
 function updateStats() {
@@ -946,18 +1005,37 @@ function formatRelativeTime(isoString) {
 
 function getFileIcon(filename) {
   const ext = filename.split(".").pop().toLowerCase();
+  const fullExt = filename.toLowerCase();
+
+  // Verificar extensões compostas primeiro
+  if (fullExt.endsWith(".tar.gz") || fullExt.endsWith(".tgz")) return "📦";
+  if (fullExt.endsWith(".tar.bz2") || fullExt.endsWith(".tbz2")) return "📦";
+  if (fullExt.endsWith(".tar.xz")) return "📦";
+  if (fullExt.endsWith(".sql.gz")) return "🗄️";
+  if (fullExt.endsWith(".qcow2")) return "💿";
+
   const icons = {
     zip: "📦",
     tar: "📦",
     gz: "📦",
     rar: "📦",
     "7z": "📦",
+    xz: "📦",
+    bz2: "📦",
     sql: "🗄️",
+    dump: "🗄️",
     db: "🗄️",
+    sqlite: "🗄️",
+    mysql: "🗄️",
+    pgsql: "🗄️",
     bak: "💾",
     backup: "💾",
     img: "💿",
     iso: "💿",
+    vmdk: "💿",
+    vdi: "💿",
+    qcow: "💿",
+    qcow2: "💿",
     txt: "📄",
     log: "📋",
   };

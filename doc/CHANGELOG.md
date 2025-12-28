@@ -5,6 +5,22 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.3.1] - 2024-12-28
+
+### 🐛 Corrigido
+- **Navegação de abas**: Corrigido problema onde as abas desapareciam ao acessar a aba "Configurações"
+- **Busca recursiva**: Implementado suporte completo para estruturas hierárquicas de diretórios
+- **Profundidade configurável**: Adicionado campo para controlar níveis de subdiretórios (1-50 níveis)
+- **Exibição de caminho**: Backups agora mostram o caminho relativo completo do arquivo
+- **Busca aprimorada**: Busca agora procura também nos caminhos relativos dos arquivos
+- **Ordenação por caminho**: Adicionadas opções de ordenação por caminho (A-Z e Z-A)
+- **Ícones expandidos**: Reconhecimento de mais tipos de arquivo (.qcow2, .dump, .tar.gz, etc.)
+
+### 📝 Documentação
+- Adicionado [BACKUP-HIERARCHICAL.md](BACKUP-HIERARCHICAL.md) - Guia completo para estruturas hierárquicas
+- Exemplos de configuração para diretórios organizados por data
+- Casos de uso práticos para VMs e bancos de dados
+
 ## [1.3.0] - 2024-12-28
 
 ### 🎉 Adicionado - Gerenciador de Backups

@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/build-debian.yml/badge.svg)
 ![Release](https://github.com/QuantumTecnology/cockpit-scheduling-exec/actions/workflows/release.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.3.0-green.svg)
+![Version](https://img.shields.io/badge/version-1.3.1-green.svg)
 
 Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell personalizados através de uma interface web intuitiva. Agora com **Gerenciador de Backups** integrado!
 
@@ -28,17 +28,21 @@ Plugin para Cockpit que permite criar, editar, executar e agendar scripts shell 
 ### 🗄️ Gerenciador de Backups (NOVO!)
 
 - 📁 **Múltiplos Diretórios**: Monitore vários diretórios de backup
-- 📦 **Listagem Inteligente**: Veja todos os backups com data, tamanho e diretório
-- 🔍 **Busca e Filtros**: Encontre backups rapidamente
+- 🌳 **Busca Recursiva**: Suporte completo para estruturas hierárquicas de diretórios
+- 📦 **Listagem Inteligente**: Veja todos os backups com data, tamanho e caminho relativo
+- 🔍 **Busca e Filtros**: Encontre backups por nome ou caminho
+- 🎯 **Profundidade Configurável**: Controle quantos níveis de subdiretórios pesquisar
 - ⬇️ **Download**: Baixe backups diretamente
 - 📧 **Envio por Email**: Envie backups para emails pré-configurados
 - 🗑️ **Gerenciamento**: Delete backups individuais ou em lote
 - 📤 **Exportação**: Crie arquivos tar.gz com múltiplos backups
 - 🧹 **Limpeza Automática**: Remove backups antigos com base em dias
 - 📊 **Dashboard**: Estatísticas de backups em tempo real
+- 🎨 **Ícones Inteligentes**: Reconhecimento automático de tipos (.qcow2, .dump, .sql.gz, etc.)
 
 👉 [**Documentação Completa do Gerenciador de Backups**](doc/BACKUP-MANAGER.md)
 👉 [**Guia de Início Rápido**](doc/BACKUP-QUICKSTART.md)
+👉 [**Estruturas Hierárquicas**](doc/BACKUP-HIERARCHICAL.md)
 
 ## 📦 Instalação
 

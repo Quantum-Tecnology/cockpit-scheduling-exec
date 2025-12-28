@@ -452,7 +452,7 @@
                     class="pf-c-form-control"
                     type="text"
                     id="search-input"
-                    placeholder="Digite o nome do arquivo..."
+                    placeholder="Digite o nome ou caminho do arquivo..."
                     onkeyup="filterBackups()"
                   />
                 </div>
@@ -487,6 +487,8 @@
                     <option value="size-asc">Menor tamanho</option>
                     <option value="name-asc">Nome (A-Z)</option>
                     <option value="name-desc">Nome (Z-A)</option>
+                    <option value="path-asc">Caminho (A-Z)</option>
+                    <option value="path-desc">Caminho (Z-A)</option>
                   </select>
                 </div>
               </div>
@@ -815,6 +817,27 @@
               <p class="pf-c-form__helper-text">
                 Use * para todos os arquivos ou especifique extensões separadas
                 por vírgula
+              </p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="max-depth">
+                <span class="pf-c-form__label-text"
+                  >Profundidade Máxima de Busca</span
+                >
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="number"
+                id="max-depth"
+                placeholder="10"
+                value="10"
+                min="1"
+                max="50"
+              />
+              <p class="pf-c-form__helper-text">
+                Número de níveis de subdiretórios a serem pesquisados (1 =
+                apenas diretório raiz, 10 = até 10 níveis de profundidade)
               </p>
             </div>
           </form>
