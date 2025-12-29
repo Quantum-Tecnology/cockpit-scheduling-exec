@@ -1295,12 +1295,23 @@ function switchTab(tab) {
   }
   if (vmsTab) {
     vmsTab.style.display = tab === "vms" ? "block" : "none";
-    // Auto-descobrir VMs se ainda não descobriu
-    if (tab === "vms" && allVMs.length === 0) {
-      const discoveryRan = sessionStorage.getItem("vm-discovery-ran");
-      if (!discoveryRan) {
-        setTimeout(() => discoverVMs(), 500);
-        sessionStorage.setItem("vm-discovery-ran", "true");
+    // Verificar permissões e auto-descobrir VMs
+    if (tab === "vms") {
+      const permissionsChecked = sessionStorage.getItem(
+        "vm-permissions-checked"
+      );
+      if (!permissionsChecked) {
+        setTimeout(() => checkAndFixVMScriptPermissions(), 500);
+        sessionStorage.setItem("vm-permissions-checked", "true");
+      }
+
+      // Auto-descobrir VMs após verificar permissões
+      if (allVMs.length === 0) {
+        const discoveryRan = sessionStorage.getItem("vm-discovery-ran");
+        if (!discoveryRan) {
+          setTimeout(() => discoverVMs(), 1000);
+          sessionStorage.setItem("vm-discovery-ran", "true");
+        }
       }
     }
   }
@@ -1470,6 +1481,85 @@ function escapeHtml(text) {
 // ============================================================================
 // BACKUP DE VMs
 // ============================================================================
+
+// Verificar e corrigir permissões dos scripts de VM automaticamente
+async function checkAndFixVMScriptPermissions() {
+  try {
+    console.log("VM Backup: Verificando permissões dos scripts...");
+
+    const scripts = [
+      "discover-vms.sh",
+      "backup-vm.sh",
+      "backup-all-vms.sh",
+      "diagnose-vms.sh",
+      "test-falcon-front.sh",
+    ];
+
+    let needsFix = false;
+
+    // Verificar se os scripts têm permissão de execução
+    for (const script of scripts) {
+      const scriptPath = `${VM_SCRIPTS_DIR}/${script}`;
+
+      try {
+        // Tentar obter permissões do arquivo
+        const stat = await cockpit.spawn(["stat", "-c", "%a", scriptPath], {
+          err: "ignore",
+          superuser: "try",
+        });
+
+        const permissions = stat.trim();
+        console.log(`VM Backup: ${script} permissões: ${permissions}`);
+
+        // Verificar se tem bit de execução (últimos 3 dígitos devem ter x)
+        // Permissão ideal: 755 ou 775
+        if (!permissions.match(/[57]/)) {
+          needsFix = true;
+          console.log(`VM Backup: ${script} precisa de permissão de execução`);
+          break;
+        }
+      } catch (error) {
+        console.warn(`VM Backup: Não foi possível verificar ${script}:`, error);
+        needsFix = true;
+        break;
+      }
+    }
+
+    // Se precisar corrigir, fazer automaticamente
+    if (needsFix) {
+      console.log("VM Backup: Aplicando permissões automaticamente...");
+
+      try {
+        // Aplicar chmod +x em todos os scripts
+        await cockpit.spawn(["bash", "-c", `chmod +x ${VM_SCRIPTS_DIR}/*.sh`], {
+          err: "message",
+          superuser: "require", // Vai pedir senha se necessário
+        });
+
+        console.log("VM Backup: ✅ Permissões aplicadas com sucesso!");
+        showAlert("success", "✅ Scripts configurados automaticamente!");
+      } catch (error) {
+        console.error("VM Backup: Erro ao aplicar permissões:", error);
+
+        // Se falhar, mostrar alerta com instruções
+        const errorMsg = error?.message || "Erro ao aplicar permissões";
+
+        showAlert(
+          "warning",
+          `⚠️ Não foi possível configurar automaticamente.\n\n` +
+            `Execute no servidor:\n` +
+            `sudo chmod +x ${VM_SCRIPTS_DIR}/*.sh`,
+          15000
+        );
+      }
+    } else {
+      console.log("VM Backup: ✅ Todas as permissões OK!");
+    }
+  } catch (error) {
+    console.error("VM Backup: Erro ao verificar permissões:", error);
+    // Não mostrar erro ao usuário, apenas log
+  }
+}
 
 // Função para descobrir VMs
 async function discoverVMs() {
