@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gerenciador de Backups</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- PatternFly 4 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@patternfly/patternfly@4.224.5/patternfly.min.css"
+      crossorigin="anonymous"
+    />
+
+    <!-- Branding do Cockpit -->
+    <link rel="stylesheet" href="../../static/branding.css" />
+
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="css/backup-manager.css" />
+
+    <!-- Cockpit JS API -->
+    <script src="../base1/cockpit.js"></script>
+
+    <!-- Template Loader -->
+    <script src="js/template-loader.js"></script>
+
+    <!-- Main JS -->
+    <script src="backup-manager.js" defer></script>
+  </head>
+
+  <body>
+    <div class="pf-c-page">
+      <!-- Header -->
+      <header class="pf-c-page__header">
+        <div class="pf-c-page__header-brand">
+          <div class="pf-c-page__header-brand-toggle"></div>
+          <a class="pf-c-page__header-brand-link">
+            <div class="pf-c-brand">
+              <h1 style="margin: 0; color: white; font-size: 1.5rem">
+                🗄️ Gerenciador de Backups
+              </h1>
+            </div>
+          </a>
+        </div>
+      </header>
+
+      <!-- Main content -->
+      <main style="width: 100%">
+        <div
+          class="pf-l-grid pf-m-gutter"
+          style="padding: var(--pf-global--spacer--md); width: 100%"
+        >
+          <div class="pf-l-grid__item pf-m-12-col">
+            <div id="status-message"></div>
+          </div>
+
+          <!-- Alertas -->
+          <div class="pf-l-grid__item pf-m-12-col" id="alerts-container"></div>
+
+          <!-- Tabs -->
+          <div class="pf-l-grid__item pf-m-12-col">
+            <div class="pf-c-tabs" id="backup-tabs">
+              <ul class="pf-c-tabs__list">
+                <li class="pf-c-tabs__item pf-m-current">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-backups"
+                    onclick="switchTab('backups')"
+                  >
+                    <span class="pf-c-tabs__item-text"
+                      >📦 Lista de Backups</span
+                    >
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-vms"
+                    onclick="switchTab('vms')"
+                  >
+                    <span class="pf-c-tabs__item-text">💿 Backup de VMs</span>
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-automation"
+                    onclick="switchTab('automation')"
+                  >
+                    <span class="pf-c-tabs__item-text">⚡ Automação</span>
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-schedules"
+                    onclick="switchTab('schedules')"
+                  >
+                    <span class="pf-c-tabs__item-text">📅 Agendamentos</span>
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-config"
+                    onclick="switchTab('config')"
+                  >
+                    <span class="pf-c-tabs__item-text">⚙️ Configurações</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Container para templates das abas -->
+          <div id="tab-content-container" class="pf-l-grid__item pf-m-12-col">
+            <!-- Templates são carregados dinamicamente aqui -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Container para modais -->
+    <div id="modals-container">
+      <!-- Modais são carregados dinamicamente aqui -->
+    </div>
+
+    <!-- Footer -->
+    <div id="plugin-footer" class="plugin-footer">
+      v1.5.0 — Luis Gustavo Santarosa Pinto
+    </div>
+
+    <script>
+      // Inicialização: carrega templates ao iniciar
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Carregar templates das abas
+        await TemplateLoader.loadMultiple([
+          {
+            name: "tab-backups",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-config",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-vms",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-automation",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-schedules",
+            target: "#tab-content-container",
+            position: "append",
+          },
+        ]);
+
+        // Carregar modais
+        await TemplateLoader.loadMultiple([
+          {
+            name: "modals/modal-add-directory",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-confirm-delete",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-email",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-directory-browser",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-cron",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-script",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-schedule",
+            target: "#modals-container",
+            position: "append",
+          },
+        ]);
+
+        // Inicializar a aplicação após carregar templates
+        if (typeof init === "function") {
+          init();
+        }
+      });
+    </script>
+  </body>
+</html>
