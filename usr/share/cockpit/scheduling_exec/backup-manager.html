@@ -423,73 +423,9 @@
         </div>
       </header>
 
-      <!-- Main content -->
-      <main class="pf-c-page__main">
-        <!-- Alertas -->
-        <div id="alerts-container"></div>
-
-        <!-- Estatísticas -->
-        <div
-          class="pf-l-grid pf-m-gutter"
-          style="margin-bottom: var(--pf-global--spacer--lg)"
-        >
-          <div
-            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-          >
-            <div
-              class="stats-card"
-              style="
-                background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
-              "
-            >
-              <h3 id="total-backups">0</h3>
-              <p>Total de Backups</p>
-            </div>
-          </div>
-          <div
-            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-          >
-            <div
-              class="stats-card"
-              style="
-                background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-              "
-            >
-              <h3 id="total-directories">0</h3>
-              <p>Diretórios Monitorados</p>
-            </div>
-          </div>
-          <div
-            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-          >
-            <div
-              class="stats-card"
-              style="
-                background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-              "
-            >
-              <h3 id="total-size">0 MB</h3>
-              <p>Tamanho Total</p>
-            </div>
-          </div>
-          <div
-            class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-          >
-            <div
-              class="stats-card"
-              style="
-                background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-              "
-            >
-              <h3 id="last-backup">Nunca</h3>
-              <p>Último Backup</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="pf-c-tabs" id="backup-tabs">
-          <ul class="pf-c-tabs__list">
+      <!-- Tabs -->
+      <div class="pf-c-tabs" id="backup-tabs">
+        <ul class="pf-c-tabs__list">
             <li class="pf-c-tabs__item pf-m-current">
               <button
                 class="pf-c-tabs__link"
@@ -537,6 +473,12 @@
             </li>
           </ul>
         </div>
+      </div>
+
+      <!-- Main content -->
+      <main class="pf-c-page__main">
+        <!-- Alertas -->
+        <div id="alerts-container"></div>
 
         <!-- Tab: Lista de Backups -->
         <div id="backups-tab-content" class="tab-content">
