@@ -445,12 +445,21 @@ function initEventHandlers() {
 
       const action = currentEditingScript ? "update" : "create";
 
+      // Se estiver editando, buscar o caminho completo do script
+      let scriptPathToSave = scriptName;
+      if (currentEditingScript) {
+        const script = allScripts.find((s) => s.name === currentEditingScript);
+        if (script && script.path) {
+          scriptPathToSave = script.path;
+        }
+      }
+
       cockpit
         .spawn(
           [
             "/usr/share/cockpit/scheduling_exec/scripts/save-script.sh",
             action,
-            scriptName,
+            scriptPathToSave,
           ],
           { err: "message" }
         )
@@ -478,6 +487,10 @@ function initEventHandlers() {
         return;
       }
 
+      // Buscar o caminho completo do script
+      const script = allScripts.find((s) => s.name === scriptName);
+      const scriptPath = script ? script.path : scriptName;
+
       const minute = document.getElementById("cron-minute").value;
       const hour = document.getElementById("cron-hour").value;
       const day = document.getElementById("cron-day").value;
@@ -491,7 +504,7 @@ function initEventHandlers() {
       cockpit
         .spawn([
           "/usr/share/cockpit/scheduling_exec/scripts/set-cron.sh",
-          scriptName,
+          scriptPath,
           cronExpression,
         ])
         .then(() => {
@@ -1336,10 +1349,14 @@ function editScript(scriptName) {
   showLoading(true);
   currentEditingScript = scriptName;
 
+  // Buscar o script no cache para obter o caminho completo
+  const script = allScripts.find((s) => s.name === scriptName);
+  const scriptPath = script ? script.path : scriptName;
+
   cockpit
     .spawn([
       "/usr/share/cockpit/scheduling_exec/scripts/get-script.sh",
-      scriptName,
+      scriptPath,
     ])
     .then((content) => {
       showLoading(false);
@@ -1362,9 +1379,13 @@ function editScript(scriptName) {
 
 // Excluir script
 function deleteScript(scriptName) {
+  // Buscar o script no cache para obter o caminho completo
+  const script = allScripts.find((s) => s.name === scriptName);
+  const scriptPath = script ? script.path : scriptName;
+
   if (
     !confirm(
-      `Tem certeza que deseja excluir o script "${scriptName}"?\nEsta ação não pode ser desfeita.`
+      `Tem certeza que deseja excluir o script "${scriptName}"?\n\nCaminho: ${scriptPath}\n\nEsta ação não pode ser desfeita.`
     )
   ) {
     return;
@@ -1375,7 +1396,7 @@ function deleteScript(scriptName) {
   cockpit
     .spawn([
       "/usr/share/cockpit/scheduling_exec/scripts/delete-script.sh",
-      scriptName,
+      scriptPath,
     ])
     .then(() => {
       showLoading(false);
@@ -1394,8 +1415,16 @@ function executeScript(scriptName, options) {
       ? options.sudoPassword
       : "";
 
+  // Buscar o script no cache para obter o caminho completo
+  const script = allScripts.find((s) => s.name === scriptName);
+  const scriptPath = script ? script.path : scriptName;
+
   if (!sudoPassword) {
-    if (!confirm(`Executar o script "${scriptName}" agora?`)) {
+    if (
+      !confirm(
+        `Executar o script "${scriptName}" agora?\n\nCaminho: ${scriptPath}`
+      )
+    ) {
       return;
     }
   }
@@ -1404,7 +1433,7 @@ function executeScript(scriptName, options) {
 
   const args = ["/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh"];
   if (sudoPassword) args.push("--sudo");
-  args.push(scriptName);
+  args.push(scriptPath); // Passa o caminho completo ao invés de apenas o nome
 
   let proc = cockpit.spawn(args);
   if (sudoPassword) {

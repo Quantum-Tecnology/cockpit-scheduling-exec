@@ -5,6 +5,61 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.6.0] - 2025-01-15
+
+### 🏗️ Refatoração - Modularização do JavaScript
+
+#### Problema
+- Arquivo `backup-manager.js` com 4000+ linhas de código
+- Manutenção difícil e código monolítico
+- Funções de diferentes domínios misturadas
+
+#### Solução - Módulos Criados
+O código foi dividido em 8 módulos organizados por domínio funcional:
+
+| Módulo | Linhas | Responsabilidade |
+|--------|--------|------------------|
+| `js/utils.js` | ~170 | Funções utilitárias (formatSize, escapeHtml, showAlert, etc.) |
+| `js/directory-browser.js` | ~150 | Navegação de diretórios e modal de seleção |
+| `js/email.js` | ~220 | Envio de backups por email e configuração SMTP |
+| `js/backups.js` | ~400 | Carregamento, listagem, filtro e ações de backup |
+| `js/vm-backup.js` | ~500 | Backup de máquinas virtuais (VMs) |
+| `js/automation.js` | ~450 | Core de automação (estado, helpers, renderização) |
+| `js/automation-scripts.js` | ~550 | Criação, edição, execução e agendamento de scripts |
+| `js/schedules.js` | ~350 | Gerenciamento de agendamentos cron |
+
+#### Arquitetura
+- **Padrão de Exportação**: Cada módulo exporta funções para `window.*`
+- **Estado Compartilhado**: Variáveis globais acessíveis via `window.*`
+- **Carregamento**: Scripts com `defer` em ordem de dependência
+- **Compatibilidade**: Mantém toda funcionalidade existente
+
+#### Benefícios
+- ✅ Código organizado por responsabilidade
+- ✅ Manutenção mais fácil
+- ✅ Reutilização de código
+- ✅ Debugging mais simples
+- ✅ Menor tempo de carregamento inicial
+- ✅ Facilita contribuições
+
+### 📝 Arquivos Alterados
+
+#### Novos Arquivos
+- `js/utils.js` - Funções utilitárias compartilhadas
+- `js/directory-browser.js` - Navegador de diretórios
+- `js/email.js` - Funcionalidades de email
+- `js/backups.js` - Gerenciamento de backups
+- `js/vm-backup.js` - Backup de VMs
+- `js/automation.js` - Core de automação
+- `js/automation-scripts.js` - Scripts de automação
+- `js/schedules.js` - Agendamentos
+
+#### Arquivos Modificados
+- `backup-manager.html` - Adicionados imports dos módulos JS
+- `backup-manager.js` - Reduzido para código core de inicialização
+
+---
+
 ## [1.5.0] - 2025-12-28
 
 ### 🚀 Novidades Principais
@@ -43,6 +98,17 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - **Salvamento automático**: Após cada operação de add/remove
 
 ### 🔧 Correções
+
+#### Scripts Shell Atualizados para Suporte a Caminhos Completos
+- **execute-script.sh**: Aceita caminho absoluto ou apenas nome do script
+- **list-scripts.sh**: Busca scripts em diretórios configurados (não apenas ~/scripts)
+- **get-script.sh**: Aceita caminho completo para leitura
+- **delete-script.sh**: Aceita caminho completo para exclusão
+- **save-script.sh**: Aceita caminho completo para salvar no local original
+- **set-cron.sh**: Agenda usando caminho completo do script
+- **remove-cron.sh**: Remove agendamentos por caminho completo
+
+#### Outros Ajustes
 - Removidas colunas "Criado Em" e "Atualizado Em" da tabela (não eram usadas)
 - Ajustado colspan do empty state de 8 para 7 colunas
 - Logs detalhados com prefixo "Automation:" para debug

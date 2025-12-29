@@ -15,8 +15,23 @@
     <!-- Branding do Cockpit -->
     <link rel="stylesheet" href="../../static/branding.css" />
 
+    <!-- CSS Modular do Backup Manager -->
+    <link rel="stylesheet" href="css/backup-manager.css" />
+
     <!-- Cockpit JS API -->
     <script src="../base1/cockpit.js"></script>
+
+    <!-- Módulos JavaScript -->
+    <script src="js/utils.js" defer></script>
+    <script src="js/directory-browser.js" defer></script>
+    <script src="js/email.js" defer></script>
+    <script src="js/backups.js" defer></script>
+    <script src="js/vm-backup.js" defer></script>
+    <script src="js/automation.js" defer></script>
+    <script src="js/automation-scripts.js" defer></script>
+    <script src="js/schedules.js" defer></script>
+
+    <!-- Core do Backup Manager -->
     <script src="backup-manager.js" defer></script>
 
     <style>
@@ -434,10 +449,14 @@
       </header>
 
       <!-- Main content -->
-      <main style="width: 100%">
+      <main style="width: 100%; max-width: 100%; flex: 1">
         <div
           class="pf-l-grid pf-m-gutter"
-          style="padding: var(--pf-global--spacer--md); width: 100%"
+          style="
+            padding: var(--pf-global--spacer--md);
+            width: 100%;
+            max-width: 100%;
+          "
         >
           <div class="pf-l-grid__item pf-m-12-col">
             <div id="status-message"></div>

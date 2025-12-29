@@ -1,23 +1,56 @@
 #!/bin/bash
 # Script para listar todos os scripts do usuário com suas estatísticas
+# Busca scripts nos diretórios configurados ou em $HOME/scripts como fallback
 
-SCRIPTS_DIR="$HOME/scripts"
+CONFIG_FILE="/var/lib/cockpit/backup-manager/config.json"
 METADATA_DIR="$HOME/.scripts-metadata"
 EXECUTE_SCRIPT="/usr/share/cockpit/scheduling_exec/scripts/execute-script.sh"
 
-# Criar diretórios se não existirem
-mkdir -p "$SCRIPTS_DIR"
+# Criar diretório de metadata se não existir
 mkdir -p "$METADATA_DIR"
+
+# Função para extrair diretórios de scripts da configuração
+get_script_directories() {
+    if [ -f "$CONFIG_FILE" ]; then
+        # Tentar extrair scriptDirectories do JSON
+        # Formato esperado: "scriptDirectories": [{"path": "/caminho", "maxDepth": 1}, ...]
+        local dirs=$(cat "$CONFIG_FILE" 2>/dev/null | \
+            grep -oP '"scriptDirectories"\s*:\s*\[.*?\]' | \
+            grep -oP '"path"\s*:\s*"[^"]*"' | \
+            grep -oP '"[^"]*"$' | \
+            tr -d '"' | \
+            sort -u)
+
+        if [ -n "$dirs" ]; then
+            echo "$dirs"
+            return
+        fi
+    fi
+
+    # Fallback para $HOME/scripts se não houver configuração
+    echo "$HOME/scripts"
+}
+
+# Obter lista de diretórios
+SCRIPT_DIRS=$(get_script_directories)
 
 # Array JSON de scripts
 echo "["
 
 first=true
 
-# Listar todos os scripts .sh no diretório
-for script in "$SCRIPTS_DIR"/*.sh; do
-    if [ -f "$script" ]; then
+# Para cada diretório configurado
+while IFS= read -r SCRIPTS_DIR; do
+    [ -z "$SCRIPTS_DIR" ] && continue
+    [ ! -d "$SCRIPTS_DIR" ] && continue
+
+    # Listar todos os scripts .sh no diretório (busca recursiva limitada)
+    while IFS= read -r script; do
+        [ -z "$script" ] && continue
+        [ ! -f "$script" ] && continue
+
         basename=$(basename "$script")
+        script_dir=$(dirname "$script")
         metadata_file="$METADATA_DIR/$basename.json"
 
         # Criar metadata se não existir
@@ -38,15 +71,16 @@ EOF
         metadata=$(cat "$metadata_file")
 
                 # Obter expressão cron (primeira entrada encontrada)
-                cron_line=$(crontab -l 2>/dev/null | grep -v "^#" | awk -v exec="$EXECUTE_SCRIPT" -v script="$basename" -v scripts_dir="$SCRIPTS_DIR" '
+                cron_line=$(crontab -l 2>/dev/null | grep -v "^#" | awk -v exec="$EXECUTE_SCRIPT" -v script="$basename" -v script_full="$script" '
                 {
                     line=$0
                     if (index(line, "scheduling_exec:" script) > 0) { print line; exit }
                     n=split(line,a,/[ \t]+/)
                     for (i=6; i<=n; i++) {
                         if (a[i]==exec && (i+1)<=n && a[i+1]==script) { print line; exit }
+                        if (a[i]==exec && (i+1)<=n && a[i+1]==script_full) { print line; exit }
                     }
-                    if (index(line, scripts_dir "/" script) > 0) { print line; exit }
+                    if (index(line, script_full) > 0) { print line; exit }
                 }
                 ')
 
@@ -74,11 +108,12 @@ EOF
         [ -z "$total_executions" ] && total_executions="0"
         [ -z "$successful_executions" ] && successful_executions="0"
 
-        # Construir objeto JSON
+        # Construir objeto JSON com caminho completo
         cat << EOF
 {
     "name": "$basename",
-    "path": "$SCRIPTS_DIR/$basename",
+    "path": "$script",
+    "directory": "$script_dir",
     "cron_expression": "$cron_expression",
     "created_at": $created_at,
     "updated_at": $updated_timestamp,
@@ -87,7 +122,7 @@ EOF
     "successful_executions": $successful_executions
 }
 EOF
-    fi
-done
+    done < <(find "$SCRIPTS_DIR" -maxdepth 3 -type f -name "*.sh" 2>/dev/null)
+done <<< "$SCRIPT_DIRS"
 
 echo "]"

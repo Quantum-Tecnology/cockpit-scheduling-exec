@@ -1,9 +1,8 @@
 #!/bin/bash
 # Script para executar um script e atualizar suas estatísticas
+# Aceita tanto o caminho completo quanto apenas o nome do script
 
-SCRIPTS_DIR="$HOME/scripts"
 METADATA_DIR="$HOME/.scripts-metadata"
-ENV_FILE="$SCRIPTS_DIR/.env"
 RUN_AS_SUDO=0
 
 if [ "$1" = "--sudo" ]; then
@@ -11,20 +10,39 @@ if [ "$1" = "--sudo" ]; then
     shift
 fi
 
-SCRIPT_NAME="$1"
+SCRIPT_INPUT="$1"
 
-if [ -z "$SCRIPT_NAME" ]; then
-    echo "Erro: Nome do script não fornecido" >&2
+if [ -z "$SCRIPT_INPUT" ]; then
+    echo "Erro: Nome ou caminho do script não fornecido" >&2
     exit 1
 fi
 
-SCRIPT_PATH="$SCRIPTS_DIR/$SCRIPT_NAME"
-SCRIPT_ENV_FILE="$SCRIPTS_DIR/.env.$SCRIPT_NAME"
+# Determinar se é caminho completo ou apenas nome
+if [[ "$SCRIPT_INPUT" == /* ]]; then
+    # Caminho absoluto
+    SCRIPT_PATH="$SCRIPT_INPUT"
+    SCRIPT_NAME=$(basename "$SCRIPT_PATH")
+    SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+elif [[ "$SCRIPT_INPUT" == ~/* || "$SCRIPT_INPUT" == \~/* ]]; then
+    # Caminho relativo ao home
+    SCRIPT_PATH="${SCRIPT_INPUT/#\~/$HOME}"
+    SCRIPT_NAME=$(basename "$SCRIPT_PATH")
+    SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+else
+    # Apenas nome do script - busca em $HOME/scripts por compatibilidade
+    SCRIPT_NAME="$SCRIPT_INPUT"
+    SCRIPT_PATH="$HOME/scripts/$SCRIPT_NAME"
+    SCRIPT_DIR="$HOME/scripts"
+fi
+
+# Variáveis de ambiente globais e específicas do script
+ENV_FILE="$SCRIPT_DIR/.env"
+SCRIPT_ENV_FILE="$SCRIPT_DIR/.env.$SCRIPT_NAME"
 METADATA_FILE="$METADATA_DIR/$SCRIPT_NAME.json"
 LOG_FILE="$METADATA_DIR/$SCRIPT_NAME.log"
 
 if [ ! -f "$SCRIPT_PATH" ]; then
-    echo "Erro: Script não encontrado" >&2
+    echo "Erro: Script não encontrado: $SCRIPT_PATH" >&2
     exit 1
 fi
 
@@ -93,8 +111,8 @@ if [ $exit_code -eq 0 ] && [ -f "$SCRIPT_ENV_FILE" ]; then
 fi
 
 if [ $exit_code -eq 0 ]; then
-    # Executar o script
-    cd "$SCRIPTS_DIR"
+    # Executar o script (no diretório onde ele está)
+    cd "$SCRIPT_DIR"
     if [ $RUN_AS_SUDO -eq 1 ]; then
         SUDO_PASSWORD=""
         IFS= read -r SUDO_PASSWORD || true

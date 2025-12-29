@@ -1,21 +1,40 @@
 #!/bin/bash
 # Script para salvar (criar ou atualizar) um script
+# Aceita tanto caminho completo quanto apenas o nome do script
 
-SCRIPTS_DIR="$HOME/scripts"
 METADATA_DIR="$HOME/.scripts-metadata"
 ACTION="$1"
-SCRIPT_NAME="$2"
+SCRIPT_INPUT="$2"
 
-if [ -z "$ACTION" ] || [ -z "$SCRIPT_NAME" ]; then
-    echo "Erro: Ação e nome do script são obrigatórios" >&2
+if [ -z "$ACTION" ] || [ -z "$SCRIPT_INPUT" ]; then
+    echo "Erro: Ação e nome/caminho do script são obrigatórios" >&2
     exit 1
 fi
 
-# Criar diretórios se não existirem
-mkdir -p "$SCRIPTS_DIR"
+# Criar diretório de metadata se não existir
 mkdir -p "$METADATA_DIR"
 
-SCRIPT_PATH="$SCRIPTS_DIR/$SCRIPT_NAME"
+# Determinar se é caminho completo ou apenas nome
+if [[ "$SCRIPT_INPUT" == /* ]]; then
+    # Caminho absoluto
+    SCRIPT_PATH="$SCRIPT_INPUT"
+    SCRIPT_NAME=$(basename "$SCRIPT_PATH")
+    SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+elif [[ "$SCRIPT_INPUT" == ~/* || "$SCRIPT_INPUT" == \~/* ]]; then
+    # Caminho relativo ao home
+    SCRIPT_PATH="${SCRIPT_INPUT/#\~/$HOME}"
+    SCRIPT_NAME=$(basename "$SCRIPT_PATH")
+    SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+else
+    # Apenas nome do script - salva em $HOME/scripts por compatibilidade
+    SCRIPT_NAME="$SCRIPT_INPUT"
+    SCRIPT_DIR="$HOME/scripts"
+    SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
+fi
+
+# Criar diretório do script se não existir
+mkdir -p "$SCRIPT_DIR"
+
 METADATA_FILE="$METADATA_DIR/$SCRIPT_NAME.json"
 
 # Ler conteúdo do stdin
@@ -27,11 +46,11 @@ if [ "$ACTION" = "create" ]; then
         echo "Erro: Script já existe. Use 'update' para modificá-lo." >&2
         exit 1
     fi
-    
+
     # Criar novo script
     echo "$CONTENT" > "$SCRIPT_PATH"
     chmod +x "$SCRIPT_PATH"
-    
+
     # Criar metadata
     timestamp=$(date +%s)
     cat > "$METADATA_FILE" << EOF
@@ -43,34 +62,34 @@ if [ "$ACTION" = "create" ]; then
     "successful_executions": 0
 }
 EOF
-    
+
 elif [ "$ACTION" = "update" ]; then
     if [ ! -f "$SCRIPT_PATH" ]; then
         echo "Erro: Script não encontrado" >&2
         exit 1
     fi
-    
+
     # Atualizar script
     echo "$CONTENT" > "$SCRIPT_PATH"
     chmod +x "$SCRIPT_PATH"
-    
+
     # Atualizar timestamp de atualização no metadata
     if [ -f "$METADATA_FILE" ]; then
         timestamp=$(date +%s)
         metadata=$(cat "$METADATA_FILE")
-        
+
         # Extrair valores existentes
         created_at=$(echo "$metadata" | grep -o '"created_at":[0-9]*' | grep -o '[0-9]*')
         last_execution=$(echo "$metadata" | grep -o '"last_execution":[0-9]*' | grep -o '[0-9]*')
         total_executions=$(echo "$metadata" | grep -o '"total_executions":[0-9]*' | grep -o '[0-9]*')
         successful_executions=$(echo "$metadata" | grep -o '"successful_executions":[0-9]*' | grep -o '[0-9]*')
-        
+
         # Defaults se não encontrados
         [ -z "$created_at" ] && created_at="$timestamp"
         [ -z "$last_execution" ] && last_execution="null"
         [ -z "$total_executions" ] && total_executions="0"
         [ -z "$successful_executions" ] && successful_executions="0"
-        
+
         # Reescrever metadata com novo updated_at
         cat > "$METADATA_FILE" << EOF
 {
