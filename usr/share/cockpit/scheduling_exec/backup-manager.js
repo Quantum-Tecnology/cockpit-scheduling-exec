@@ -14,8 +14,18 @@ let emailConfig = {
 let userHome = null;
 let configFile = null;
 
+// Variáveis globais para VMs
+let allVMs = [];
+let selectedVMs = new Set();
+let vmBackupConfig = {
+  destDir: "/mnt/storage/backups/vm_backups",
+  retentionDays: 7,
+  verifyChecksum: false,
+};
+
 // Constantes
 const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
+const VM_SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/vm";
 
 // Inicialização
 document.addEventListener("DOMContentLoaded", async () => {
@@ -85,6 +95,7 @@ async function loadConfiguration() {
     const config = JSON.parse(result);
     backupDirectories = config.directories || [];
     emailConfig = { ...emailConfig, ...config.email };
+    vmBackupConfig = { ...vmBackupConfig, ...(config.vmBackupConfig || {}) };
 
     // Atualizar referência global
     configFile = systemConfigFile;
@@ -99,6 +110,7 @@ async function loadConfiguration() {
     updateDirectoriesList();
     updateDirectoryFilter();
     updateEmailForm();
+    updateVMConfigForm();
   } catch (error) {
     console.log(
       "Backup Manager: Arquivo de configuração não encontrado, criando novo..."
@@ -114,6 +126,7 @@ async function saveConfiguration() {
   const config = {
     directories: backupDirectories,
     email: emailConfig,
+    vmBackupConfig: vmBackupConfig,
     version: "1.0.0",
     lastUpdated: new Date().toISOString(),
   };
@@ -1045,18 +1058,62 @@ async function exportSelectedBackups() {
     allBackups.find((b) => b.id === id)
   );
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outputFile = `${userHome}/backups-export-${timestamp}.tar.gz`;
+  const outputFile = `/tmp/backups-export-${timestamp}.tar.gz`;
 
   try {
     showAlert("info", "📦 Criando arquivo de exportação...", 0);
 
+    // Criar arquivo tar.gz no servidor
     const files = backups.map((b) => b.fullPath);
-    await cockpit.spawn(["tar", "-czf", outputFile, ...files]);
+    await cockpit.spawn(["tar", "-czf", outputFile, ...files], {
+      superuser: "try",
+    });
 
-    showAlert("success", `✅ Backups exportados para: ${outputFile}`);
+    console.log("Backup Manager: Arquivo criado:", outputFile);
+    showAlert("info", "📥 Iniciando download...", 0);
+
+    // Ler o conteúdo do arquivo usando cockpit.file() com binary: true
+    const file = cockpit.file(outputFile, { binary: true, superuser: "try" });
+    const content = await file.read();
+
+    // Criar Blob e iniciar download automático no navegador
+    const blob = new Blob([content], { type: "application/gzip" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `backups-export-${timestamp}.tar.gz`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showAlert(
+      "success",
+      `✅ Download de ${backups.length} backup(s) iniciado!`
+    );
+
+    // Remover arquivo temporário após 5 segundos
+    setTimeout(async () => {
+      try {
+        await cockpit.spawn(["rm", "-f", outputFile], { superuser: "try" });
+        console.log("Backup Manager: Arquivo temporário removido:", outputFile);
+      } catch (error) {
+        console.error(
+          "Backup Manager: Erro ao remover arquivo temporário:",
+          error
+        );
+      }
+    }, 5000);
   } catch (error) {
     const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
     showAlert("danger", `Erro ao exportar: ${errorMsg}`);
+
+    // Tentar remover arquivo em caso de erro
+    try {
+      await cockpit.spawn(["rm", "-f", outputFile], { superuser: "try" });
+    } catch (e) {
+      // Ignorar erros na limpeza
+    }
   }
 }
 
@@ -1228,12 +1285,24 @@ function switchTab(tab) {
   // Atualizar conteúdo
   const backupsTab = document.getElementById("backups-tab-content");
   const configTab = document.getElementById("config-tab-content");
+  const vmsTab = document.getElementById("vms-tab-content");
 
   if (backupsTab) {
     backupsTab.style.display = tab === "backups" ? "block" : "none";
   }
   if (configTab) {
     configTab.style.display = tab === "config" ? "block" : "none";
+  }
+  if (vmsTab) {
+    vmsTab.style.display = tab === "vms" ? "block" : "none";
+    // Auto-descobrir VMs se ainda não descobriu
+    if (tab === "vms" && allVMs.length === 0) {
+      const discoveryRan = sessionStorage.getItem("vm-discovery-ran");
+      if (!discoveryRan) {
+        setTimeout(() => discoverVMs(), 500);
+        sessionStorage.setItem("vm-discovery-ran", "true");
+      }
+    }
   }
 
   console.log(`Backup Manager: Conteúdo da aba ${tab} exibido`);
@@ -1396,4 +1465,443 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+// ============================================================================
+// BACKUP DE VMs
+// ============================================================================
+
+// Função para descobrir VMs
+async function discoverVMs() {
+  console.log("VM Backup: Iniciando descoberta de VMs...");
+
+  const loadingDiv = document.getElementById("vm-discovery-loading");
+  const tableContainer = document.getElementById("vm-table-container");
+  const emptyState = document.getElementById("vm-empty-state");
+  const discoverBtn = document.getElementById("discover-vms-btn");
+
+  try {
+    // Mostrar loading
+    loadingDiv.style.display = "block";
+    tableContainer.style.display = "none";
+    emptyState.style.display = "none";
+    discoverBtn.disabled = true;
+
+    addVMLog("🔍 Procurando VMs no sistema...");
+
+    // Verificar se virsh está instalado
+    try {
+      await cockpit.spawn(["which", "virsh"], { err: "ignore" });
+    } catch (error) {
+      throw new Error(
+        "virsh não encontrado. Instale o pacote libvirt-clients."
+      );
+    }
+
+    // Chamar script de descoberta
+    const scriptPath = `${VM_SCRIPTS_DIR}/discover-vms.sh`;
+    const result = await cockpit.spawn(["bash", scriptPath], {
+      err: "message",
+      superuser: "try",
+    });
+
+    console.log("VM Backup: Resultado bruto:", result);
+
+    // Parsear JSON
+    allVMs = JSON.parse(result);
+
+    console.log("VM Backup: VMs descobertas:", allVMs.length);
+    addVMLog(`✅ ${allVMs.length} VM(s) encontrada(s)`);
+
+    // Renderizar tabela
+    renderVMTable();
+
+    // Mostrar tabela ou empty state
+    if (allVMs.length > 0) {
+      tableContainer.style.display = "block";
+      emptyState.style.display = "none";
+    } else {
+      tableContainer.style.display = "none";
+      emptyState.innerHTML = `
+        <div style="font-size: 4rem; margin-bottom: var(--pf-global--spacer--md); opacity: 0.5;">⚠️</div>
+        <h3>Nenhuma VM encontrada</h3>
+        <p style="color: var(--pf-global--Color--200);">
+          Não há máquinas virtuais configuradas no sistema.
+        </p>
+      `;
+      emptyState.style.display = "block";
+    }
+
+    showAlert("success", `✅ ${allVMs.length} VM(s) encontrada(s)`);
+  } catch (error) {
+    console.error("VM Backup: Erro ao descobrir VMs:", error);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `Erro ao descobrir VMs: ${errorMsg}`);
+    addVMLog(`❌ Erro: ${errorMsg}`);
+
+    emptyState.innerHTML = `
+      <div style="font-size: 4rem; margin-bottom: var(--pf-global--spacer--md); opacity: 0.5;">❌</div>
+      <h3>Erro ao descobrir VMs</h3>
+      <p style="color: var(--pf-global--danger-color--100);">${escapeHtml(
+        errorMsg
+      )}</p>
+      <button class="pf-c-button pf-m-primary" onclick="discoverVMs()">🔄 Tentar Novamente</button>
+    `;
+    emptyState.style.display = "block";
+  } finally {
+    loadingDiv.style.display = "none";
+    discoverBtn.disabled = false;
+  }
+}
+
+// Função para renderizar tabela de VMs
+function renderVMTable() {
+  const tbody = document.getElementById("vms-table-body");
+
+  if (allVMs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: var(--pf-global--spacer--xl);">
+          <div style="opacity: 0.5;">Nenhuma VM encontrada</div>
+        </td>
+      </tr>
+    `;
+    updateVMStats();
+    return;
+  }
+
+  tbody.innerHTML = allVMs
+    .map((vm) => {
+      const isSelected = selectedVMs.has(vm.name);
+      const statusBadge =
+        vm.status === "running"
+          ? '<span class="pf-c-label pf-m-green"><span class="pf-c-label__content">🟢 Rodando</span></span>'
+          : '<span class="pf-c-label"><span class="pf-c-label__content">⚪ Parada</span></span>';
+
+      const diskPaths = vm.disks.map((d) => d.path).join("\n");
+      const diskTooltip =
+        vm.disks.length > 0 ? `title="${escapeHtml(diskPaths)}"` : "";
+
+      return `
+        <tr>
+          <td>
+            <input
+              type="checkbox"
+              class="custom-checkbox vm-checkbox"
+              data-vm-name="${escapeHtml(vm.name)}"
+              ${isSelected ? "checked" : ""}
+              onchange="toggleVMSelection('${escapeHtml(
+                vm.name
+              )}', this.checked)"
+            />
+          </td>
+          <td><strong>${escapeHtml(vm.name)}</strong></td>
+          <td>${statusBadge}</td>
+          <td>${vm.disks.length} disco(s)</td>
+          <td><span class="size-badge ${getSizeClass(
+            vm.total_size
+          )}">${formatSize(vm.total_size)}</span></td>
+          <td ${diskTooltip} style="cursor: help; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${vm.disks.length > 0 ? escapeHtml(vm.disks[0].path) : "—"}
+            ${
+              vm.disks.length > 1
+                ? ` <span style="color: var(--pf-global--Color--200);">+${
+                    vm.disks.length - 1
+                  } mais</span>`
+                : ""
+            }
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  updateVMStats();
+}
+
+// Função para alternar seleção de VM
+function toggleVMSelection(vmName, selected) {
+  if (selected) {
+    selectedVMs.add(vmName);
+  } else {
+    selectedVMs.delete(vmName);
+  }
+
+  updateVMStats();
+
+  // Atualizar botão de backup
+  const backupBtn = document.getElementById("backup-selected-vms-btn");
+  backupBtn.disabled = selectedVMs.size === 0;
+}
+
+// Função para selecionar/desselecionar todas as VMs
+function toggleSelectAllVMs(checkbox) {
+  const isChecked = checkbox.checked;
+
+  document.querySelectorAll(".vm-checkbox").forEach((cb) => {
+    cb.checked = isChecked;
+    const vmName = cb.getAttribute("data-vm-name");
+    if (isChecked) {
+      selectedVMs.add(vmName);
+    } else {
+      selectedVMs.delete(vmName);
+    }
+  });
+
+  updateVMStats();
+
+  const backupBtn = document.getElementById("backup-selected-vms-btn");
+  backupBtn.disabled = selectedVMs.size === 0;
+}
+
+// Função para atualizar estatísticas de VMs
+function updateVMStats() {
+  const totalVMs = allVMs.length;
+  const selectedCount = selectedVMs.size;
+
+  // Calcular tamanho total das VMs selecionadas
+  let totalSize = 0;
+  allVMs.forEach((vm) => {
+    if (selectedVMs.has(vm.name)) {
+      totalSize += vm.total_size;
+    }
+  });
+
+  document.getElementById("vm-stats-total").textContent = totalVMs;
+  document.getElementById("vm-stats-selected").textContent = selectedCount;
+  document.getElementById("vm-stats-size").textContent = formatSize(totalSize);
+}
+
+// Função para fazer backup de VMs selecionadas
+async function backupSelectedVMs() {
+  if (selectedVMs.size === 0) {
+    showAlert("warning", "Selecione pelo menos uma VM para fazer backup.");
+    return;
+  }
+
+  const confirmMsg = `Fazer backup de ${
+    selectedVMs.size
+  } VM(s) selecionada(s)?\n\nDestino: ${vmBackupConfig.destDir}\nRetenção: ${
+    vmBackupConfig.retentionDays
+  } dias\nChecksum: ${vmBackupConfig.verifyChecksum ? "Sim" : "Não"}`;
+
+  if (!confirm(confirmMsg)) {
+    return;
+  }
+
+  const backupBtn = document.getElementById("backup-selected-vms-btn");
+  backupBtn.disabled = true;
+  backupBtn.innerHTML =
+    '<span class="loading-spinner"></span> Fazendo backup...';
+
+  try {
+    clearVMLog();
+    addVMLog("========================================");
+    addVMLog("🚀 INICIANDO BACKUP DE VMs");
+    addVMLog("========================================");
+    addVMLog(`VMs selecionadas: ${selectedVMs.size}`);
+    addVMLog(`Destino: ${vmBackupConfig.destDir}`);
+    addVMLog(`Retenção: ${vmBackupConfig.retentionDays} dias`);
+    addVMLog(
+      `Verificar checksum: ${vmBackupConfig.verifyChecksum ? "Sim" : "Não"}`
+    );
+    addVMLog("========================================");
+    addVMLog("");
+
+    const selectedVMsList = Array.from(selectedVMs).join(",");
+    const scriptPath = `${VM_SCRIPTS_DIR}/backup-all-vms.sh`;
+
+    // Executar script de backup
+    const proc = cockpit.spawn(
+      [
+        "bash",
+        scriptPath,
+        selectedVMsList,
+        vmBackupConfig.destDir,
+        vmBackupConfig.retentionDays.toString(),
+        vmBackupConfig.verifyChecksum.toString(),
+      ],
+      {
+        err: "out",
+        superuser: "try",
+      }
+    );
+
+    // Capturar saída em tempo real
+    proc.stream((data) => {
+      const lines = data.split("\n");
+      lines.forEach((line) => {
+        if (line.trim()) {
+          addVMLog(line);
+        }
+      });
+    });
+
+    const result = await proc;
+
+    console.log("VM Backup: Resultado:", result);
+
+    // Parsear resultado JSON (última linha)
+    const lines = result.trim().split("\n");
+    const jsonLine = lines[lines.length - 1];
+
+    try {
+      const summary = JSON.parse(jsonLine);
+
+      addVMLog("");
+      addVMLog("========================================");
+      addVMLog("✅ BACKUP CONCLUÍDO");
+      addVMLog("========================================");
+      addVMLog(`Total de VMs: ${summary.summary.total_vms}`);
+      addVMLog(`Sucesso: ${summary.summary.success_count}`);
+      addVMLog(`Falhas: ${summary.summary.failed_count}`);
+      addVMLog(`Tamanho total: ${formatSize(summary.summary.total_size)}`);
+      addVMLog(`Tempo total: ${summary.summary.total_duration}s`);
+      addVMLog(`Arquivos antigos removidos: ${summary.summary.deleted_count}`);
+      addVMLog("========================================");
+
+      if (summary.summary.failed_count === 0) {
+        showAlert(
+          "success",
+          `✅ Backup de ${summary.summary.success_count} VM(s) concluído com sucesso!`
+        );
+      } else {
+        showAlert(
+          "warning",
+          `⚠️ Backup concluído com ${summary.summary.failed_count} falha(s). Verifique o log.`
+        );
+      }
+    } catch (e) {
+      console.warn("VM Backup: Não foi possível parsear JSON do resultado:", e);
+      addVMLog("");
+      addVMLog("✅ Backup concluído");
+      showAlert("success", "✅ Backup de VMs concluído!");
+    }
+  } catch (error) {
+    console.error("VM Backup: Erro durante backup:", error);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    addVMLog("");
+    addVMLog("========================================");
+    addVMLog("❌ ERRO NO BACKUP");
+    addVMLog("========================================");
+    addVMLog(errorMsg);
+    showAlert("danger", `Erro ao fazer backup: ${errorMsg}`);
+  } finally {
+    backupBtn.disabled = false;
+    backupBtn.innerHTML = "📦 Fazer Backup das VMs Selecionadas";
+  }
+}
+
+// Função para limpar backups antigos de VMs
+async function cleanOldVMBackups() {
+  const days = prompt(
+    `Remover backups de VMs com mais de quantos dias?\n\nDiretório: ${vmBackupConfig.destDir}`,
+    vmBackupConfig.retentionDays.toString()
+  );
+
+  if (!days || isNaN(days) || parseInt(days) < 0) {
+    return;
+  }
+
+  const confirmMsg = `Tem certeza que deseja remover backups de VMs com mais de ${days} dias?\n\nDiretório: ${vmBackupConfig.destDir}`;
+
+  if (!confirm(confirmMsg)) {
+    return;
+  }
+
+  try {
+    addVMLog("🗑️ Procurando backups antigos...");
+
+    const result = await cockpit.spawn(
+      [
+        "bash",
+        "-c",
+        `find "${vmBackupConfig.destDir}" -type f -mtime +${days} -exec du -b {} + | awk '{sum+=$1} END {print sum}'; find "${vmBackupConfig.destDir}" -type f -mtime +${days} | wc -l`,
+      ],
+      {
+        err: "message",
+        superuser: "try",
+      }
+    );
+
+    const [totalSize, fileCount] = result.trim().split("\n");
+    const deletedSize = parseInt(totalSize) || 0;
+    const deletedCount = parseInt(fileCount) || 0;
+
+    if (deletedCount === 0) {
+      addVMLog(`ℹ️ Nenhum backup encontrado com mais de ${days} dias`);
+      showAlert("info", `Não há backups de VMs com mais de ${days} dias.`);
+      return;
+    }
+
+    // Remover arquivos
+    await cockpit.spawn(
+      [
+        "bash",
+        "-c",
+        `find "${vmBackupConfig.destDir}" -type f -mtime +${days} -delete`,
+      ],
+      {
+        err: "message",
+        superuser: "try",
+      }
+    );
+
+    addVMLog(
+      `✅ ${deletedCount} arquivo(s) removido(s) (${formatSize(deletedSize)})`
+    );
+    showAlert("success", `✅ ${deletedCount} backup(s) antigo(s) removido(s)`);
+  } catch (error) {
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    addVMLog(`❌ Erro: ${errorMsg}`);
+    showAlert("danger", `Erro ao limpar backups: ${errorMsg}`);
+  }
+}
+
+// Função para atualizar configuração de VM backup
+function updateVMBackupConfig() {
+  vmBackupConfig.destDir = document.getElementById("vm-dest-dir").value.trim();
+  vmBackupConfig.retentionDays = parseInt(
+    document.getElementById("vm-retention-days").value
+  );
+  vmBackupConfig.verifyChecksum =
+    document.getElementById("vm-verify-checksum").checked;
+
+  console.log("VM Backup: Configuração atualizada:", vmBackupConfig);
+
+  // Salvar configuração
+  saveConfiguration();
+}
+
+// Função para atualizar formulário de configuração de VMs
+function updateVMConfigForm() {
+  const destDirInput = document.getElementById("vm-dest-dir");
+  const retentionInput = document.getElementById("vm-retention-days");
+  const checksumInput = document.getElementById("vm-verify-checksum");
+
+  if (destDirInput) destDirInput.value = vmBackupConfig.destDir;
+  if (retentionInput) retentionInput.value = vmBackupConfig.retentionDays;
+  if (checksumInput) checksumInput.checked = vmBackupConfig.verifyChecksum;
+}
+
+// Função para adicionar linha ao log de VMs
+function addVMLog(message) {
+  const logContainer = document.getElementById("vm-log-container");
+  const timestamp = new Date().toLocaleTimeString("pt-BR");
+  const line = `[${timestamp}] ${message}\n`;
+
+  if (logContainer.textContent === "Aguardando ação...") {
+    logContainer.textContent = "";
+  }
+
+  logContainer.textContent += line;
+  logContainer.scrollTop = logContainer.scrollHeight;
+
+  console.log("VM Backup:", message);
+}
+
+// Função para limpar log de VMs
+function clearVMLog() {
+  const logContainer = document.getElementById("vm-log-container");
+  logContainer.textContent = "Aguardando ação...";
 }

@@ -5,6 +5,142 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2024-12-28
+
+### 🚀 Novidades Principais
+
+#### 💿 Sistema de Backup de VMs (NOVO!)
+- **Descoberta automática de VMs**: Detecção via virsh de todas as máquinas virtuais
+- **Detecção inteligente de discos**: Encontra .qcow2, .vmdk, .vdi em qualquer localização
+- **Interface dedicada**: Nova aba "💿 Backup de VMs" com tabela interativa
+- **Seleção múltipla**: Checkbox para escolher quais VMs fazer backup
+- **Status em tempo real**: Badges coloridos (🟢 running / ⚫ stopped)
+- **Estatísticas detalhadas**: Tamanho total, número de discos, caminhos
+- **Log em tempo real**: Terminal-style com auto-scroll durante backup
+- **Verificação de integridade**: Checksum SHA256 opcional
+- **Retenção configurável**: Limpeza automática de backups antigos
+- **Configuração persistente**: Destino, dias de retenção, verificação
+
+#### 📧 Sistema de Email Melhorado
+- **Suporte ao msmtp**: Prioridade para msmtp (mais leve que Postfix)
+- **Detecção automática**: Verifica msmtp > mail > mailx
+- **Teste de configuração**: Botão "🔧 Testar Configuração de Email"
+- **Mensagens inteligentes**: Erros específicos com soluções
+- **Guias completos**: EMAIL-SETUP-GUIDE.md e MSMTP-SETUP-GUIDE.md
+- **Tratamento robusto**: Captura stderr e códigos de saída
+
+#### 📦 Exportação Corrigida
+- **Download automático**: Arquivo .tar.gz baixa direto no navegador
+- **Limpeza automática**: Remove arquivo temporário após download
+- **Feedback visual**: Alertas de progresso (criando → download)
+- **Binário otimizado**: Usa cockpit.file() com binary: true
+
+### ✨ Melhorias
+
+#### Scripts de VM
+- **discover-vms.sh**: 133 linhas - Descoberta completa de VMs e discos
+- **backup-vm.sh**: 135 linhas - Backup individual com verificação
+- **backup-all-vms.sh**: 226 linhas - Backup em lote com estatísticas
+- **Validação de espaço**: Verifica disco antes de iniciar backup
+- **Avisos de VM ativa**: Alerta quando VM está rodando
+- **JSON estruturado**: Saída padronizada para parsing JavaScript
+
+#### Interface de VM Backup
+- **+200 linhas HTML**: Card completo com configurações e tabela
+- **+400 linhas JavaScript**: 12 novas funções integradas
+- **Responsividade**: Layout adaptável com PatternFly
+- **Loading states**: Spinners durante operações assíncronas
+- **Tooltips informativos**: Ajuda contextual em campos
+
+#### Scripts de Email
+- **send-backup-email.sh**: Suporte nativo ao msmtp
+- **test-email.sh**: Diagnóstico completo de configuração
+- **Códigos de saída**: Específicos por tipo de erro (1: params, 2: não instalado, 3: falha)
+- **Instruções inline**: Comandos de instalação nos erros
+
+### 📚 Documentação
+
+#### Novos Guias
+- **MSMTP-SETUP-GUIDE.md**: Configuração completa do msmtp
+  - Instalação rápida
+  - Exemplos Gmail, Outlook, SMTP próprio
+  - Senhas de App
+  - Troubleshooting
+  - Comparação msmtp vs Postfix
+  - Múltiplas contas
+- **scripts/vm/README.md**: Documentação técnica dos scripts de VM
+  - Descrição de cada script
+  - Parâmetros e exemplos
+  - Estrutura JSON de saída
+
+#### Atualizações
+- **EMAIL-SETUP-GUIDE.md**: Seção sobre alternativas (msmtp)
+
+### 🐛 Correções
+
+#### Exportação de Backups
+- ✅ Corrigido: Download não iniciava no navegador
+- ✅ Corrigido: Arquivo ficava preso em /tmp
+- ✅ Melhorado: Feedback visual durante processo
+
+#### Sistema de Email
+- ✅ Corrigido: Erros genéricos sem contexto
+- ✅ Corrigido: Falta de verificação de dependências
+- ✅ Melhorado: Mensagens de erro específicas com soluções
+
+### 🔧 Técnico
+
+#### Arquitetura
+- **Modularização**: Scripts de VM em diretório separado
+- **Configuração unificada**: vmBackupConfig no config.json
+- **Event-driven**: Listeners para todos os botões de VM
+- **Error handling**: Try/catch em todas as funções async
+- **Logging extensivo**: Console.log para debug em produção
+
+#### Dependências
+- **virsh**: Gerenciamento de VMs (libvirt-clients)
+- **rsync**: Cópia eficiente de arquivos grandes
+- **jq**: Parsing de JSON em bash
+- **msmtp**: Envio de email leve (recomendado)
+- **sha256sum**: Verificação de integridade
+
+#### Performance
+- **Checksum opcional**: Pode desabilitar para backups mais rápidos
+- **Progresso otimizado**: rsync com --info=progress2
+- **Limpeza assíncrona**: Remove temporários sem bloquear UI
+
+### 📊 Estatísticas da Versão
+
+- **Linhas adicionadas**: ~1.094
+  - Bash: 494 linhas (3 scripts)
+  - JavaScript: 400 linhas (12 funções)
+  - HTML: 200 linhas (nova aba)
+- **Arquivos criados**: 6
+- **Arquivos modificados**: 4
+- **Funções novas**: 12
+- **Guias de documentação**: 2
+
+### ⚠️ Limitações Conhecidas
+
+1. **Dependências externas**: Requer virsh, rsync, jq instalados
+2. **Backups grandes**: VMs de TB podem demorar horas
+3. **VM em execução**: Backup pode ser inconsistente (avisar usuário)
+4. **Sem restore na UI**: Restore deve ser manual via linha de comando
+5. **Checksum lento**: SHA256 dobra tempo em arquivos grandes
+6. **Logs não persistentes**: Log da UI é perdido ao fechar página
+
+### 🔜 Próximas Versões
+
+- [ ] Função de restore de VMs pela UI
+- [ ] Snapshots LVM antes do backup
+- [ ] Notificações por email de backups de VM
+- [ ] Compressão de backups de VM
+- [ ] Backup incremental/diferencial
+- [ ] Agendamento cron para backups de VM
+- [ ] Gráficos de histórico de backups
+
+---
+
 ## [1.3.3] - 2024-12-28
 
 ### 🎨 UI/UX Premium - Transformação Completa
