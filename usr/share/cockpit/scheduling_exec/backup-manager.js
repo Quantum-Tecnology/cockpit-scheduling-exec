@@ -1503,6 +1503,7 @@ async function discoverVMs() {
     const result = await cockpit.spawn(["bash", scriptPath], {
       err: "message",
       superuser: "try",
+      environ: ["DEBUG=true"], // Habilitar debug
     });
 
     console.log("VM Backup: Resultado bruto:", result);
@@ -1551,6 +1552,50 @@ async function discoverVMs() {
   } finally {
     loadingDiv.style.display = "none";
     discoverBtn.disabled = false;
+  }
+}
+
+// Função para diagnóstico de VMs
+async function diagnoseVMs() {
+  console.log("VM Backup: Iniciando diagnóstico...");
+
+  const diagnoseBtn = document.getElementById("diagnose-vms-btn");
+
+  try {
+    diagnoseBtn.disabled = true;
+    showAlert("info", "🩺 Executando diagnóstico...", 0);
+    addVMLog("========================================");
+    addVMLog("🩺 INICIANDO DIAGNÓSTICO");
+    addVMLog("========================================");
+
+    const scriptPath = `${VM_SCRIPTS_DIR}/diagnose-vms.sh`;
+
+    // Executar diagnóstico
+    const result = await cockpit.spawn(["bash", scriptPath], {
+      err: "out", // Combinar stderr com stdout
+      superuser: "try",
+    });
+
+    // Adicionar resultado ao log
+    const lines = result.split("\n");
+    lines.forEach((line) => {
+      if (line.trim()) {
+        addVMLog(line);
+      }
+    });
+
+    addVMLog("========================================");
+    addVMLog("✅ DIAGNÓSTICO CONCLUÍDO");
+    addVMLog("========================================");
+
+    showAlert("success", "✅ Diagnóstico concluído! Veja o log abaixo.");
+  } catch (error) {
+    console.error("VM Backup: Erro no diagnóstico:", error);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `❌ Erro no diagnóstico: ${errorMsg}`);
+    addVMLog(`❌ ERRO: ${errorMsg}`);
+  } finally {
+    diagnoseBtn.disabled = false;
   }
 }
 
