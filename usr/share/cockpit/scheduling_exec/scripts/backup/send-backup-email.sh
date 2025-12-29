@@ -8,16 +8,29 @@ FILES="$3"
 MESSAGE="$4"
 
 if [ -z "$EMAIL_TO" ] || [ -z "$SUBJECT" ] || [ -z "$FILES" ]; then
-    echo "Erro: Parâmetros insuficientes" >&2
+    echo "ERRO: Parâmetros insuficientes" >&2
     echo "Uso: $0 <destinatario> <assunto> <arquivos> [mensagem]" >&2
     exit 1
 fi
 
-# Verificar se mail ou mailx está instalado
-if ! command -v mail &> /dev/null && ! command -v mailx &> /dev/null; then
-    echo "Erro: 'mail' ou 'mailx' não está instalado" >&2
-    echo "Instale com: sudo apt-get install mailutils" >&2
-    exit 1
+# Verificar qual utilitário de email está instalado (msmtp é preferido por ser mais leve)
+MAIL_CMD=""
+if command -v msmtp &> /dev/null; then
+    MAIL_CMD="msmtp"
+    echo "✅ Usando msmtp (recomendado)" >&2
+elif command -v mail &> /dev/null; then
+    MAIL_CMD="mail"
+    echo "✅ Usando mail" >&2
+elif command -v mailx &> /dev/null; then
+    MAIL_CMD="mailx"
+    echo "✅ Usando mailx" >&2
+else
+    echo "ERRO: Nenhum utilitário de email instalado" >&2
+    echo "Recomendado (mais leve): sudo apt-get install msmtp msmtp-mta" >&2
+    echo "Alternativas:" >&2
+    echo "  - Debian/Ubuntu: sudo apt-get install mailutils" >&2
+    echo "  - CentOS/RHEL: sudo yum install mailx" >&2
+    exit 2
 fi
 
 # Criar arquivo temporário para o corpo do email
@@ -70,16 +83,42 @@ for file in "${FILE_ARRAY[@]}"; do
 done
 
 # Enviar email
-if command -v mail &> /dev/null; then
-    cat "$TEMP_BODY" | mail -s "$SUBJECT" $ATTACHMENTS "$EMAIL_TO"
-elif command -v mailx &> /dev/null; then
-    cat "$TEMP_BODY" | mailx -s "$SUBJECT" $ATTACHMENTS "$EMAIL_TO"
+echo "Enviando email para $EMAIL_TO..." >&2
+echo "Assunto: $SUBJECT" >&2
+echo "Arquivos: ${#FILE_ARRAY[@]} arquivo(s)" >&2
+
+if [ "$MAIL_CMD" = "msmtp" ]; then
+    # msmtp usa formato diferente - precisa do cabeçalho completo
+    {
+        echo "To: $EMAIL_TO"
+        echo "Subject: $SUBJECT"
+        echo "Content-Type: text/plain; charset=UTF-8"
+        echo ""
+        cat "$TEMP_BODY"
+    } | msmtp "$EMAIL_TO" 2>&1
+    RESULT=$?
+
+    # msmtp não suporta anexos diretamente - aviso
+    if [ ${#FILE_ARRAY[@]} -gt 0 ]; then
+        echo "⚠️  AVISO: msmtp não suporta anexos. Para enviar arquivos, use mail/mailx" >&2
+        echo "    ou configure msmtp com mutt: sudo apt-get install mutt" >&2
+    fi
+elif [ "$MAIL_CMD" = "mail" ]; then
+    cat "$TEMP_BODY" | mail -s "$SUBJECT" $ATTACHMENTS "$EMAIL_TO" 2>&1
+    RESULT=$?
+elif [ "$MAIL_CMD" = "mailx" ]; then
+    cat "$TEMP_BODY" | mailx -s "$SUBJECT" $ATTACHMENTS "$EMAIL_TO" 2>&1
+    RESULT=$?
 fi
 
-if [ $? -eq 0 ]; then
-    echo "Email enviado com sucesso para $EMAIL_TO"
+# Limpar arquivo temporário
+rm -f "$TEMP_BODY"
+
+if [ $RESULT -eq 0 ]; then
+    echo "✅ Email enviado com sucesso para $EMAIL_TO"
     exit 0
 else
-    echo "Erro ao enviar email" >&2
-    exit 1
+    echo "ERRO: Falha ao enviar email (código: $RESULT)" >&2
+    echo "Verifique a configuração do servidor de email (postfix/sendmail)" >&2
+    exit 3
 fi

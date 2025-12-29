@@ -894,19 +894,65 @@ async function sendEmail() {
       formatDate(new Date().toISOString())
     );
 
-    await cockpit.spawn([
-      "/usr/share/cockpit/scheduling_exec/scripts/backup/send-backup-email.sh",
+    const script =
+      "/usr/share/cockpit/scheduling_exec/scripts/backup/send-backup-email.sh";
+
+    console.log("Enviando email:", {
       emailTo,
       subject,
-      files,
-      message,
-    ]);
+      filesCount: backups.length,
+      totalSize: formatSize(totalSize),
+    });
 
+    const result = await cockpit.spawn(
+      [script, emailTo, subject, files, message],
+      { err: "message", superuser: "try" }
+    );
+
+    console.log("Resultado:", result);
     showAlert("success", `✅ Email enviado com sucesso para ${emailTo}!`);
     closeEmailModal();
   } catch (error) {
-    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
-    showAlert("danger", `Erro ao enviar email: ${errorMsg}`);
+    console.error("Erro ao enviar email:", error);
+
+    let errorMsg = "Erro desconhecido";
+
+    if (error?.message) {
+      errorMsg = error.message;
+
+      // Mensagens de erro específicas
+      if (
+        errorMsg.includes("Nenhum utilitário de email instalado") ||
+        errorMsg.includes("não está instalado") ||
+        errorMsg.includes("not installed")
+      ) {
+        errorMsg =
+          "❌ Sistema de email não configurado.\n\n" +
+          "📦 Recomendado (mais leve):\n" +
+          "   sudo apt-get install msmtp msmtp-mta\n\n" +
+          "📄 Veja: doc/MSMTP-SETUP-GUIDE.md";
+      } else if (errorMsg.includes("configuração do servidor")) {
+        errorMsg =
+          "❌ Servidor de email não configurado.\n" +
+          "Configure o msmtp (~/.msmtprc ou /etc/msmtprc)\n" +
+          "Veja o guia: doc/MSMTP-SETUP-GUIDE.md";
+      } else if (errorMsg.includes("Parâmetros insuficientes")) {
+        errorMsg = "❌ Erro nos parâmetros do email. Verifique os dados.";
+      } else if (errorMsg.includes("authentication failed")) {
+        errorMsg =
+          "❌ Falha na autenticação.\n" +
+          "Para Gmail, use Senha de App (não a senha normal).\n" +
+          "Veja: doc/MSMTP-SETUP-GUIDE.md";
+      } else if (errorMsg.includes("cannot connect")) {
+        errorMsg =
+          "❌ Não foi possível conectar ao servidor SMTP.\n" +
+          "Verifique sua conexão e firewall (porta 587).";
+      }
+    } else if (error?.toString) {
+      errorMsg = error.toString();
+    }
+
+    showAlert("danger", errorMsg, 15000);
   }
 }
 
@@ -1075,6 +1121,54 @@ function updateEmailForm() {
   document.getElementById("max-email-size").value = emailConfig.maxSize;
 }
 
+async function testEmailConfiguration() {
+  try {
+    showAlert("info", "🔧 Testando configuração de email...", 0);
+
+    const script =
+      "/usr/share/cockpit/scheduling_exec/scripts/backup/test-email.sh";
+    const recipient = document.getElementById("email-recipient").value.trim();
+
+    console.log("Testando configuração de email...");
+
+    const result = await cockpit.spawn([script, recipient || ""], {
+      err: "message",
+      superuser: "try",
+    });
+
+    console.log("Resultado do teste:", result);
+
+    // Processar resultado
+    const lines = result.split("\n");
+    let hasError = false;
+    let errorMessage = "";
+    let successMessage = "";
+
+    for (const line of lines) {
+      if (line.includes("❌")) {
+        hasError = true;
+        errorMessage += line + "\n";
+      } else if (line.includes("✅")) {
+        successMessage += line + "\n";
+      }
+    }
+
+    if (hasError) {
+      showAlert(
+        "warning",
+        `⚠️ Problemas encontrados:\n${errorMessage}\n${successMessage}`,
+        15000
+      );
+    } else {
+      showAlert("success", `✅ Configuração OK!\n${successMessage}`, 10000);
+    }
+  } catch (error) {
+    console.error("Erro ao testar configuração:", error);
+    const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
+    showAlert("danger", `❌ Erro ao testar configuração: ${errorMsg}`, 10000);
+  }
+}
+
 function setupEventListeners() {
   document
     .getElementById("email-config-form")
@@ -1093,6 +1187,10 @@ function setupEventListeners() {
 
       await saveConfiguration();
     });
+
+  document
+    .getElementById("test-email-config-btn")
+    .addEventListener("click", testEmailConfiguration);
 }
 
 // ============================================================================
