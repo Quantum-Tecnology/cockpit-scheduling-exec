@@ -58,8 +58,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Backup Manager: Elemento #backup-tabs não encontrado!");
   }
 
-  loadConfiguration();
-  loadBackups();
+  // Carregar configuração primeiro, depois os backups
+  await loadConfiguration();
+  await loadBackups();
   setupEventListeners();
 
   // Garantir que a aba de backups esteja visível inicialmente
