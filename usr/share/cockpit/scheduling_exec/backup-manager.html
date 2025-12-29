@@ -404,6 +404,16 @@
           margin-bottom: var(--pf-global--spacer--sm);
         }
       }
+
+      .plugin-footer {
+        position: fixed;
+        right: var(--pf-global--spacer--md);
+        bottom: var(--pf-global--spacer--sm);
+        z-index: 10;
+        font-size: var(--pf-global--FontSize--xs);
+        color: var(--pf-global--Color--200);
+        user-select: text;
+      }
     </style>
   </head>
 
@@ -1228,11 +1238,83 @@
             class="tab-content"
             style="display: none"
           >
+            <!-- Estatísticas da aba -->
             <div
               class="pf-l-grid pf-m-gutter"
-              style="margin-top: var(--pf-global--spacer--md)"
+              style="margin-bottom: var(--pf-global--spacer--lg)"
             >
-              <!-- Lista de Scripts com Header e Estatísticas -->
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #0066cc 0%,
+                      #004999 100%
+                    );
+                  "
+                >
+                  <h3 id="automation-stat-total-scripts">0</h3>
+                  <p>Total de Scripts</p>
+                </div>
+              </div>
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #28a745 0%,
+                      #1e7e34 100%
+                    );
+                  "
+                >
+                  <h3 id="automation-stat-scheduled">0</h3>
+                  <p>Agendados</p>
+                </div>
+              </div>
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #f39c12 0%,
+                      #e67e22 100%
+                    );
+                  "
+                >
+                  <h3 id="automation-stat-running">0</h3>
+                  <p>Executando</p>
+                </div>
+              </div>
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #dc3545 0%,
+                      #c82333 100%
+                    );
+                  "
+                >
+                  <h3 id="automation-stat-failures">0</h3>
+                  <p>Falhas</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lista de Scripts -->
+            <div class="pf-l-grid pf-m-gutter">
               <div class="pf-l-grid__item pf-m-12-col">
                 <div class="pf-c-card">
                   <div class="pf-c-card__header">
@@ -1252,75 +1334,6 @@
                       >
                         🔄 Atualizar
                       </button>
-                    </div>
-                  </div>
-
-                  <!-- Estatísticas compactas dentro do card -->
-                  <div
-                    class="pf-c-card__body"
-                    style="
-                      background-color: #f5f5f5;
-                      border-bottom: 1px solid
-                        var(--pf-global--BorderColor--100);
-                    "
-                  >
-                    <div class="pf-l-grid pf-m-gutter">
-                      <div
-                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                        style="text-align: center"
-                      >
-                        <div style="font-size: 1.5rem">📜</div>
-                        <strong
-                          id="automation-stat-total-scripts"
-                          style="display: block; font-size: 1.5rem"
-                          >0</strong
-                        >
-                        <small style="color: var(--pf-global--Color--200)"
-                          >Total</small
-                        >
-                      </div>
-                      <div
-                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                        style="text-align: center"
-                      >
-                        <div style="font-size: 1.5rem">⏰</div>
-                        <strong
-                          id="automation-stat-scheduled"
-                          style="display: block; font-size: 1.5rem"
-                          >0</strong
-                        >
-                        <small style="color: var(--pf-global--Color--200)"
-                          >Agendados</small
-                        >
-                      </div>
-                      <div
-                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                        style="text-align: center"
-                      >
-                        <div style="font-size: 1.5rem">🔄</div>
-                        <strong
-                          id="automation-stat-running"
-                          style="display: block; font-size: 1.5rem"
-                          >0</strong
-                        >
-                        <small style="color: var(--pf-global--Color--200)"
-                          >Executando</small
-                        >
-                      </div>
-                      <div
-                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                        style="text-align: center"
-                      >
-                        <div style="font-size: 1.5rem">❌</div>
-                        <strong
-                          id="automation-stat-failures"
-                          style="display: block; font-size: 1.5rem"
-                          >0</strong
-                        >
-                        <small style="color: var(--pf-global--Color--200)"
-                          >Falhas</small
-                        >
-                      </div>
                     </div>
                   </div>
                   <div
@@ -1478,6 +1491,122 @@
                           ➕ Criar Primeiro Script
                         </button>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Agendamentos -->
+          <div
+            id="schedules-tab-content"
+            class="tab-content"
+            style="display: none"
+          >
+            <!-- Estatísticas da aba -->
+            <div
+              class="pf-l-grid pf-m-gutter"
+              style="margin-bottom: var(--pf-global--spacer--lg)"
+            >
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #0066cc 0%,
+                      #004999 100%
+                    );
+                  "
+                >
+                  <h3 id="schedules-stat-total">0</h3>
+                  <p>Total de Agendamentos</p>
+                </div>
+              </div>
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #28a745 0%,
+                      #1e7e34 100%
+                    );
+                  "
+                >
+                  <h3 id="schedules-stat-active">0</h3>
+                  <p>Ativos</p>
+                </div>
+              </div>
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #f39c12 0%,
+                      #e67e22 100%
+                    );
+                  "
+                >
+                  <h3 id="schedules-stat-next">--</h3>
+                  <p>Próxima Execução</p>
+                </div>
+              </div>
+              <div
+                class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
+              >
+                <div
+                  class="stats-card"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #dc3545 0%,
+                      #c82333 100%
+                    );
+                  "
+                >
+                  <h3 id="schedules-stat-inactive">0</h3>
+                  <p>Inativos</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lista de Agendamentos -->
+            <div class="pf-l-grid pf-m-gutter">
+              <div class="pf-l-grid__item pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">
+                        📋 Agendamentos Configurados
+                      </h2>
+                    </div>
+                    <div class="pf-c-card__header-actions">
+                      <button
+                        class="pf-c-button pf-m-primary"
+                        onclick="openScheduleModal()"
+                      >
+                        ➕ Novo Agendamento
+                      </button>
+                      <button
+                        class="pf-c-button pf-m-secondary"
+                        onclick="loadSchedules()"
+                      >
+                        🔄 Atualizar
+                      </button>
+                    </div>
+                  </div>
+                  <div class="pf-c-card__body">
+                    <div id="schedules-table-container">
+                      <!-- Tabela será renderizada aqui -->
                     </div>
                   </div>
                 </div>
@@ -1905,112 +2034,6 @@
           >
             Cancelar
           </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab: Agendamentos -->
-    <div id="schedules-tab-content" class="tab-content" style="display: none">
-      <div
-        class="pf-l-grid pf-m-gutter"
-        style="margin-top: var(--pf-global--spacer--md)"
-      >
-        <!-- Lista de Agendamentos -->
-        <div class="pf-l-grid__item pf-m-12-col">
-          <div class="pf-c-card">
-            <div class="pf-c-card__header">
-              <div class="pf-c-card__header-main">
-                <h2 class="pf-c-card__title">📋 Agendamentos Configurados</h2>
-              </div>
-              <div class="pf-c-card__header-actions">
-                <button
-                  class="pf-c-button pf-m-primary"
-                  onclick="openScheduleModal()"
-                >
-                  ➕ Novo Agendamento
-                </button>
-                <button
-                  class="pf-c-button pf-m-secondary"
-                  onclick="loadSchedules()"
-                >
-                  🔄 Atualizar
-                </button>
-              </div>
-            </div>
-
-            <!-- Estatísticas compactas dentro do card -->
-            <div
-              class="pf-c-card__body"
-              style="
-                background-color: #f5f5f5;
-                border-bottom: 1px solid var(--pf-global--BorderColor--100);
-              "
-            >
-              <div class="pf-l-grid pf-m-gutter">
-                <div
-                  class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                  style="text-align: center"
-                >
-                  <div style="font-size: 1.5rem">📅</div>
-                  <strong
-                    id="schedules-stat-total"
-                    style="display: block; font-size: 1.5rem"
-                    >0</strong
-                  >
-                  <small style="color: var(--pf-global--Color--200)"
-                    >Total</small
-                  >
-                </div>
-                <div
-                  class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                  style="text-align: center"
-                >
-                  <div style="font-size: 1.5rem">✅</div>
-                  <strong
-                    id="schedules-stat-active"
-                    style="display: block; font-size: 1.5rem"
-                    >0</strong
-                  >
-                  <small style="color: var(--pf-global--Color--200)"
-                    >Ativos</small
-                  >
-                </div>
-                <div
-                  class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                  style="text-align: center"
-                >
-                  <div style="font-size: 1.5rem">⏰</div>
-                  <strong
-                    id="schedules-stat-next"
-                    style="display: block; font-size: 1.5rem"
-                    >--</strong
-                  >
-                  <small style="color: var(--pf-global--Color--200)"
-                    >Próxima</small
-                  >
-                </div>
-                <div
-                  class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                  style="text-align: center"
-                >
-                  <div style="font-size: 1.5rem">❌</div>
-                  <strong
-                    id="schedules-stat-inactive"
-                    style="display: block; font-size: 1.5rem"
-                    >0</strong
-                  >
-                  <small style="color: var(--pf-global--Color--200)"
-                    >Inativos</small
-                  >
-                </div>
-              </div>
-            </div>
-            <div class="pf-c-card__body">
-              <div id="schedules-table-container">
-                <!-- Tabela será renderizada aqui -->
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -2683,5 +2706,9 @@
       style="display: none"
       onclick="closeScheduleModal()"
     ></div>
+
+    <div id="plugin-footer" class="plugin-footer">
+      v1.5.0 — Luis Gustavo Santarosa Pinto
+    </div>
   </body>
 </html>
