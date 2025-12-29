@@ -35,6 +35,10 @@ let automationCronModalMode = "script";
 let automationOpenRowActionsMenuId = null;
 let automationCurrentLogScript = null;
 
+// Variáveis globais para Agendamentos
+let allSchedules = [];
+let editingScheduleId = null;
+
 // Constantes
 const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
 const VM_SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/vm";
@@ -1301,12 +1305,17 @@ function switchTab(tab) {
   const configTab = document.getElementById("config-tab-content");
   const vmsTab = document.getElementById("vms-tab-content");
   const automationTab = document.getElementById("automation-tab-content");
+  const schedulesTab = document.getElementById("schedules-tab-content");
 
   if (backupsTab) {
     backupsTab.style.display = tab === "backups" ? "block" : "none";
   }
   if (configTab) {
     configTab.style.display = tab === "config" ? "block" : "none";
+    // Renderizar lista de diretórios de scripts quando entrar na aba
+    if (tab === "config") {
+      automationRenderScriptDirectoriesList();
+    }
   }
   if (vmsTab) {
     vmsTab.style.display = tab === "vms" ? "block" : "none";
@@ -1332,11 +1341,8 @@ function switchTab(tab) {
   }
   if (automationTab) {
     automationTab.style.display = tab === "automation" ? "block" : "none";
-    // Auto-carregar scripts e renderizar diretórios
+    // Auto-carregar scripts
     if (tab === "automation") {
-      // Renderizar lista de diretórios configurados
-      automationRenderScriptDirectoriesList();
-
       // Auto-carregar scripts se ainda não carregou
       if (allScripts.length === 0) {
         const scriptsLoaded = sessionStorage.getItem("scripts-loaded");
@@ -1346,6 +1352,12 @@ function switchTab(tab) {
           sessionStorage.setItem("scripts-loaded", "true");
         }
       }
+    }
+  }
+  if (schedulesTab) {
+    schedulesTab.style.display = tab === "schedules" ? "block" : "none";
+    if (tab === "schedules") {
+      loadSchedules();
     }
   }
 
@@ -3623,6 +3635,404 @@ function automationRemoveCron() {
         "Erro ao remover agendamento: " + automationFormatCockpitError(error)
       );
     });
+}
+
+// ==============================================
+// AGENDAMENTOS (SCHEDULES)
+// ==============================================
+
+// Carregar agendamentos do crontab
+async function loadSchedules() {
+  console.log("Schedules: Carregando agendamentos do crontab...");
+
+  try {
+    // Ler crontab atual
+    const result = await cockpit.spawn(["crontab", "-l"], {
+      err: "ignore",
+      superuser: "try",
+    });
+
+    allSchedules = [];
+    const lines = result.trim().split("\n");
+
+    for (const line of lines) {
+      // Ignorar comentários e linhas vazias
+      if (!line || line.startsWith("#")) continue;
+
+      // Parse da linha cron
+      const match = line.match(/^(\S+\s+\S+\s+\S+\s+\S+\s+\S+)\s+(.+)$/);
+      if (!match) continue;
+
+      const cronExpression = match[1];
+      const command = match[2];
+
+      // Identificar tipo baseado no comando
+      let type = "custom";
+      let target = "";
+      let description = "";
+
+      if (command.includes("backup-all-vms.sh")) {
+        type = "vm-backup";
+        description = "Backup de VMs";
+      } else if (command.includes(".sh")) {
+        type = "script";
+        const scriptMatch = command.match(/([^\/]+\.sh)/);
+        target = scriptMatch ? scriptMatch[1] : "";
+        description = `Script: ${target}`;
+      } else if (command.includes("tar") || command.includes("backup")) {
+        type = "backup";
+        description = "Backup de arquivos";
+      }
+
+      allSchedules.push({
+        id: Date.now() + Math.random(),
+        type: type,
+        target: target,
+        description: description || command,
+        cronExpression: cronExpression,
+        command: command,
+        enabled: true,
+        lastRun: null,
+        nextRun: calculateNextRun(cronExpression),
+      });
+    }
+
+    console.log(`Schedules: ${allSchedules.length} agendamento(s) carregados`);
+    renderSchedulesTable();
+    updateSchedulesStats();
+  } catch (error) {
+    console.error("Schedules: Erro ao carregar agendamentos:", error);
+    if (error.toString().includes("no crontab")) {
+      console.log("Schedules: Nenhum crontab configurado");
+      allSchedules = [];
+      renderSchedulesTable();
+      updateSchedulesStats();
+    } else {
+      showAlert("danger", "Erro ao carregar agendamentos: " + error);
+    }
+  }
+}
+
+// Renderizar tabela de agendamentos
+function renderSchedulesTable() {
+  const container = document.getElementById("schedules-table-container");
+
+  if (allSchedules.length === 0) {
+    container.innerHTML = `
+      <div class="pf-c-empty-state pf-m-sm">
+        <div class="pf-c-empty-state__content">
+          <i class="fas fa-calendar-alt pf-c-empty-state__icon"></i>
+          <h2 class="pf-c-title pf-m-lg">Nenhum agendamento configurado</h2>
+          <div class="pf-c-empty-state__body">
+            Crie seu primeiro agendamento para automatizar backups, scripts ou VMs.
+          </div>
+          <button class="pf-c-button pf-m-primary" onclick="openScheduleModal()">
+            ➕ Criar Agendamento
+          </button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const html = `
+    <table class="pf-c-table pf-m-grid-md" role="grid">
+      <thead>
+        <tr role="row">
+          <th role="columnheader">Tipo</th>
+          <th role="columnheader">Descrição</th>
+          <th role="columnheader">Expressão Cron</th>
+          <th role="columnheader">Próxima Execução</th>
+          <th role="columnheader">Status</th>
+          <th role="columnheader" style="width: 150px;">Ações</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        ${allSchedules
+          .map(
+            (schedule) => `
+          <tr role="row">
+            <td role="cell">
+              ${
+                schedule.type === "backup"
+                  ? "📦 Backup"
+                  : schedule.type === "vm-backup"
+                  ? "💿 VM"
+                  : schedule.type === "script"
+                  ? "⚡ Script"
+                  : "⚙️ Personalizado"
+              }
+            </td>
+            <td role="cell">
+              <strong>${escapeHtml(schedule.description)}</strong>
+              ${
+                schedule.target
+                  ? `<br><code style="font-size: 0.85em;">${escapeHtml(
+                      schedule.target
+                    )}</code>`
+                  : ""
+              }
+            </td>
+            <td role="cell"><code>${escapeHtml(
+              schedule.cronExpression
+            )}</code></td>
+            <td role="cell">${schedule.nextRun || "--"}</td>
+            <td role="cell">
+              <span class="pf-c-badge ${schedule.enabled ? "pf-m-read" : ""}">
+                ${schedule.enabled ? "✅ Ativo" : "❌ Inativo"}
+              </span>
+            </td>
+            <td role="cell">
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="pf-c-button pf-m-secondary pf-m-small"
+                        onclick="editSchedule('${schedule.id}')"
+                        title="Editar">
+                  ✏️
+                </button>
+                <button class="pf-c-button pf-m-danger pf-m-small"
+                        onclick="deleteSchedule('${schedule.id}')"
+                        title="Excluir">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+
+  container.innerHTML = html;
+}
+
+// Atualizar estatísticas
+function updateSchedulesStats() {
+  const total = allSchedules.length;
+  const active = allSchedules.filter((s) => s.enabled).length;
+  const inactive = allSchedules.filter((s) => !s.enabled).length;
+
+  // Próxima execução
+  const nextRuns = allSchedules
+    .filter((s) => s.enabled && s.nextRun)
+    .map((s) => s.nextRun)
+    .sort();
+  const nextRun = nextRuns[0] || "--";
+
+  document.getElementById("schedules-stat-total").textContent = total;
+  document.getElementById("schedules-stat-active").textContent = active;
+  document.getElementById("schedules-stat-inactive").textContent = inactive;
+  document.getElementById("schedules-stat-next").textContent = nextRun;
+}
+
+// Calcular próxima execução (simplificado)
+function calculateNextRun(cronExpression) {
+  // Esta é uma implementação básica - idealmente usar biblioteca de parsing de cron
+  const parts = cronExpression.split(" ");
+  if (parts.length !== 5) return "Formato inválido";
+
+  const [minute, hour, day, month, weekday] = parts;
+
+  // Exemplos simples
+  if (cronExpression === "0 2 * * *") return "Diariamente às 02:00";
+  if (cronExpression === "0 0 * * 0") return "Domingos à meia-noite";
+  if (cronExpression.includes("*/")) {
+    const interval = cronExpression.match(/\*\/(\d+)/)[1];
+    if (cronExpression.startsWith("*/")) return `A cada ${interval} minutos`;
+    if (cronExpression.includes(" */")) return `A cada ${interval} horas`;
+  }
+
+  return `${hour}:${minute.padStart(2, "0")}`;
+}
+
+// Abrir modal de agendamento
+function openScheduleModal(scheduleId = null) {
+  editingScheduleId = scheduleId;
+
+  const modal = document.getElementById("schedule-modal");
+  const backdrop = document.getElementById("schedule-modal-backdrop");
+  const title = document.getElementById("schedule-modal-title");
+
+  if (scheduleId) {
+    const schedule = allSchedules.find((s) => s.id === scheduleId);
+    title.textContent = "✏️ Editar Agendamento";
+    document.getElementById("schedule-type").value = schedule.type;
+    document.getElementById("schedule-description").value =
+      schedule.description;
+    document.getElementById("schedule-cron").value = schedule.cronExpression;
+    document.getElementById("schedule-enabled").checked = schedule.enabled;
+    updateScheduleOptions();
+    document.getElementById("schedule-target").value = schedule.target;
+  } else {
+    title.textContent = "➕ Novo Agendamento";
+    document.getElementById("schedule-form").reset();
+    document.getElementById("schedule-target-group").style.display = "none";
+  }
+
+  modal.style.display = "block";
+  backdrop.style.display = "block";
+}
+
+// Fechar modal
+function closeScheduleModal() {
+  document.getElementById("schedule-modal").style.display = "none";
+  document.getElementById("schedule-modal-backdrop").style.display = "none";
+  editingScheduleId = null;
+}
+
+// Atualizar opções de destino baseado no tipo
+function updateScheduleOptions() {
+  const type = document.getElementById("schedule-type").value;
+  const targetGroup = document.getElementById("schedule-target-group");
+  const targetLabel = document.getElementById("schedule-target-label");
+  const targetSelect = document.getElementById("schedule-target");
+
+  if (!type) {
+    targetGroup.style.display = "none";
+    return;
+  }
+
+  targetGroup.style.display = "block";
+  targetSelect.innerHTML = '<option value="">Selecione...</option>';
+
+  if (type === "backup") {
+    targetLabel.textContent = "Diretório de Backup";
+    backupDirectories.forEach((dir) => {
+      targetSelect.innerHTML += `<option value="${escapeHtml(
+        dir.path
+      )}">${escapeHtml(dir.label || dir.path)}</option>`;
+    });
+  } else if (type === "vm-backup") {
+    targetLabel.textContent = "Máquina Virtual";
+    targetSelect.innerHTML += '<option value="all">Todas as VMs</option>';
+    allVMs.forEach((vm) => {
+      targetSelect.innerHTML += `<option value="${escapeHtml(
+        vm.name
+      )}">${escapeHtml(vm.name)}</option>`;
+    });
+  } else if (type === "script") {
+    targetLabel.textContent = "Script";
+    allScripts.forEach((script) => {
+      targetSelect.innerHTML += `<option value="${escapeHtml(
+        script.path
+      )}">${escapeHtml(script.name)}</option>`;
+    });
+  }
+}
+
+// Salvar agendamento
+async function saveSchedule() {
+  const type = document.getElementById("schedule-type").value;
+  const target = document.getElementById("schedule-target").value;
+  const description = document.getElementById("schedule-description").value;
+  const cronExpression = document.getElementById("schedule-cron").value;
+  const enabled = document.getElementById("schedule-enabled").checked;
+
+  if (!type || !cronExpression) {
+    showAlert("warning", "⚠️ Preencha todos os campos obrigatórios");
+    return;
+  }
+
+  // Construir comando baseado no tipo
+  let command = "";
+  if (type === "backup") {
+    command = `tar -czf /backup/backup-$(date +\\%Y\\%m\\%d-\\%H\\%M\\%S).tar.gz ${target}`;
+  } else if (type === "vm-backup") {
+    const vmScript = "/usr/local/bin/backup-all-vms.sh";
+    command = target === "all" ? vmScript : `${vmScript} ${target}`;
+  } else if (type === "script") {
+    command = `bash ${target}`;
+  }
+
+  try {
+    // Ler crontab atual
+    let currentCrontab = "";
+    try {
+      currentCrontab = await cockpit.spawn(["crontab", "-l"], {
+        err: "ignore",
+        superuser: "try",
+      });
+    } catch (e) {
+      console.log("Schedules: Crontab vazio ou inexistente");
+    }
+
+    // Se editando, remover linha antiga
+    if (editingScheduleId) {
+      const oldSchedule = allSchedules.find((s) => s.id === editingScheduleId);
+      const lines = currentCrontab
+        .split("\n")
+        .filter(
+          (line) =>
+            line !== `${oldSchedule.cronExpression} ${oldSchedule.command}`
+        );
+      currentCrontab = lines.join("\n");
+    }
+
+    // Adicionar novo agendamento
+    const newLine = `${cronExpression} ${command}`;
+    const newCrontab = currentCrontab
+      ? `${currentCrontab}\n${newLine}`
+      : newLine;
+
+    // Salvar crontab
+    await cockpit
+      .spawn(["crontab", "-"], {
+        superuser: "require",
+      })
+      .input(newCrontab);
+
+    showAlert("success", "✅ Agendamento salvo com sucesso!");
+    closeScheduleModal();
+    await loadSchedules();
+  } catch (error) {
+    console.error("Schedules: Erro ao salvar agendamento:", error);
+    showAlert("danger", "Erro ao salvar agendamento: " + error);
+  }
+}
+
+// Editar agendamento
+function editSchedule(scheduleId) {
+  openScheduleModal(scheduleId);
+}
+
+// Excluir agendamento
+async function deleteSchedule(scheduleId) {
+  const schedule = allSchedules.find((s) => s.id === scheduleId);
+  if (
+    !confirm(
+      `Deseja realmente excluir o agendamento "${schedule.description}"?`
+    )
+  )
+    return;
+
+  try {
+    // Ler crontab atual
+    const currentCrontab = await cockpit.spawn(["crontab", "-l"], {
+      err: "ignore",
+      superuser: "try",
+    });
+
+    // Remover linha
+    const lines = currentCrontab.split("\n").filter((line) => {
+      return line !== `${schedule.cronExpression} ${schedule.command}`;
+    });
+
+    const newCrontab = lines.join("\n");
+
+    // Salvar crontab
+    await cockpit
+      .spawn(["crontab", "-"], {
+        superuser: "require",
+      })
+      .input(newCrontab);
+
+    showAlert("success", "✅ Agendamento excluído com sucesso!");
+    await loadSchedules();
+  } catch (error) {
+    console.error("Schedules: Erro ao excluir agendamento:", error);
+    showAlert("danger", "Erro ao excluir agendamento: " + error);
+  }
 }
 
 // Função para adicionar linha ao log de VMs

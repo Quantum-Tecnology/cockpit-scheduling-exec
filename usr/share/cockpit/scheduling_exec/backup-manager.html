@@ -526,6 +526,15 @@
                 <span class="pf-c-tabs__item-text">⚡ Automação</span>
               </button>
             </li>
+            <li class="pf-c-tabs__item">
+              <button
+                class="pf-c-tabs__link"
+                id="tab-schedules"
+                onclick="switchTab('schedules')"
+              >
+                <span class="pf-c-tabs__item-text">📅 Agendamentos</span>
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -707,6 +716,39 @@
                     style="margin-top: var(--pf-global--spacer--md)"
                   >
                     <!-- Lista de diretórios será preenchida aqui -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diretórios de Scripts -->
+            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+              <div class="pf-c-card">
+                <div class="pf-c-card__header">
+                  <div class="pf-c-card__header-main">
+                    <h2 class="pf-c-card__title">📂 Diretórios de Scripts</h2>
+                  </div>
+                </div>
+                <div class="pf-c-card__body">
+                  <p
+                    style="
+                      color: var(--pf-global--Color--200);
+                      margin-bottom: var(--pf-global--spacer--md);
+                    "
+                  >
+                    Configure os diretórios onde seus scripts estão localizados.
+                  </p>
+                  <button
+                    class="pf-c-button pf-m-primary pf-m-block"
+                    onclick="automationAddScriptDirectory()"
+                  >
+                    ➕ Adicionar Diretório
+                  </button>
+                  <div
+                    id="automation-script-directories-list"
+                    style="margin-top: var(--pf-global--spacer--md)"
+                  >
+                    <!-- Lista será renderizada aqui -->
                   </div>
                 </div>
               </div>
@@ -1290,38 +1332,6 @@
               </div>
             </div>
 
-            <!-- Diretórios de Scripts -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">📂 Diretórios de Scripts</h2>
-                  </div>
-                  <div class="pf-c-card__header-actions">
-                    <button
-                      class="pf-c-button pf-m-primary"
-                      onclick="automationAddScriptDirectory()"
-                    >
-                      ➕ Adicionar Diretório
-                    </button>
-                  </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <p
-                    class="pf-c-content"
-                    style="margin-bottom: var(--pf-global--spacer--md)"
-                  >
-                    Configure os diretórios onde seus scripts estão localizados.
-                    O sistema irá escanear estes diretórios e mostrar todos os
-                    scripts encontrados.
-                  </p>
-                  <div id="automation-script-directories-list">
-                    <!-- Lista será renderizada aqui -->
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Ações Principais -->
             <div class="pf-l-grid__item pf-m-12-col">
               <div class="pf-c-card" style="border-top: 4px solid #667eea">
@@ -1885,9 +1895,211 @@
       </div>
     </div>
 
-    <!-- MODAIS DE AUTOMAÇÃO -->
+    <!-- Tab: Agendamentos -->
+    <div id="schedules-tab-content" class="tab-content" style="display: none">
+      <div class="pf-l-grid pf-m-gutter">
+        <!-- Estatísticas -->
+        <div class="pf-l-grid__item pf-m-12-col">
+          <div class="pf-l-grid pf-m-gutter">
+            <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+              <div class="pf-c-card" style="border-top: 4px solid #667eea">
+                <div class="pf-c-card__body">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: var(--pf-global--spacer--md);
+                    "
+                  >
+                    <div style="font-size: 2rem">📅</div>
+                    <div>
+                      <h3
+                        id="schedules-stat-total"
+                        class="pf-c-title pf-m-2xl"
+                        style="margin: 0; font-weight: bold"
+                      >
+                        0
+                      </h3>
+                      <p
+                        style="
+                          margin: 0;
+                          color: var(--pf-global--Color--200);
+                          font-size: var(--pf-global--FontSize--sm);
+                        "
+                      >
+                        Total de Agendamentos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-    <!-- Modal: Criar/Editar Script -->
+            <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+              <div class="pf-c-card" style="border-top: 4px solid #43e97b">
+                <div class="pf-c-card__body">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: var(--pf-global--spacer--md);
+                    "
+                  >
+                    <div style="font-size: 2rem">✅</div>
+                    <div>
+                      <h3
+                        id="schedules-stat-active"
+                        class="pf-c-title pf-m-2xl"
+                        style="margin: 0; font-weight: bold"
+                      >
+                        0
+                      </h3>
+                      <p
+                        style="
+                          margin: 0;
+                          color: var(--pf-global--Color--200);
+                          font-size: var(--pf-global--FontSize--sm);
+                        "
+                      >
+                        Ativos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+              <div class="pf-c-card" style="border-top: 4px solid #f093fb">
+                <div class="pf-c-card__body">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: var(--pf-global--spacer--md);
+                    "
+                  >
+                    <div style="font-size: 2rem">⏰</div>
+                    <div>
+                      <h3
+                        id="schedules-stat-next"
+                        class="pf-c-title pf-m-2xl"
+                        style="margin: 0; font-weight: bold"
+                      >
+                        --
+                      </h3>
+                      <p
+                        style="
+                          margin: 0;
+                          color: var(--pf-global--Color--200);
+                          font-size: var(--pf-global--FontSize--sm);
+                        "
+                      >
+                        Próxima Execução
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+              <div class="pf-c-card" style="border-top: 4px solid #fa709a">
+                <div class="pf-c-card__body">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: var(--pf-global--spacer--md);
+                    "
+                  >
+                    <div style="font-size: 2rem">❌</div>
+                    <div>
+                      <h3
+                        id="schedules-stat-inactive"
+                        class="pf-c-title pf-m-2xl"
+                        style="margin: 0; font-weight: bold"
+                      >
+                        0
+                      </h3>
+                      <p
+                        style="
+                          margin: 0;
+                          color: var(--pf-global--Color--200);
+                          font-size: var(--pf-global--FontSize--sm);
+                        "
+                      >
+                        Inativos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão Criar Agendamento -->
+        <div class="pf-l-grid__item pf-m-12-col">
+          <div class="pf-c-card" style="border-top: 4px solid #667eea">
+            <div class="pf-c-card__body">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  gap: var(--pf-global--spacer--md);
+                "
+              >
+                <div>
+                  <h3
+                    class="pf-c-title pf-m-lg"
+                    style="margin-bottom: var(--pf-global--spacer--xs)"
+                  >
+                    ➕ Criar Novo Agendamento
+                  </h3>
+                  <p style="margin: 0; color: var(--pf-global--Color--200)">
+                    Agende backups automáticos, execução de scripts ou backup de
+                    VMs
+                  </p>
+                </div>
+                <button
+                  class="pf-c-button pf-m-primary"
+                  onclick="openScheduleModal()"
+                >
+                  ➕ Novo Agendamento
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Agendamentos -->
+        <div class="pf-l-grid__item pf-m-12-col">
+          <div class="pf-c-card">
+            <div class="pf-c-card__header">
+              <div class="pf-c-card__header-main">
+                <h2 class="pf-c-card__title">📋 Agendamentos Configurados</h2>
+              </div>
+              <div class="pf-c-card__header-actions">
+                <button
+                  class="pf-c-button pf-m-secondary"
+                  onclick="loadSchedules()"
+                >
+                  🔄 Atualizar
+                </button>
+              </div>
+            </div>
+            <div class="pf-c-card__body">
+              <div id="schedules-table-container">
+                <!-- Tabela será renderizada aqui -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="automation-scriptModal" class="modal">
       <div class="modal-content" style="max-width: 1000px">
         <div class="pf-c-modal-box__header">
@@ -2434,5 +2646,127 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal: Criar/Editar Agendamento -->
+    <div
+      id="schedule-modal"
+      class="pf-c-modal-box"
+      style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        background: white;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 90%;
+      "
+    >
+      <div class="pf-c-modal-box__header">
+        <h2 class="pf-c-modal-box__title" id="schedule-modal-title">
+          ➕ Novo Agendamento
+        </h2>
+        <button class="pf-c-button pf-m-plain" onclick="closeScheduleModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="pf-c-modal-box__body">
+        <form id="schedule-form">
+          <div class="pf-c-form__group">
+            <label class="pf-c-form__label">
+              <span class="pf-c-form__label-text">Tipo de Agendamento</span>
+              <span class="pf-c-form__label-required">*</span>
+            </label>
+            <select
+              class="pf-c-form-control"
+              id="schedule-type"
+              required
+              onchange="updateScheduleOptions()"
+            >
+              <option value="">Selecione...</option>
+              <option value="backup">📦 Backup de Arquivos</option>
+              <option value="vm-backup">💿 Backup de VM</option>
+              <option value="script">⚡ Executar Script</option>
+            </select>
+          </div>
+
+          <div
+            class="pf-c-form__group"
+            id="schedule-target-group"
+            style="display: none"
+          >
+            <label class="pf-c-form__label">
+              <span class="pf-c-form__label-text" id="schedule-target-label"
+                >Selecione</span
+              >
+              <span class="pf-c-form__label-required">*</span>
+            </label>
+            <select class="pf-c-form-control" id="schedule-target" required>
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+
+          <div class="pf-c-form__group">
+            <label class="pf-c-form__label">
+              <span class="pf-c-form__label-text">Descrição</span>
+            </label>
+            <input
+              class="pf-c-form-control"
+              type="text"
+              id="schedule-description"
+              placeholder="Ex: Backup diário do servidor"
+            />
+          </div>
+
+          <div class="pf-c-form__group">
+            <label class="pf-c-form__label">
+              <span class="pf-c-form__label-text">Expressão Cron</span>
+              <span class="pf-c-form__label-required">*</span>
+            </label>
+            <input
+              class="pf-c-form-control"
+              type="text"
+              id="schedule-cron"
+              placeholder="*/5 * * * *"
+              required
+            />
+            <p class="pf-c-form__helper-text">
+              Exemplos: "0 2 * * *" (todo dia às 2h), "0 */6 * * *" (a cada 6
+              horas), "0 0 * * 0" (todo domingo)
+            </p>
+          </div>
+
+          <div class="pf-c-form__group">
+            <div class="pf-c-check">
+              <input
+                class="pf-c-check__input"
+                type="checkbox"
+                id="schedule-enabled"
+                checked
+              />
+              <label class="pf-c-check__label" for="schedule-enabled"
+                >Ativo</label
+              >
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="pf-c-modal-box__footer">
+        <button class="pf-c-button pf-m-primary" onclick="saveSchedule()">
+          💾 Salvar
+        </button>
+        <button class="pf-c-button pf-m-link" onclick="closeScheduleModal()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+    <div
+      id="schedule-modal-backdrop"
+      class="pf-c-backdrop"
+      style="display: none"
+      onclick="closeScheduleModal()"
+    ></div>
   </body>
 </html>
