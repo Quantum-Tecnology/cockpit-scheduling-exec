@@ -374,11 +374,22 @@ function toggleRowActionsMenu(menuId) {
   closeAllRowActionsMenus();
 
   if (willOpen) {
+    // Mover menu para o body se ainda não estiver lá
+    if (menu.parentElement !== document.body) {
+      document.body.appendChild(menu);
+    }
+
     // Calcular posição do menu
     if (toggle) {
       const rect = toggle.getBoundingClientRect();
+      const menuWidth = 192; // 12rem
+
+      // Posicionar abaixo do botão, alinhado à direita, usando coordenadas fixas
+      menu.style.position = "fixed";
       menu.style.top = `${rect.bottom + 8}px`;
-      menu.style.left = `${rect.right - 192}px`; // 192px = 12rem (min-width do menu)
+      menu.style.left = `${rect.right - menuWidth}px`;
+      menu.style.zIndex = "99999";
+
       menu.hidden = false;
       toggle.setAttribute("aria-expanded", "true");
       if (container) container.classList.add("is-open");
