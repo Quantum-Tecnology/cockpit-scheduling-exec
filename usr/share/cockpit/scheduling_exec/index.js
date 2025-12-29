@@ -350,11 +350,8 @@ function closeAllRowActionsMenus() {
 
   const containers = document.querySelectorAll(".js-row-actions.is-open");
   containers.forEach((container) => {
-    container.classList.remove('is-open');
+    container.classList.remove("is-open");
   });
-
-  openRowActionsMenuId = null;
-}
 
   openRowActionsMenuId = null;
 }
@@ -366,7 +363,7 @@ function toggleRowActionsMenu(menuId) {
   const toggle = document.querySelector(
     `.js-row-actions-toggle[data-menu-id="${menuId}"]`
   );
-  const container = toggle?.closest('.js-row-actions');
+  const container = toggle?.closest(".js-row-actions");
 
   // Fecha o que estiver aberto (inclusive o próprio)
   if (openRowActionsMenuId && openRowActionsMenuId !== menuId) {
@@ -384,7 +381,7 @@ function toggleRowActionsMenu(menuId) {
       menu.style.left = `${rect.right - 192}px`; // 192px = 12rem (min-width do menu)
       menu.hidden = false;
       toggle.setAttribute("aria-expanded", "true");
-      if (container) container.classList.add('is-open');
+      if (container) container.classList.add("is-open");
       openRowActionsMenuId = menuId;
     }
   }

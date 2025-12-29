@@ -364,8 +364,10 @@ async function addDirectory() {
   updateDirectoryFilter();
   closeAddDirectoryModal();
 
-  // Recarregar backups
-  loadBackups();
+  // Recarregar backups automaticamente
+  console.log("Backup Manager: Recarregando lista de backups...");
+  await loadBackups();
+  console.log("Backup Manager: Lista de backups atualizada");
 }
 
 async function removeDirectory(id) {
@@ -445,24 +447,49 @@ function updateDirectoryFilter() {
 // ============================================================================
 
 async function loadBackups() {
+  console.log("Backup Manager: loadBackups() chamado");
+  console.log(
+    "Backup Manager: Número de diretórios configurados:",
+    backupDirectories.length
+  );
+
   allBackups = [];
 
   if (backupDirectories.length === 0) {
+    console.log(
+      "Backup Manager: Nenhum diretório configurado, não há backups para carregar"
+    );
     updateBackupsTable();
     updateStats();
     return;
   }
 
   showAlert("info", "🔄 Carregando lista de backups...", 2000);
+  console.log(
+    "Backup Manager: Iniciando carregamento de backups de",
+    backupDirectories.length,
+    "diretório(s)"
+  );
 
   for (const dir of backupDirectories) {
+    console.log(
+      `Backup Manager: Carregando backups de ${dir.label} (${dir.path})`
+    );
     try {
       await loadBackupsFromDirectory(dir);
+      console.log(`Backup Manager: ✓ Backups carregados de ${dir.label}`);
     } catch (error) {
-      console.error(`Erro ao carregar backups de ${dir.path}:`, error);
+      console.error(
+        `Backup Manager: ✗ Erro ao carregar backups de ${dir.path}:`,
+        error
+      );
     }
   }
 
+  console.log(
+    "Backup Manager: Total de backups encontrados:",
+    allBackups.length
+  );
   updateBackupsTable();
   updateStats();
   showAlert(
