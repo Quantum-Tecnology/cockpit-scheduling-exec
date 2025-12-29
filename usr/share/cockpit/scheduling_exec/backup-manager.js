@@ -2108,6 +2108,16 @@ function automationEscapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+// Função específica para escapar strings em atributos JavaScript (onclick, etc)
+function automationEscapeJs(value) {
+  return String(value)
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'")
+    .replaceAll('"', '\\"')
+    .replaceAll("\n", "\\n")
+    .replaceAll("\r", "\\r");
+}
+
 function automationMakeSafeId(value) {
   return String(value || "")
     .replaceAll(/[^a-zA-Z0-9_-]/g, "_")
@@ -2699,7 +2709,7 @@ function automationRenderScripts(scripts) {
       <td role="cell" data-label="Ações" class="pf-m-center">
         <div style="display: flex; justify-content: center;">
           <div class="pf-c-dropdown js-row-actions">
-            <button class="pf-c-dropdown__toggle pf-m-plain js-row-actions-toggle" type="button" onclick="automationToggleRowActionsMenu('${automationEscapeHtml(
+            <button class="pf-c-dropdown__toggle pf-m-plain js-row-actions-toggle" type="button" onclick="automationToggleRowActionsMenu('${automationEscapeJs(
               menuId
             )}')" style="padding: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; cursor: pointer;">
               ⋮
@@ -2707,25 +2717,25 @@ function automationRenderScripts(scripts) {
             <ul class="pf-c-dropdown__menu js-row-actions-menu" id="${automationEscapeHtml(
               menuId
             )}" hidden style="position: fixed; z-index: 9999; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 12rem;">
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationExecuteScript('${automationEscapeHtml(
+              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationExecuteScript('${automationEscapeJs(
                 scriptName
               )}');">▶️ Executar</button></li>
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenSudoModal('${automationEscapeHtml(
+              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenSudoModal('${automationEscapeJs(
                 scriptName
               )}');">🔐 Executar (admin)</button></li>
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenScriptEnvModal('${automationEscapeHtml(
+              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenScriptEnvModal('${automationEscapeJs(
                 scriptName
               )}');">🔧 Variáveis (script)</button></li>
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenLogModal('${automationEscapeHtml(
+              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenLogModal('${automationEscapeJs(
                 scriptName
               )}');">📋 Logs</button></li>
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationEditScript('${automationEscapeHtml(
+              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationEditScript('${automationEscapeJs(
                 scriptName
               )}');">✏️ Editar</button></li>
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenCronModal('${automationEscapeHtml(
+              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenCronModal('${automationEscapeJs(
                 scriptName
               )}');">⏰ Agendar</button></li>
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationDeleteScript('${automationEscapeHtml(
+              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationDeleteScript('${automationEscapeJs(
                 scriptName
               )}');" style="color: #c9190b;">🗑️ Excluir</button></li>
             </ul>
