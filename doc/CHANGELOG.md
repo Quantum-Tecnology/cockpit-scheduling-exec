@@ -5,6 +5,81 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.5.0] - 2025-12-28
+
+### 🚀 Novidades Principais
+
+#### ⚡ Sistema de Automação com Diretórios Configuráveis
+- **Gerenciamento de diretórios**: Interface visual para adicionar/remover diretórios de scripts
+- **Busca configurável**: Usuário escolhe onde seus scripts estão localizados
+- **Busca recursiva opcional**: Escaneia subdiretórios com profundidade configurável
+- **Caminho completo visível**: Coluna "Diretório" mostra origem de cada script
+- **Auto-recarregamento**: Scripts são atualizados automaticamente após mudanças
+- **Execução direta**: Scripts executados do local original (não há mais cópia)
+- **Detecção de duplicatas**: Sistema evita listar scripts repetidos
+- **Empty states contextuais**: Mensagens inteligentes diferenciando estados
+
+### ✨ Melhorias
+
+#### Interface de Automação
+- **Novo card "📂 Diretórios de Scripts"**: Gestão visual completa
+- **Tabela PatternFly**: Lista com Caminho, Rótulo, Recursivo, Ações
+- **Badge recursivo**: Indicador visual se busca em subdiretórios
+- **Rótulos personalizados**: Identifique facilmente cada diretório
+- **Coluna Diretório**: Cada script mostra sua origem
+- **Botões de ação**: Adicionar/remover diretórios com um clique
+
+#### Funções JavaScript
+- **automationRenderScriptDirectoriesList()**: Renderiza lista de diretórios
+- **automationAddScriptDirectory()**: Adiciona novo diretório com validação
+- **automationRemoveScriptDirectory()**: Remove diretório com confirmação
+- **automationLoadScripts()**: Reescrita completa para busca em diretórios configurados
+- **Execução/Edição/Exclusão**: Todas usam caminho completo do script original
+
+#### Persistência e Configuração
+- **scriptDirectories** salvo em `/var/lib/cockpit/backup-manager/config.json`
+- **Estrutura**: `{path, label, maxDepth}` para cada diretório
+- **Compatibilidade**: Mantém estrutura existente de configuração
+- **Salvamento automático**: Após cada operação de add/remove
+
+### 🔧 Correções
+- Removidas colunas "Criado Em" e "Atualizado Em" da tabela (não eram usadas)
+- Ajustado colspan do empty state de 8 para 7 colunas
+- Logs detalhados com prefixo "Automation:" para debug
+- Tratamento de erros por diretório individual
+- Alertas informativos após cada operação
+
+### 📚 Estrutura de Dados
+
+```javascript
+scriptDirectories = [
+  {
+    path: "/home/user/scripts",
+    label: "Scripts Pessoais",
+    maxDepth: 10  // 1 = não recursivo, 10 = recursivo
+  }
+]
+
+allScripts = [
+  {
+    name: "backup.sh",
+    path: "/home/user/scripts/backup.sh",  // Caminho completo
+    directory: "Scripts Pessoais",
+    // ... outros campos
+  }
+]
+```
+
+### 🎯 Benefícios
+- ✅ Flexibilidade total na organização de scripts
+- ✅ Não há mais localizações hardcoded
+- ✅ Mesmo padrão visual do sistema de backups
+- ✅ Scripts permanecem em suas localizações originais
+- ✅ Suporte a múltiplos diretórios simultaneamente
+- ✅ Interface intuitiva e consistente
+
+---
+
 ## [1.4.0] - 2024-12-28
 
 ### 🚀 Novidades Principais

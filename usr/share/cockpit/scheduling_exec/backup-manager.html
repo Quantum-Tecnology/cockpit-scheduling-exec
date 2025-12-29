@@ -517,6 +517,15 @@
                 <span class="pf-c-tabs__item-text">💿 Backup de VMs</span>
               </button>
             </li>
+            <li class="pf-c-tabs__item">
+              <button
+                class="pf-c-tabs__link"
+                id="tab-automation"
+                onclick="switchTab('automation')"
+              >
+                <span class="pf-c-tabs__item-text">⚡ Automação</span>
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -1128,6 +1137,428 @@
             </div>
           </div>
         </div>
+
+        <!-- Tab: Automação & Scripts -->
+        <div
+          id="automation-tab-content"
+          class="tab-content"
+          style="display: none"
+        >
+          <div class="pf-l-grid pf-m-gutter">
+            <!-- Cards de Estatísticas de Scripts -->
+            <div class="pf-l-grid__item pf-m-12-col">
+              <div
+                class="stats-grid"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                  gap: var(--pf-global--spacer--lg);
+                  margin-bottom: var(--pf-global--spacer--xl);
+                "
+              >
+                <!-- Total Scripts -->
+                <div class="pf-c-card" style="border-top: 4px solid #667eea">
+                  <div class="pf-c-card__body">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: var(--pf-global--spacer--md);
+                      "
+                    >
+                      <div style="font-size: 2rem">📜</div>
+                      <div>
+                        <h3
+                          id="automation-stat-total-scripts"
+                          class="pf-c-title pf-m-2xl"
+                          style="margin: 0; font-weight: bold"
+                        >
+                          0
+                        </h3>
+                        <p
+                          style="
+                            margin: 0;
+                            color: var(--pf-global--Color--200);
+                            font-size: var(--pf-global--FontSize--sm);
+                          "
+                        >
+                          Total de Scripts
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Scripts Agendados -->
+                <div class="pf-c-card" style="border-top: 4px solid #4facfe">
+                  <div class="pf-c-card__body">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: var(--pf-global--spacer--md);
+                      "
+                    >
+                      <div style="font-size: 2rem">⏰</div>
+                      <div>
+                        <h3
+                          id="automation-stat-scheduled"
+                          class="pf-c-title pf-m-2xl"
+                          style="margin: 0; font-weight: bold"
+                        >
+                          0
+                        </h3>
+                        <p
+                          style="
+                            margin: 0;
+                            color: var(--pf-global--Color--200);
+                            font-size: var(--pf-global--FontSize--sm);
+                          "
+                        >
+                          Agendados
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Executando -->
+                <div class="pf-c-card" style="border-top: 4px solid #43e97b">
+                  <div class="pf-c-card__body">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: var(--pf-global--spacer--md);
+                      "
+                    >
+                      <div style="font-size: 2rem">🔄</div>
+                      <div>
+                        <h3
+                          id="automation-stat-running"
+                          class="pf-c-title pf-m-2xl"
+                          style="margin: 0; font-weight: bold"
+                        >
+                          0
+                        </h3>
+                        <p
+                          style="
+                            margin: 0;
+                            color: var(--pf-global--Color--200);
+                            font-size: var(--pf-global--FontSize--sm);
+                          "
+                        >
+                          Em Execução
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Últimas Falhas -->
+                <div class="pf-c-card" style="border-top: 4px solid #fa709a">
+                  <div class="pf-c-card__body">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: var(--pf-global--spacer--md);
+                      "
+                    >
+                      <div style="font-size: 2rem">❌</div>
+                      <div>
+                        <h3
+                          id="automation-stat-failures"
+                          class="pf-c-title pf-m-2xl"
+                          style="margin: 0; font-weight: bold"
+                        >
+                          0
+                        </h3>
+                        <p
+                          style="
+                            margin: 0;
+                            color: var(--pf-global--Color--200);
+                            font-size: var(--pf-global--FontSize--sm);
+                          "
+                        >
+                          Últimas Falhas
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diretórios de Scripts -->
+            <div class="pf-l-grid__item pf-m-12-col">
+              <div class="pf-c-card">
+                <div class="pf-c-card__header">
+                  <div class="pf-c-card__header-main">
+                    <h2 class="pf-c-card__title">📂 Diretórios de Scripts</h2>
+                  </div>
+                  <div class="pf-c-card__header-actions">
+                    <button
+                      class="pf-c-button pf-m-primary"
+                      onclick="automationAddScriptDirectory()"
+                    >
+                      ➕ Adicionar Diretório
+                    </button>
+                  </div>
+                </div>
+                <div class="pf-c-card__body">
+                  <p
+                    class="pf-c-content"
+                    style="margin-bottom: var(--pf-global--spacer--md)"
+                  >
+                    Configure os diretórios onde seus scripts estão localizados.
+                    O sistema irá escanear estes diretórios e mostrar todos os
+                    scripts encontrados.
+                  </p>
+                  <div id="automation-script-directories-list">
+                    <!-- Lista será renderizada aqui -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ações Principais -->
+            <div class="pf-l-grid__item pf-m-12-col">
+              <div class="pf-c-card" style="border-top: 4px solid #667eea">
+                <div class="pf-c-card__body">
+                  <div
+                    style="
+                      display: flex;
+                      gap: var(--pf-global--spacer--sm);
+                      flex-wrap: wrap;
+                    "
+                  >
+                    <button
+                      class="pf-c-button pf-m-primary"
+                      type="button"
+                      onclick="automationOpenCreateModal()"
+                    >
+                      ➕ Novo Script
+                    </button>
+                    <button
+                      class="pf-c-button pf-m-secondary"
+                      type="button"
+                      onclick="automationOpenImportModal()"
+                    >
+                      📥 Buscar Scripts
+                    </button>
+                    <button
+                      class="pf-c-button pf-m-secondary"
+                      type="button"
+                      onclick="automationOpenCronManagerModal()"
+                    >
+                      ⏰ Agendamentos
+                    </button>
+                    <button
+                      class="pf-c-button pf-m-tertiary"
+                      type="button"
+                      onclick="automationOpenEnvModal()"
+                    >
+                      🔧 Variáveis Globais (.env)
+                    </button>
+                    <button
+                      class="pf-c-button pf-m-secondary"
+                      type="button"
+                      onclick="automationLoadScripts()"
+                    >
+                      🔄 Atualizar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="pf-l-grid__item pf-m-12-col">
+              <div class="pf-c-card" style="border-top: 4px solid #4facfe">
+                <div class="pf-c-card__body">
+                  <div class="pf-l-grid pf-m-gutter">
+                    <!-- Busca -->
+                    <div class="pf-l-grid__item pf-m-6-col-on-md pf-m-12-col">
+                      <div class="pf-c-form__group">
+                        <label
+                          class="pf-c-form__label"
+                          for="automation-filter-search"
+                        >
+                          <span class="pf-c-form__label-text">🔍 Buscar</span>
+                        </label>
+                        <input
+                          class="pf-c-form-control"
+                          type="text"
+                          id="automation-filter-search"
+                          placeholder="Buscar por nome do script..."
+                          onkeyup="automationApplyFilters()"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Ordenar por -->
+                    <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+                      <div class="pf-c-form__group">
+                        <label
+                          class="pf-c-form__label"
+                          for="automation-filter-sort"
+                        >
+                          <span class="pf-c-form__label-text">↕️ Ordenar</span>
+                        </label>
+                        <select
+                          class="pf-c-form-control"
+                          id="automation-filter-sort"
+                          onchange="automationApplyFilters()"
+                        >
+                          <option value="name-asc">Nome (A-Z)</option>
+                          <option value="name-desc">Nome (Z-A)</option>
+                          <option value="created-desc">Mais Recente</option>
+                          <option value="created-asc">Mais Antigo</option>
+                          <option value="executions-desc">
+                            Mais Executado
+                          </option>
+                          <option value="next-asc">Próxima Execução</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Filtrar por Status -->
+                    <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+                      <div class="pf-c-form__group">
+                        <label
+                          class="pf-c-form__label"
+                          for="automation-filter-status"
+                        >
+                          <span class="pf-c-form__label-text">📊 Status</span>
+                        </label>
+                        <select
+                          class="pf-c-form-control"
+                          id="automation-filter-status"
+                          onchange="automationApplyFilters()"
+                        >
+                          <option value="all">Todos</option>
+                          <option value="scheduled">Agendados</option>
+                          <option value="not-scheduled">Sem Agendamento</option>
+                          <option value="running">Em Execução</option>
+                          <option value="failed">Com Falhas</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabela de Scripts -->
+            <div class="pf-l-grid__item pf-m-12-col">
+              <div class="pf-c-card" style="border-top: 4px solid #43e97b">
+                <div class="pf-c-card__body">
+                  <!-- Loading -->
+                  <div
+                    id="automation-loading"
+                    class="pf-c-empty-state"
+                    style="display: none"
+                  >
+                    <div class="pf-c-empty-state__content">
+                      <div class="pf-c-spinner pf-m-xl" role="progressbar">
+                        <span class="pf-c-spinner__clipper"></span>
+                        <span class="pf-c-spinner__lead-ball"></span>
+                        <span class="pf-c-spinner__tail-ball"></span>
+                      </div>
+                      <h2 class="pf-c-title pf-m-lg">Carregando scripts...</h2>
+                    </div>
+                  </div>
+
+                  <!-- Erro -->
+                  <div
+                    id="automation-error-message"
+                    class="pf-c-alert pf-m-danger pf-m-inline"
+                    style="
+                      display: none;
+                      margin-bottom: var(--pf-global--spacer--md);
+                    "
+                  >
+                    <p class="pf-c-alert__title">
+                      <span class="pf-screen-reader">Erro: </span>
+                      <span id="automation-error-text"></span>
+                    </p>
+                  </div>
+
+                  <!-- Tabela -->
+                  <div class="backup-table-wrapper">
+                    <table
+                      class="pf-c-table pf-m-grid-md"
+                      role="grid"
+                      id="automation-scripts-table"
+                    >
+                      <thead>
+                        <tr role="row">
+                          <th role="columnheader" scope="col">
+                            Nome do Script
+                          </th>
+                          <th role="columnheader" scope="col">Diretório</th>
+                          <th role="columnheader" scope="col">
+                            Próxima Execução
+                          </th>
+                          <th role="columnheader" scope="col">
+                            Última Execução
+                          </th>
+                          <th
+                            role="columnheader"
+                            scope="col"
+                            class="pf-m-center"
+                          >
+                            Execuções
+                          </th>
+                          <th
+                            role="columnheader"
+                            scope="col"
+                            class="pf-m-center"
+                          >
+                            Sucessos
+                          </th>
+                          <th
+                            role="columnheader"
+                            scope="col"
+                            class="pf-m-center"
+                          >
+                            Ações
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody role="rowgroup" id="automation-scripts-body">
+                        <!-- Scripts serão carregados aqui -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Empty State -->
+                  <div
+                    id="automation-empty-state"
+                    class="pf-c-empty-state"
+                    style="display: none"
+                  >
+                    <div class="pf-c-empty-state__content">
+                      <h2 class="pf-c-title pf-m-lg">
+                        Nenhum script encontrado
+                      </h2>
+                      <div class="pf-c-empty-state__body">
+                        Crie seu primeiro script personalizado para começar!
+                      </div>
+                      <button
+                        class="pf-c-button pf-m-primary"
+                        onclick="automationOpenCreateModal()"
+                      >
+                        ➕ Criar Primeiro Script
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
 
@@ -1449,6 +1880,556 @@
             onclick="closeDirectoryBrowser()"
           >
             Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAIS DE AUTOMAÇÃO -->
+
+    <!-- Modal: Criar/Editar Script -->
+    <div id="automation-scriptModal" class="modal">
+      <div class="modal-content" style="max-width: 1000px">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title" id="automation-modal-title">
+            Novo Script
+          </h2>
+          <button class="close" onclick="automationCloseScriptModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <div
+            class="pf-c-alert pf-m-info pf-m-inline"
+            style="margin-bottom: var(--pf-global--spacer--md)"
+          >
+            <p class="pf-c-alert__title">
+              Ao executar/agendar, este plugin carrega as variáveis de
+              <code>~/scripts/.env</code> e também de
+              <code>~/scripts/.env.&lt;script&gt;</code> (se existir).
+            </p>
+          </div>
+
+          <form id="automation-script-form">
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="automation-script-name">
+                <span class="pf-c-form__label-text">Nome do Script</span>
+                <span class="pf-c-form__label-required">*</span>
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="text"
+                id="automation-script-name"
+                required
+                placeholder="meu-script.sh"
+                pattern="[a-zA-Z0-9._-]+\.sh$"
+              />
+              <p class="pf-c-form__helper-text">O nome deve terminar com .sh</p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="automation-script-path">
+                <span class="pf-c-form__label-text">Caminho</span>
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="text"
+                id="automation-script-path"
+                readonly
+              />
+              <p class="pf-c-form__helper-text">Informação (somente leitura)</p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="automation-script-content">
+                <span class="pf-c-form__label-text">Conteúdo do Script</span>
+                <span class="pf-c-form__label-required">*</span>
+              </label>
+              <textarea
+                class="pf-c-form-control"
+                id="automation-script-content"
+                required
+                rows="15"
+                style="font-family: 'Courier New', monospace"
+                placeholder="#!/bin/bash&#10;&#10;echo 'Olá Mundo'"
+              ></textarea>
+              <p
+                class="pf-c-form__helper-text"
+                id="automation-script-vars-summary"
+              >
+                Variáveis referenciadas detectadas: <code>-</code>
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="automationCloseScriptModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            onclick="automationSaveScript()"
+          >
+            💾 Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Configurar Cron -->
+    <div id="automation-cronModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">⏰ Configurar Agendamento</h2>
+          <button class="close" onclick="automationCloseCronModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <form id="automation-cron-form">
+            <input type="hidden" id="automation-cron-script-name" />
+
+            <div
+              class="pf-c-form__group"
+              id="automation-cron-script-select-group"
+              style="display: none"
+            >
+              <label
+                class="pf-c-form__label"
+                for="automation-cron-script-select"
+              >
+                <span class="pf-c-form__label-text">Script</span>
+                <span class="pf-c-form__label-required">*</span>
+              </label>
+              <select
+                class="pf-c-form-control"
+                id="automation-cron-script-select"
+                onchange="automationOnCronScriptSelectChange()"
+              >
+                <option value="">-- Selecione um script --</option>
+              </select>
+            </div>
+
+            <div
+              class="cron-helper"
+              style="
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                padding: var(--pf-global--spacer--lg);
+                border-left: 5px solid #2196f3;
+                border-radius: 12px;
+                margin-bottom: var(--pf-global--spacer--md);
+              "
+            >
+              <strong>Agendamentos existentes</strong>
+              <div id="automation-cron-existing-empty" style="margin-top: 6px">
+                Nenhum agendamento encontrado para este filtro.
+              </div>
+              <div
+                id="automation-cron-existing-table-wrap"
+                style="display: none; margin-top: 10px"
+              >
+                <table class="pf-c-table pf-m-compact pf-m-grid-md">
+                  <thead>
+                    <tr>
+                      <th>Script</th>
+                      <th>Expressão</th>
+                      <th>Comando</th>
+                    </tr>
+                  </thead>
+                  <tbody id="automation-cron-existing-body"></tbody>
+                </table>
+              </div>
+              <p class="pf-c-form__helper-text" style="margin-top: 10px">
+                Observação: o botão "Remover" remove <strong>todos</strong> os
+                agendamentos do script selecionado.
+              </p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label">Expressão Cron</label>
+              <div
+                class="cron-fields"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                  gap: var(--pf-global--spacer--md);
+                "
+              >
+                <div>
+                  <label class="pf-c-form__label" for="automation-cron-minute"
+                    >Minuto</label
+                  >
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="automation-cron-minute"
+                    placeholder="*"
+                    value="*"
+                  />
+                  <p class="pf-c-form__helper-text">0-59</p>
+                </div>
+                <div>
+                  <label class="pf-c-form__label" for="automation-cron-hour"
+                    >Hora</label
+                  >
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="automation-cron-hour"
+                    placeholder="*"
+                    value="*"
+                  />
+                  <p class="pf-c-form__helper-text">0-23</p>
+                </div>
+                <div>
+                  <label class="pf-c-form__label" for="automation-cron-day"
+                    >Dia</label
+                  >
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="automation-cron-day"
+                    placeholder="*"
+                    value="*"
+                  />
+                  <p class="pf-c-form__helper-text">1-31</p>
+                </div>
+                <div>
+                  <label class="pf-c-form__label" for="automation-cron-month"
+                    >Mês</label
+                  >
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="automation-cron-month"
+                    placeholder="*"
+                    value="*"
+                  />
+                  <p class="pf-c-form__helper-text">1-12</p>
+                </div>
+                <div>
+                  <label class="pf-c-form__label" for="automation-cron-weekday"
+                    >Dia Semana</label
+                  >
+                  <input
+                    class="pf-c-form-control"
+                    type="text"
+                    id="automation-cron-weekday"
+                    placeholder="*"
+                    value="*"
+                  />
+                  <p class="pf-c-form__helper-text">0-7</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="automation-cron-preset"
+                >Ou escolha um modelo</label
+              >
+              <select
+                class="pf-c-form-control"
+                id="automation-cron-preset"
+                onchange="automationApplyCronPreset()"
+              >
+                <option value="">-- Selecione um modelo --</option>
+                <option value="* * * * *">A cada minuto</option>
+                <option value="*/5 * * * *">A cada 5 minutos</option>
+                <option value="0 * * * *">A cada hora</option>
+                <option value="0 0 * * *">Diariamente (meia-noite)</option>
+                <option value="0 12 * * *">Diariamente (meio-dia)</option>
+                <option value="0 0 * * 0">Semanalmente (domingo)</option>
+                <option value="0 0 1 * *">Mensalmente (dia 1)</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-link"
+            onclick="automationCloseCronModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-warning"
+            onclick="automationRemoveCron()"
+          >
+            🗑️ Remover Agendamentos
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            onclick="automationSaveCron()"
+          >
+            💾 Salvar Agendamento
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Variáveis Globais (.env) -->
+    <div id="automation-envModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">🔧 Variáveis Globais (.env)</h2>
+          <button class="close" onclick="automationCloseEnvModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <form id="automation-env-form">
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="automation-env-content">
+                <span class="pf-c-form__label-text"
+                  >Conteúdo do arquivo ~/scripts/.env</span
+                >
+              </label>
+              <textarea
+                class="pf-c-form-control"
+                id="automation-env-content"
+                rows="15"
+                style="font-family: 'Courier New', monospace"
+                placeholder="VARIAVEL1=valor1&#10;VARIAVEL2=valor2"
+              ></textarea>
+              <p class="pf-c-form__helper-text">
+                Estas variáveis estarão disponíveis em todos os scripts
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="automationCloseEnvModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            onclick="automationSaveEnv()"
+          >
+            💾 Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Variáveis do Script -->
+    <div id="automation-scriptEnvModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title" id="automation-script-env-title">
+            Variáveis do Script
+          </h2>
+          <button class="close" onclick="automationCloseScriptEnvModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <form id="automation-script-env-form">
+            <div class="pf-c-form__group">
+              <label
+                class="pf-c-form__label"
+                for="automation-script-env-content"
+              >
+                <span class="pf-c-form__label-text"
+                  >Variáveis específicas deste script</span
+                >
+              </label>
+              <textarea
+                class="pf-c-form-control"
+                id="automation-script-env-content"
+                rows="15"
+                style="font-family: 'Courier New', monospace"
+              ></textarea>
+              <p class="pf-c-form__helper-text">
+                Estas variáveis só estarão disponíveis para este script
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="automationCloseScriptEnvModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            onclick="automationSaveScriptEnv()"
+          >
+            💾 Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Logs do Script -->
+    <div id="automation-logModal" class="modal">
+      <div class="modal-content" style="max-width: 1200px">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title" id="automation-log-title">
+            Logs do Script
+          </h2>
+          <button class="close" onclick="automationCloseLogModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <div
+            id="automation-log-loading"
+            style="display: none; text-align: center; padding: 2rem"
+          >
+            <div class="loading-spinner"></div>
+            <p>Carregando logs...</p>
+          </div>
+          <textarea
+            class="pf-c-form-control"
+            id="automation-log-content"
+            readonly
+            rows="20"
+            style="
+              font-family: 'Courier New', monospace;
+              background: #1a1a1a;
+              color: #00ff00;
+            "
+          ></textarea>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="automationCloseLogModal()"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Executar como Admin (sudo) -->
+    <div id="automation-sudoModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title" id="automation-sudo-title">
+            Executar como Admin
+          </h2>
+          <button class="close" onclick="automationCloseSudoModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <form id="automation-sudo-form">
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="automation-sudo-password">
+                <span class="pf-c-form__label-text">Senha do sudo</span>
+                <span class="pf-c-form__label-required">*</span>
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="password"
+                id="automation-sudo-password"
+                required
+                autocomplete="current-password"
+              />
+              <p class="pf-c-form__helper-text">
+                A senha será enviada via stdin apenas para esta execução
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="automationCloseSudoModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            onclick="automationExecuteSudo()"
+          >
+            ▶️ Executar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Importar Scripts -->
+    <div id="automation-importModal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">📥 Importar Scripts</h2>
+          <button class="close" onclick="automationCloseImportModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <p>
+            Selecione scripts <strong>.sh</strong> encontrados no seu
+            <strong>HOME</strong> para copiar para <code>~/scripts</code>.
+          </p>
+
+          <div
+            id="automation-import-loading"
+            class="pf-c-empty-state"
+            style="display: none"
+          >
+            <div class="pf-c-empty-state__content">
+              <div class="pf-c-spinner pf-m-xl" role="progressbar">
+                <span class="pf-c-spinner__clipper"></span>
+                <span class="pf-c-spinner__lead-ball"></span>
+                <span class="pf-c-spinner__tail-ball"></span>
+              </div>
+              <h2 class="pf-c-title pf-m-lg">Buscando scripts...</h2>
+            </div>
+          </div>
+
+          <div
+            id="automation-import-empty"
+            class="pf-c-empty-state pf-m-sm"
+            style="display: none"
+          >
+            <div class="pf-c-empty-state__content">
+              <h2 class="pf-c-title pf-m-lg">Nenhum script encontrado</h2>
+              <div class="pf-c-empty-state__body">
+                Nenhum arquivo .sh elegível foi encontrado para importação.
+                <br /><small
+                  >Obs.: scripts que já estão em <code>~/scripts</code> não
+                  aparecem aqui.</small
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="automation-import-table-wrap" style="display: none">
+            <table class="pf-c-table pf-m-compact pf-m-grid-md">
+              <thead>
+                <tr>
+                  <th style="width: 50px"></th>
+                  <th>Nome</th>
+                  <th>Caminho</th>
+                </tr>
+              </thead>
+              <tbody id="automation-import-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="automationCloseImportModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            onclick="automationImportSelectedScripts()"
+          >
+            📥 Importar Selecionados
           </button>
         </div>
       </div>
