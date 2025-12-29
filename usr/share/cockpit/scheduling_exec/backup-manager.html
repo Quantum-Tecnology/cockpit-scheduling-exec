@@ -423,292 +423,397 @@
         </div>
       </header>
 
-      <!-- Tabs -->
-      <div class="pf-c-tabs" id="backup-tabs">
-        <ul class="pf-c-tabs__list">
-          <li class="pf-c-tabs__item pf-m-current">
-            <button
-              class="pf-c-tabs__link"
-              id="tab-backups"
-              onclick="switchTab('backups')"
-            >
-              <span class="pf-c-tabs__item-text">📦 Lista de Backups</span>
-            </button>
-          </li>
-          <li class="pf-c-tabs__item">
-            <button
-              class="pf-c-tabs__link"
-              id="tab-vms"
-              onclick="switchTab('vms')"
-            >
-              <span class="pf-c-tabs__item-text">💿 Backup de VMs</span>
-            </button>
-          </li>
-          <li class="pf-c-tabs__item">
-            <button
-              class="pf-c-tabs__link"
-              id="tab-automation"
-              onclick="switchTab('automation')"
-            >
-              <span class="pf-c-tabs__item-text">⚡ Automação</span>
-            </button>
-          </li>
-          <li class="pf-c-tabs__item">
-            <button
-              class="pf-c-tabs__link"
-              id="tab-schedules"
-              onclick="switchTab('schedules')"
-            >
-              <span class="pf-c-tabs__item-text">📅 Agendamentos</span>
-            </button>
-          </li>
-          <li class="pf-c-tabs__item">
-            <button
-              class="pf-c-tabs__link"
-              id="tab-config"
-              onclick="switchTab('config')"
-            >
-              <span class="pf-c-tabs__item-text">⚙️ Configurações</span>
-            </button>
-          </li>
-        </ul>
-      </div>
-
       <!-- Main content -->
       <main class="pf-c-page__main">
-        <!-- Alertas -->
-        <div id="alerts-container"></div>
-
-        <!-- Tab: Lista de Backups -->
-        <div id="backups-tab-content" class="tab-content">
-          <!-- Filtros e busca -->
-          <div class="filters-section">
-            <div class="pf-l-grid pf-m-gutter">
-              <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-                <div class="pf-c-form__group">
-                  <label class="pf-c-form__label" for="search-input">
-                    <span class="pf-c-form__label-text">🔍 Buscar backup</span>
-                  </label>
-                  <input
-                    class="pf-c-form-control"
-                    type="text"
-                    id="search-input"
-                    placeholder="Digite o nome ou caminho do arquivo..."
-                    onkeyup="filterBackups()"
-                  />
-                </div>
-              </div>
-              <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
-                <div class="pf-c-form__group">
-                  <label class="pf-c-form__label" for="directory-filter">
-                    <span class="pf-c-form__label-text">📁 Diretório</span>
-                  </label>
-                  <select
-                    class="pf-c-form-control"
-                    id="directory-filter"
-                    onchange="filterBackups()"
-                  >
-                    <option value="">Todos</option>
-                  </select>
-                </div>
-              </div>
-              <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
-                <div class="pf-c-form__group">
-                  <label class="pf-c-form__label" for="sort-by">
-                    <span class="pf-c-form__label-text">🔄 Ordenar por</span>
-                  </label>
-                  <select
-                    class="pf-c-form-control"
-                    id="sort-by"
-                    onchange="filterBackups()"
-                  >
-                    <option value="date-desc">Mais recentes</option>
-                    <option value="date-asc">Mais antigos</option>
-                    <option value="size-desc">Maior tamanho</option>
-                    <option value="size-asc">Menor tamanho</option>
-                    <option value="name-asc">Nome (A-Z)</option>
-                    <option value="name-desc">Nome (Z-A)</option>
-                    <option value="path-asc">Caminho (A-Z)</option>
-                    <option value="path-desc">Caminho (Z-A)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div
-              style="
-                margin-top: var(--pf-global--spacer--md);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <div>
-                <button
-                  class="pf-c-button pf-m-link"
-                  onclick="selectAllBackups()"
-                >
-                  ☑️ Selecionar todos
-                </button>
-                <button
-                  class="pf-c-button pf-m-link"
-                  onclick="deselectAllBackups()"
-                >
-                  ☐ Desmarcar todos
-                </button>
-              </div>
-              <div>
-                <button
-                  class="pf-c-button pf-m-secondary"
-                  onclick="exportSelectedBackups()"
-                  id="export-selected-btn"
-                  disabled
-                >
-                  📤 Exportar selecionados
-                </button>
-                <button
-                  class="pf-c-button pf-m-danger"
-                  onclick="deleteSelectedBackups()"
-                  id="delete-selected-btn"
-                  disabled
-                >
-                  🗑️ Deletar selecionados
-                </button>
-              </div>
-            </div>
+        <div class="pf-l-grid pf-m-gutter">
+          <div class="pf-l-grid__item pf-m-12-col">
+            <div id="status-message"></div>
           </div>
 
-          <!-- Tabela de backups -->
-          <div class="backup-table-wrapper">
-            <table
-              class="pf-c-table pf-m-grid-md"
-              role="grid"
-              id="backups-table"
-            >
-              <thead>
-                <tr>
-                  <th role="columnheader" style="width: 50px">
+          <!-- Alertas -->
+          <div id="alerts-container"></div>
+
+          <!-- Tabs -->
+          <div class="pf-c-tabs" id="backup-tabs">
+            <ul class="pf-c-tabs__list">
+              <li class="pf-c-tabs__item pf-m-current">
+                <button
+                  class="pf-c-tabs__link"
+                  id="tab-backups"
+                  onclick="switchTab('backups')"
+                >
+                  <span class="pf-c-tabs__item-text">📦 Lista de Backups</span>
+                </button>
+              </li>
+              <li class="pf-c-tabs__item">
+                <button
+                  class="pf-c-tabs__link"
+                  id="tab-vms"
+                  onclick="switchTab('vms')"
+                >
+                  <span class="pf-c-tabs__item-text">💿 Backup de VMs</span>
+                </button>
+              </li>
+              <li class="pf-c-tabs__item">
+                <button
+                  class="pf-c-tabs__link"
+                  id="tab-automation"
+                  onclick="switchTab('automation')"
+                >
+                  <span class="pf-c-tabs__item-text">⚡ Automação</span>
+                </button>
+              </li>
+              <li class="pf-c-tabs__item">
+                <button
+                  class="pf-c-tabs__link"
+                  id="tab-schedules"
+                  onclick="switchTab('schedules')"
+                >
+                  <span class="pf-c-tabs__item-text">📅 Agendamentos</span>
+                </button>
+              </li>
+              <li class="pf-c-tabs__item">
+                <button
+                  class="pf-c-tabs__link"
+                  id="tab-config"
+                  onclick="switchTab('config')"
+                >
+                  <span class="pf-c-tabs__item-text">⚙️ Configurações</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Tab: Lista de Backups -->
+          <div id="backups-tab-content" class="tab-content">
+            <!-- Filtros e busca -->
+            <div class="filters-section">
+              <div class="pf-l-grid pf-m-gutter">
+                <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="search-input">
+                      <span class="pf-c-form__label-text"
+                        >🔍 Buscar backup</span
+                      >
+                    </label>
                     <input
-                      type="checkbox"
-                      class="custom-checkbox"
-                      id="select-all-checkbox"
-                      onchange="toggleSelectAll(this)"
+                      class="pf-c-form-control"
+                      type="text"
+                      id="search-input"
+                      placeholder="Digite o nome ou caminho do arquivo..."
+                      onkeyup="filterBackups()"
                     />
-                  </th>
-                  <th role="columnheader">📄 Nome do Arquivo</th>
-                  <th role="columnheader">📅 Data de Criação</th>
-                  <th role="columnheader">📁 Diretório</th>
-                  <th role="columnheader">💾 Tamanho</th>
-                  <th role="columnheader" style="text-align: right">
-                    ⚡ Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody id="backups-table-body">
-                <!-- Será preenchido dinamicamente -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Empty state -->
-          <div id="empty-state" class="empty-state" style="display: none">
-            <div class="empty-state-icon">📦</div>
-            <h2>Nenhum backup encontrado</h2>
-            <p>
-              Configure os diretórios na aba "Configurações" para começar a
-              monitorar seus backups.
-            </p>
-            <button
-              class="pf-c-button pf-m-primary"
-              onclick="switchTab('config')"
-            >
-              Ir para Configurações
-            </button>
-          </div>
-        </div>
-
-        <!-- Tab: Configurações -->
-        <div id="config-tab-content" class="tab-content" style="display: none">
-          <div class="pf-l-grid pf-m-gutter">
-            <!-- Diretórios configurados -->
-            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">📁 Diretórios Monitorados</h2>
                   </div>
                 </div>
-                <div class="pf-c-card__body">
-                  <p
-                    style="
-                      color: var(--pf-global--Color--200);
-                      margin-bottom: var(--pf-global--spacer--md);
-                    "
-                  >
-                    Adicione os diretórios onde seus backups estão armazenados.
-                  </p>
-                  <button
-                    class="pf-c-button pf-m-primary pf-m-block"
-                    onclick="openAddDirectoryModal()"
-                  >
-                    ➕ Adicionar Diretório
-                  </button>
-                  <div
-                    id="directories-list"
-                    style="margin-top: var(--pf-global--spacer--md)"
-                  >
-                    <!-- Lista de diretórios será preenchida aqui -->
+                <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="directory-filter">
+                      <span class="pf-c-form__label-text">📁 Diretório</span>
+                    </label>
+                    <select
+                      class="pf-c-form-control"
+                      id="directory-filter"
+                      onchange="filterBackups()"
+                    >
+                      <option value="">Todos</option>
+                    </select>
                   </div>
+                </div>
+                <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="sort-by">
+                      <span class="pf-c-form__label-text">🔄 Ordenar por</span>
+                    </label>
+                    <select
+                      class="pf-c-form-control"
+                      id="sort-by"
+                      onchange="filterBackups()"
+                    >
+                      <option value="date-desc">Mais recentes</option>
+                      <option value="date-asc">Mais antigos</option>
+                      <option value="size-desc">Maior tamanho</option>
+                      <option value="size-asc">Menor tamanho</option>
+                      <option value="name-asc">Nome (A-Z)</option>
+                      <option value="name-desc">Nome (Z-A)</option>
+                      <option value="path-asc">Caminho (A-Z)</option>
+                      <option value="path-desc">Caminho (Z-A)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  margin-top: var(--pf-global--spacer--md);
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <div>
+                  <button
+                    class="pf-c-button pf-m-link"
+                    onclick="selectAllBackups()"
+                  >
+                    ☑️ Selecionar todos
+                  </button>
+                  <button
+                    class="pf-c-button pf-m-link"
+                    onclick="deselectAllBackups()"
+                  >
+                    ☐ Desmarcar todos
+                  </button>
+                </div>
+                <div>
+                  <button
+                    class="pf-c-button pf-m-secondary"
+                    onclick="exportSelectedBackups()"
+                    id="export-selected-btn"
+                    disabled
+                  >
+                    📤 Exportar selecionados
+                  </button>
+                  <button
+                    class="pf-c-button pf-m-danger"
+                    onclick="deleteSelectedBackups()"
+                    id="delete-selected-btn"
+                    disabled
+                  >
+                    🗑️ Deletar selecionados
+                  </button>
                 </div>
               </div>
             </div>
 
-            <!-- Diretórios de Scripts -->
-            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">📂 Diretórios de Scripts</h2>
+            <!-- Tabela de backups -->
+            <div class="backup-table-wrapper">
+              <table
+                class="pf-c-table pf-m-grid-md"
+                role="grid"
+                id="backups-table"
+              >
+                <thead>
+                  <tr>
+                    <th role="columnheader" style="width: 50px">
+                      <input
+                        type="checkbox"
+                        class="custom-checkbox"
+                        id="select-all-checkbox"
+                        onchange="toggleSelectAll(this)"
+                      />
+                    </th>
+                    <th role="columnheader">📄 Nome do Arquivo</th>
+                    <th role="columnheader">📅 Data de Criação</th>
+                    <th role="columnheader">📁 Diretório</th>
+                    <th role="columnheader">💾 Tamanho</th>
+                    <th role="columnheader" style="text-align: right">
+                      ⚡ Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="backups-table-body">
+                  <!-- Será preenchido dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty state -->
+            <div id="empty-state" class="empty-state" style="display: none">
+              <div class="empty-state-icon">📦</div>
+              <h2>Nenhum backup encontrado</h2>
+              <p>
+                Configure os diretórios na aba "Configurações" para começar a
+                monitorar seus backups.
+              </p>
+              <button
+                class="pf-c-button pf-m-primary"
+                onclick="switchTab('config')"
+              >
+                Ir para Configurações
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab: Configurações -->
+          <div
+            id="config-tab-content"
+            class="tab-content"
+            style="display: none"
+          >
+            <div class="pf-l-grid pf-m-gutter">
+              <!-- Diretórios configurados -->
+              <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">
+                        📁 Diretórios Monitorados
+                      </h2>
+                    </div>
                   </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <p
-                    style="
-                      color: var(--pf-global--Color--200);
-                      margin-bottom: var(--pf-global--spacer--md);
-                    "
-                  >
-                    Configure os diretórios onde seus scripts estão localizados.
-                  </p>
-                  <button
-                    class="pf-c-button pf-m-primary pf-m-block"
-                    onclick="automationAddScriptDirectory()"
-                  >
-                    ➕ Adicionar Diretório
-                  </button>
-                  <div
-                    id="automation-script-directories-list"
-                    style="margin-top: var(--pf-global--spacer--md)"
-                  >
-                    <!-- Lista será renderizada aqui -->
+                  <div class="pf-c-card__body">
+                    <p
+                      style="
+                        color: var(--pf-global--Color--200);
+                        margin-bottom: var(--pf-global--spacer--md);
+                      "
+                    >
+                      Adicione os diretórios onde seus backups estão
+                      armazenados.
+                    </p>
+                    <button
+                      class="pf-c-button pf-m-primary pf-m-block"
+                      onclick="openAddDirectoryModal()"
+                    >
+                      ➕ Adicionar Diretório
+                    </button>
+                    <div
+                      id="directories-list"
+                      style="margin-top: var(--pf-global--spacer--md)"
+                    >
+                      <!-- Lista de diretórios será preenchida aqui -->
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Configurações de email -->
-            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">📧 Configurações de Email</h2>
+              <!-- Diretórios de Scripts -->
+              <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">📂 Diretórios de Scripts</h2>
+                    </div>
+                  </div>
+                  <div class="pf-c-card__body">
+                    <p
+                      style="
+                        color: var(--pf-global--Color--200);
+                        margin-bottom: var(--pf-global--spacer--md);
+                      "
+                    >
+                      Configure os diretórios onde seus scripts estão
+                      localizados.
+                    </p>
+                    <button
+                      class="pf-c-button pf-m-primary pf-m-block"
+                      onclick="automationAddScriptDirectory()"
+                    >
+                      ➕ Adicionar Diretório
+                    </button>
+                    <div
+                      id="automation-script-directories-list"
+                      style="margin-top: var(--pf-global--spacer--md)"
+                    >
+                      <!-- Lista será renderizada aqui -->
+                    </div>
                   </div>
                 </div>
-                <div class="pf-c-card__body">
-                  <form id="email-config-form">
+              </div>
+
+              <!-- Configurações de email -->
+              <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">
+                        📧 Configurações de Email
+                      </h2>
+                    </div>
+                  </div>
+                  <div class="pf-c-card__body">
+                    <form id="email-config-form">
+                      <div class="pf-c-form__group">
+                        <label class="pf-c-form__label" for="email-recipient">
+                          <span class="pf-c-form__label-text"
+                            >Email do Destinatário</span
+                          >
+                          <span
+                            class="pf-c-form__label-required"
+                            aria-hidden="true"
+                            >*</span
+                          >
+                        </label>
+                        <input
+                          class="pf-c-form-control"
+                          type="email"
+                          id="email-recipient"
+                          placeholder="exemplo@dominio.com"
+                          required
+                        />
+                        <p class="pf-c-form__helper-text">
+                          Email para onde os backups serão enviados
+                        </p>
+                      </div>
+
+                      <div class="pf-c-form__group">
+                        <label class="pf-c-form__label" for="email-subject">
+                          <span class="pf-c-form__label-text"
+                            >Assunto do Email</span
+                          >
+                        </label>
+                        <input
+                          class="pf-c-form-control"
+                          type="text"
+                          id="email-subject"
+                          value="Backup do Sistema - {{date}}"
+                        />
+                        <p class="pf-c-form__helper-text">
+                          Use {{date}} para incluir a data atual
+                        </p>
+                      </div>
+
+                      <div class="pf-c-form__group">
+                        <label class="pf-c-form__label" for="max-email-size">
+                          <span class="pf-c-form__label-text"
+                            >Tamanho Máximo (MB)</span
+                          >
+                        </label>
+                        <input
+                          class="pf-c-form-control"
+                          type="number"
+                          id="max-email-size"
+                          value="25"
+                          min="1"
+                          max="100"
+                        />
+                        <p class="pf-c-form__helper-text">
+                          Tamanho máximo de anexo permitido para envio por email
+                        </p>
+                      </div>
+
+                      <button
+                        class="pf-c-button pf-m-primary pf-m-block"
+                        type="submit"
+                      >
+                        💾 Salvar Configurações
+                      </button>
+
+                      <button
+                        class="pf-c-button pf-m-secondary pf-m-block"
+                        type="button"
+                        id="test-email-config-btn"
+                        style="margin-top: 10px"
+                      >
+                        🔧 Testar Configuração de Email
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Configurações de Backup de VMs -->
+              <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">💿 Backup de VMs</h2>
+                    </div>
+                  </div>
+                  <div class="pf-c-card__body">
                     <div class="pf-c-form__group">
-                      <label class="pf-c-form__label" for="email-recipient">
+                      <label class="pf-c-form__label" for="vm-dest-dir">
                         <span class="pf-c-form__label-text"
-                          >Email do Destinatário</span
+                          >📁 Diretório de Destino</span
                         >
                         <span
                           class="pf-c-form__label-required"
@@ -718,658 +823,583 @@
                       </label>
                       <input
                         class="pf-c-form-control"
-                        type="email"
-                        id="email-recipient"
-                        placeholder="exemplo@dominio.com"
-                        required
-                      />
-                      <p class="pf-c-form__helper-text">
-                        Email para onde os backups serão enviados
-                      </p>
-                    </div>
-
-                    <div class="pf-c-form__group">
-                      <label class="pf-c-form__label" for="email-subject">
-                        <span class="pf-c-form__label-text"
-                          >Assunto do Email</span
-                        >
-                      </label>
-                      <input
-                        class="pf-c-form-control"
                         type="text"
-                        id="email-subject"
-                        value="Backup do Sistema - {{date}}"
+                        id="vm-dest-dir"
+                        value="/mnt/storage/backups/vm_backups"
+                        onchange="updateVMBackupConfig()"
                       />
                       <p class="pf-c-form__helper-text">
-                        Use {{date}} para incluir a data atual
+                        Onde os backups das VMs serão armazenados
                       </p>
                     </div>
 
                     <div class="pf-c-form__group">
-                      <label class="pf-c-form__label" for="max-email-size">
+                      <label class="pf-c-form__label" for="vm-retention-days">
                         <span class="pf-c-form__label-text"
-                          >Tamanho Máximo (MB)</span
+                          >🗓️ Dias de Retenção</span
                         >
                       </label>
                       <input
                         class="pf-c-form-control"
                         type="number"
-                        id="max-email-size"
-                        value="25"
-                        min="1"
-                        max="100"
+                        id="vm-retention-days"
+                        value="7"
+                        min="0"
+                        max="365"
+                        onchange="updateVMBackupConfig()"
                       />
                       <p class="pf-c-form__helper-text">
-                        Tamanho máximo de anexo permitido para envio por email
+                        Backups mais antigos que este período serão removidos
+                        automaticamente
                       </p>
                     </div>
 
+                    <div class="pf-c-form__group">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: var(--pf-global--spacer--sm);
+                        "
+                      >
+                        <input
+                          type="checkbox"
+                          id="vm-verify-checksum"
+                          class="custom-checkbox"
+                          onchange="updateVMBackupConfig()"
+                        />
+                        <label
+                          for="vm-verify-checksum"
+                          style="margin: 0; cursor: pointer"
+                        >
+                          <strong>🔐 Verificar Checksum (SHA256)</strong>
+                        </label>
+                      </div>
+                      <p
+                        class="pf-c-form__helper-text"
+                        style="margin-left: 26px"
+                      >
+                        Verifica integridade do backup (aumenta o tempo de
+                        backup)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ações em lote -->
+              <div class="pf-l-grid__item pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">🛠️ Ações em Lote</h2>
+                    </div>
+                  </div>
+                  <div class="pf-c-card__body">
+                    <div class="pf-l-grid pf-m-gutter">
+                      <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+                        <button
+                          class="pf-c-button pf-m-secondary pf-m-block"
+                          onclick="refreshBackupList()"
+                        >
+                          🔄 Atualizar Lista de Backups
+                        </button>
+                      </div>
+                      <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+                        <button
+                          class="pf-c-button pf-m-secondary pf-m-block"
+                          onclick="exportAllBackups()"
+                        >
+                          📦 Exportar Todos os Backups
+                        </button>
+                      </div>
+                      <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+                        <button
+                          class="pf-c-button pf-m-danger pf-m-block"
+                          onclick="cleanOldBackups()"
+                        >
+                          🗑️ Limpar Backups Antigos
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Backup de VMs -->
+          <div id="vms-tab-content" class="tab-content" style="display: none">
+            <div class="pf-l-grid pf-m-gutter">
+              <!-- Descobrir VMs -->
+              <div class="pf-l-grid__item pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">🔍 Descoberta de VMs</h2>
+                    </div>
+                    <div class="pf-c-card__header-actions">
+                      <button
+                        class="pf-c-button pf-m-primary"
+                        id="discover-vms-btn"
+                        onclick="discoverVMs()"
+                      >
+                        🔍 Descobrir VMs
+                      </button>
+                      <button
+                        class="pf-c-button pf-m-secondary"
+                        id="diagnose-vms-btn"
+                        onclick="diagnoseVMs()"
+                        style="margin-left: 10px"
+                      >
+                        🩺 Diagnóstico
+                      </button>
+                    </div>
+                  </div>
+                  <div class="pf-c-card__body">
+                    <div
+                      id="vm-discovery-loading"
+                      style="
+                        display: none;
+                        text-align: center;
+                        padding: var(--pf-global--spacer--lg);
+                      "
+                    >
+                      <div
+                        class="loading-spinner"
+                        style="
+                          width: 2rem;
+                          height: 2rem;
+                          margin: 0 auto var(--pf-global--spacer--md);
+                        "
+                      ></div>
+                      <p>Descobrindo VMs e discos...</p>
+                    </div>
+
+                    <div id="vm-table-container" style="display: none">
+                      <p
+                        style="
+                          color: var(--pf-global--Color--200);
+                          margin-bottom: var(--pf-global--spacer--md);
+                        "
+                      >
+                        Selecione as VMs que deseja fazer backup. O sistema irá
+                        fazer backup de todos os discos de cada VM selecionada.
+                      </p>
+
+                      <div class="backup-table-wrapper">
+                        <table
+                          class="pf-c-table pf-m-grid-md"
+                          role="grid"
+                          id="vms-table"
+                        >
+                          <thead>
+                            <tr>
+                              <th role="columnheader" style="width: 50px">
+                                <input
+                                  type="checkbox"
+                                  class="custom-checkbox"
+                                  id="select-all-vms-checkbox"
+                                  onchange="toggleSelectAllVMs(this)"
+                                />
+                              </th>
+                              <th role="columnheader">💿 Nome da VM</th>
+                              <th role="columnheader">📊 Status</th>
+                              <th role="columnheader">💾 Discos</th>
+                              <th role="columnheader">📦 Tamanho Total</th>
+                              <th role="columnheader">📁 Caminhos</th>
+                            </tr>
+                          </thead>
+                          <tbody id="vms-table-body">
+                            <!-- Será preenchido dinamicamente -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div
+                      id="vm-empty-state"
+                      style="
+                        text-align: center;
+                        padding: var(--pf-global--spacer--2xl);
+                      "
+                    >
+                      <div
+                        style="
+                          font-size: 4rem;
+                          margin-bottom: var(--pf-global--spacer--md);
+                          opacity: 0.5;
+                        "
+                      >
+                        💿
+                      </div>
+                      <h3>Clique em "Descobrir VMs" para começar</h3>
+                      <p style="color: var(--pf-global--Color--200)">
+                        O sistema irá procurar por VMs e seus discos
+                        automaticamente.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ações de Backup de VMs -->
+              <div class="pf-l-grid__item pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">🚀 Ações</h2>
+                    </div>
+                  </div>
+                  <div class="pf-c-card__body">
                     <button
                       class="pf-c-button pf-m-primary pf-m-block"
-                      type="submit"
+                      id="backup-selected-vms-btn"
+                      onclick="backupSelectedVMs()"
+                      disabled
+                      style="margin-bottom: var(--pf-global--spacer--md)"
                     >
-                      💾 Salvar Configurações
+                      📦 Fazer Backup das VMs Selecionadas
                     </button>
 
                     <button
                       class="pf-c-button pf-m-secondary pf-m-block"
-                      type="button"
-                      id="test-email-config-btn"
-                      style="margin-top: 10px"
+                      onclick="cleanOldVMBackups()"
+                      style="margin-bottom: var(--pf-global--spacer--md)"
                     >
-                      🔧 Testar Configuração de Email
+                      🗑️ Limpar Backups Antigos
                     </button>
-                  </form>
-                </div>
-              </div>
-            </div>
 
-            <!-- Configurações de Backup de VMs -->
-            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">💿 Backup de VMs</h2>
-                  </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <div class="pf-c-form__group">
-                    <label class="pf-c-form__label" for="vm-dest-dir">
-                      <span class="pf-c-form__label-text"
-                        >📁 Diretório de Destino</span
-                      >
-                      <span class="pf-c-form__label-required" aria-hidden="true"
-                        >*</span
-                      >
-                    </label>
-                    <input
-                      class="pf-c-form-control"
-                      type="text"
-                      id="vm-dest-dir"
-                      value="/mnt/storage/backups/vm_backups"
-                      onchange="updateVMBackupConfig()"
-                    />
-                    <p class="pf-c-form__helper-text">
-                      Onde os backups das VMs serão armazenados
-                    </p>
-                  </div>
-
-                  <div class="pf-c-form__group">
-                    <label class="pf-c-form__label" for="vm-retention-days">
-                      <span class="pf-c-form__label-text"
-                        >🗓️ Dias de Retenção</span
-                      >
-                    </label>
-                    <input
-                      class="pf-c-form-control"
-                      type="number"
-                      id="vm-retention-days"
-                      value="7"
-                      min="0"
-                      max="365"
-                      onchange="updateVMBackupConfig()"
-                    />
-                    <p class="pf-c-form__helper-text">
-                      Backups mais antigos que este período serão removidos
-                      automaticamente
-                    </p>
-                  </div>
-
-                  <div class="pf-c-form__group">
                     <div
                       style="
-                        display: flex;
-                        align-items: center;
-                        gap: var(--pf-global--spacer--sm);
+                        padding: var(--pf-global--spacer--md);
+                        background-color: var(
+                          --pf-global--BackgroundColor--light-200
+                        );
+                        border-radius: var(--pf-global--BorderRadius--sm);
+                        margin-top: var(--pf-global--spacer--md);
                       "
                     >
-                      <input
-                        type="checkbox"
-                        id="vm-verify-checksum"
-                        class="custom-checkbox"
-                        onchange="updateVMBackupConfig()"
-                      />
-                      <label
-                        for="vm-verify-checksum"
-                        style="margin: 0; cursor: pointer"
+                      <h4 style="margin: 0 0 var(--pf-global--spacer--sm) 0">
+                        📊 Estatísticas
+                      </h4>
+                      <div
+                        style="display: grid; gap: var(--pf-global--spacer--xs)"
                       >
-                        <strong>🔐 Verificar Checksum (SHA256)</strong>
-                      </label>
+                        <div>
+                          <strong>VMs Detectadas:</strong>
+                          <span id="vm-stats-total">0</span>
+                        </div>
+                        <div>
+                          <strong>VMs Selecionadas:</strong>
+                          <span id="vm-stats-selected">0</span>
+                        </div>
+                        <div>
+                          <strong>Tamanho Total:</strong>
+                          <span id="vm-stats-size">0 B</span>
+                        </div>
+                      </div>
                     </div>
-                    <p class="pf-c-form__helper-text" style="margin-left: 26px">
-                      Verifica integridade do backup (aumenta o tempo de backup)
-                    </p>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Ações em lote -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">🛠️ Ações em Lote</h2>
+              <!-- Log de Progresso -->
+              <div class="pf-l-grid__item pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">📋 Log de Progresso</h2>
+                    </div>
+                    <div class="pf-c-card__header-actions">
+                      <button
+                        class="pf-c-button pf-m-link"
+                        onclick="clearVMLog()"
+                      >
+                        🗑️ Limpar
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <div class="pf-l-grid pf-m-gutter">
-                    <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
-                      <button
-                        class="pf-c-button pf-m-secondary pf-m-block"
-                        onclick="refreshBackupList()"
-                      >
-                        🔄 Atualizar Lista de Backups
-                      </button>
-                    </div>
-                    <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
-                      <button
-                        class="pf-c-button pf-m-secondary pf-m-block"
-                        onclick="exportAllBackups()"
-                      >
-                        📦 Exportar Todos os Backups
-                      </button>
-                    </div>
-                    <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
-                      <button
-                        class="pf-c-button pf-m-danger pf-m-block"
-                        onclick="cleanOldBackups()"
-                      >
-                        🗑️ Limpar Backups Antigos
-                      </button>
+                  <div class="pf-c-card__body">
+                    <div
+                      id="vm-log-container"
+                      style="
+                        background-color: #1a1a1a;
+                        color: #00ff00;
+                        font-family: 'Courier New', monospace;
+                        font-size: 0.875rem;
+                        padding: var(--pf-global--spacer--md);
+                        border-radius: var(--pf-global--BorderRadius--sm);
+                        max-height: 400px;
+                        overflow-y: auto;
+                        white-space: pre-wrap;
+                        word-wrap: break-word;
+                      "
+                    >
+                      Aguardando ação...
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Tab: Backup de VMs -->
-        <div id="vms-tab-content" class="tab-content" style="display: none">
-          <div class="pf-l-grid pf-m-gutter">
-            <!-- Descobrir VMs -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">🔍 Descoberta de VMs</h2>
-                  </div>
-                  <div class="pf-c-card__header-actions">
-                    <button
-                      class="pf-c-button pf-m-primary"
-                      id="discover-vms-btn"
-                      onclick="discoverVMs()"
-                    >
-                      🔍 Descobrir VMs
-                    </button>
-                    <button
-                      class="pf-c-button pf-m-secondary"
-                      id="diagnose-vms-btn"
-                      onclick="diagnoseVMs()"
-                      style="margin-left: 10px"
-                    >
-                      🩺 Diagnóstico
-                    </button>
-                  </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <div
-                    id="vm-discovery-loading"
-                    style="
-                      display: none;
-                      text-align: center;
-                      padding: var(--pf-global--spacer--lg);
-                    "
-                  >
-                    <div
-                      class="loading-spinner"
-                      style="
-                        width: 2rem;
-                        height: 2rem;
-                        margin: 0 auto var(--pf-global--spacer--md);
-                      "
-                    ></div>
-                    <p>Descobrindo VMs e discos...</p>
-                  </div>
-
-                  <div id="vm-table-container" style="display: none">
-                    <p
-                      style="
-                        color: var(--pf-global--Color--200);
-                        margin-bottom: var(--pf-global--spacer--md);
-                      "
-                    >
-                      Selecione as VMs que deseja fazer backup. O sistema irá
-                      fazer backup de todos os discos de cada VM selecionada.
-                    </p>
-
-                    <div class="backup-table-wrapper">
-                      <table
-                        class="pf-c-table pf-m-grid-md"
-                        role="grid"
-                        id="vms-table"
-                      >
-                        <thead>
-                          <tr>
-                            <th role="columnheader" style="width: 50px">
-                              <input
-                                type="checkbox"
-                                class="custom-checkbox"
-                                id="select-all-vms-checkbox"
-                                onchange="toggleSelectAllVMs(this)"
-                              />
-                            </th>
-                            <th role="columnheader">💿 Nome da VM</th>
-                            <th role="columnheader">📊 Status</th>
-                            <th role="columnheader">💾 Discos</th>
-                            <th role="columnheader">📦 Tamanho Total</th>
-                            <th role="columnheader">📁 Caminhos</th>
-                          </tr>
-                        </thead>
-                        <tbody id="vms-table-body">
-                          <!-- Será preenchido dinamicamente -->
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  <div
-                    id="vm-empty-state"
-                    style="
-                      text-align: center;
-                      padding: var(--pf-global--spacer--2xl);
-                    "
-                  >
-                    <div
-                      style="
-                        font-size: 4rem;
-                        margin-bottom: var(--pf-global--spacer--md);
-                        opacity: 0.5;
-                      "
-                    >
-                      💿
-                    </div>
-                    <h3>Clique em "Descobrir VMs" para começar</h3>
-                    <p style="color: var(--pf-global--Color--200)">
-                      O sistema irá procurar por VMs e seus discos
-                      automaticamente.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Ações de Backup de VMs -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">🚀 Ações</h2>
-                  </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <button
-                    class="pf-c-button pf-m-primary pf-m-block"
-                    id="backup-selected-vms-btn"
-                    onclick="backupSelectedVMs()"
-                    disabled
-                    style="margin-bottom: var(--pf-global--spacer--md)"
-                  >
-                    📦 Fazer Backup das VMs Selecionadas
-                  </button>
-
-                  <button
-                    class="pf-c-button pf-m-secondary pf-m-block"
-                    onclick="cleanOldVMBackups()"
-                    style="margin-bottom: var(--pf-global--spacer--md)"
-                  >
-                    🗑️ Limpar Backups Antigos
-                  </button>
-
-                  <div
-                    style="
-                      padding: var(--pf-global--spacer--md);
-                      background-color: var(
-                        --pf-global--BackgroundColor--light-200
-                      );
-                      border-radius: var(--pf-global--BorderRadius--sm);
-                      margin-top: var(--pf-global--spacer--md);
-                    "
-                  >
-                    <h4 style="margin: 0 0 var(--pf-global--spacer--sm) 0">
-                      📊 Estatísticas
-                    </h4>
-                    <div
-                      style="display: grid; gap: var(--pf-global--spacer--xs)"
-                    >
-                      <div>
-                        <strong>VMs Detectadas:</strong>
-                        <span id="vm-stats-total">0</span>
-                      </div>
-                      <div>
-                        <strong>VMs Selecionadas:</strong>
-                        <span id="vm-stats-selected">0</span>
-                      </div>
-                      <div>
-                        <strong>Tamanho Total:</strong>
-                        <span id="vm-stats-size">0 B</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Log de Progresso -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">📋 Log de Progresso</h2>
-                  </div>
-                  <div class="pf-c-card__header-actions">
-                    <button
-                      class="pf-c-button pf-m-link"
-                      onclick="clearVMLog()"
-                    >
-                      🗑️ Limpar
-                    </button>
-                  </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <div
-                    id="vm-log-container"
-                    style="
-                      background-color: #1a1a1a;
-                      color: #00ff00;
-                      font-family: 'Courier New', monospace;
-                      font-size: 0.875rem;
-                      padding: var(--pf-global--spacer--md);
-                      border-radius: var(--pf-global--BorderRadius--sm);
-                      max-height: 400px;
-                      overflow-y: auto;
-                      white-space: pre-wrap;
-                      word-wrap: break-word;
-                    "
-                  >
-                    Aguardando ação...
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Automação & Scripts -->
-        <div
-          id="automation-tab-content"
-          class="tab-content"
-          style="display: none"
-        >
+          <!-- Tab: Automação & Scripts -->
           <div
-            class="pf-l-grid pf-m-gutter"
-            style="margin-top: var(--pf-global--spacer--md)"
+            id="automation-tab-content"
+            class="tab-content"
+            style="display: none"
           >
-            <!-- Lista de Scripts com Header e Estatísticas -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">⚡ Scripts Disponíveis</h2>
-                  </div>
-                  <div class="pf-c-card__header-actions">
-                    <button
-                      class="pf-c-button pf-m-primary"
-                      onclick="automationOpenCreateModal()"
-                    >
-                      ➕ Novo Script
-                    </button>
-                    <button
-                      class="pf-c-button pf-m-secondary"
-                      onclick="automationLoadScripts()"
-                    >
-                      🔄 Atualizar
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Estatísticas compactas dentro do card -->
-                <div
-                  class="pf-c-card__body"
-                  style="
-                    background-color: #f5f5f5;
-                    border-bottom: 1px solid var(--pf-global--BorderColor--100);
-                  "
-                >
-                  <div class="pf-l-grid pf-m-gutter">
-                    <div
-                      class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                      style="text-align: center"
-                    >
-                      <div style="font-size: 1.5rem">📜</div>
-                      <strong
-                        id="automation-stat-total-scripts"
-                        style="display: block; font-size: 1.5rem"
-                        >0</strong
-                      >
-                      <small style="color: var(--pf-global--Color--200)"
-                        >Total</small
-                      >
+            <div
+              class="pf-l-grid pf-m-gutter"
+              style="margin-top: var(--pf-global--spacer--md)"
+            >
+              <!-- Lista de Scripts com Header e Estatísticas -->
+              <div class="pf-l-grid__item pf-m-12-col">
+                <div class="pf-c-card">
+                  <div class="pf-c-card__header">
+                    <div class="pf-c-card__header-main">
+                      <h2 class="pf-c-card__title">⚡ Scripts Disponíveis</h2>
                     </div>
-                    <div
-                      class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                      style="text-align: center"
-                    >
-                      <div style="font-size: 1.5rem">⏰</div>
-                      <strong
-                        id="automation-stat-scheduled"
-                        style="display: block; font-size: 1.5rem"
-                        >0</strong
-                      >
-                      <small style="color: var(--pf-global--Color--200)"
-                        >Agendados</small
-                      >
-                    </div>
-                    <div
-                      class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                      style="text-align: center"
-                    >
-                      <div style="font-size: 1.5rem">🔄</div>
-                      <strong
-                        id="automation-stat-running"
-                        style="display: block; font-size: 1.5rem"
-                        >0</strong
-                      >
-                      <small style="color: var(--pf-global--Color--200)"
-                        >Executando</small
-                      >
-                    </div>
-                    <div
-                      class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
-                      style="text-align: center"
-                    >
-                      <div style="font-size: 1.5rem">❌</div>
-                      <strong
-                        id="automation-stat-failures"
-                        style="display: block; font-size: 1.5rem"
-                        >0</strong
-                      >
-                      <small style="color: var(--pf-global--Color--200)"
-                        >Falhas</small
-                      >
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="pf-c-card__body"
-                  style="
-                    border-bottom: 1px solid var(--pf-global--BorderColor--100);
-                  "
-                >
-                  <div class="pf-l-grid pf-m-gutter">
-                    <div class="pf-l-grid__item pf-m-6-col-on-md pf-m-12-col">
-                      <div class="pf-c-form__group" style="margin-bottom: 0">
-                        <input
-                          class="pf-c-form-control"
-                          type="text"
-                          id="automation-filter-search"
-                          placeholder="🔍 Buscar por nome do script..."
-                          onkeyup="automationApplyFilters()"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
-                      <select
-                        class="pf-c-form-control"
-                        id="automation-filter-sort"
-                        onchange="automationApplyFilters()"
-                      >
-                        <option value="name-asc">Nome (A-Z)</option>
-                        <option value="name-desc">Nome (Z-A)</option>
-                        <option value="created-desc">Mais Recente</option>
-                        <option value="created-asc">Mais Antigo</option>
-                        <option value="executions-desc">Mais Executado</option>
-                      </select>
-                    </div>
-
-                    <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
-                      <select
-                        class="pf-c-form-control"
-                        id="automation-filter-status"
-                        onchange="automationApplyFilters()"
-                      >
-                        <option value="all">Todos</option>
-                        <option value="scheduled">Agendados</option>
-                        <option value="not-scheduled">Sem Agendamento</option>
-                        <option value="running">Em Execução</option>
-                        <option value="failed">Com Falhas</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Tabela de Scripts -->
-                <div class="pf-c-card__body">
-                  <!-- Loading -->
-                  <div
-                    id="automation-loading"
-                    class="pf-c-empty-state"
-                    style="display: none"
-                  >
-                    <div class="pf-c-empty-state__content">
-                      <div class="pf-c-spinner pf-m-xl" role="progressbar">
-                        <span class="pf-c-spinner__clipper"></span>
-                        <span class="pf-c-spinner__lead-ball"></span>
-                        <span class="pf-c-spinner__tail-ball"></span>
-                      </div>
-                      <h2 class="pf-c-title pf-m-lg">Carregando scripts...</h2>
-                    </div>
-                  </div>
-
-                  <!-- Erro -->
-                  <div
-                    id="automation-error-message"
-                    class="pf-c-alert pf-m-danger pf-m-inline"
-                    style="
-                      display: none;
-                      margin-bottom: var(--pf-global--spacer--md);
-                    "
-                  >
-                    <p class="pf-c-alert__title">
-                      <span class="pf-screen-reader">Erro: </span>
-                      <span id="automation-error-text"></span>
-                    </p>
-                  </div>
-
-                  <!-- Tabela -->
-                  <div class="backup-table-wrapper">
-                    <table
-                      class="pf-c-table pf-m-grid-md"
-                      role="grid"
-                      id="automation-scripts-table"
-                    >
-                      <thead>
-                        <tr role="row">
-                          <th role="columnheader" scope="col">
-                            Nome do Script
-                          </th>
-                          <th role="columnheader" scope="col">Diretório</th>
-                          <th role="columnheader" scope="col">
-                            Próxima Execução
-                          </th>
-                          <th role="columnheader" scope="col">
-                            Última Execução
-                          </th>
-                          <th
-                            role="columnheader"
-                            scope="col"
-                            class="pf-m-center"
-                          >
-                            Execuções
-                          </th>
-                          <th
-                            role="columnheader"
-                            scope="col"
-                            class="pf-m-center"
-                          >
-                            Sucessos
-                          </th>
-                          <th
-                            role="columnheader"
-                            scope="col"
-                            class="pf-m-center"
-                          >
-                            Ações
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody role="rowgroup" id="automation-scripts-body">
-                        <!-- Scripts serão carregados aqui -->
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- Empty State -->
-                  <div
-                    id="automation-empty-state"
-                    class="pf-c-empty-state"
-                    style="display: none"
-                  >
-                    <div class="pf-c-empty-state__content">
-                      <h2 class="pf-c-title pf-m-lg">
-                        Nenhum script encontrado
-                      </h2>
-                      <div class="pf-c-empty-state__body">
-                        Crie seu primeiro script personalizado para começar!
-                      </div>
+                    <div class="pf-c-card__header-actions">
                       <button
                         class="pf-c-button pf-m-primary"
                         onclick="automationOpenCreateModal()"
                       >
-                        ➕ Criar Primeiro Script
+                        ➕ Novo Script
                       </button>
+                      <button
+                        class="pf-c-button pf-m-secondary"
+                        onclick="automationLoadScripts()"
+                      >
+                        🔄 Atualizar
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Estatísticas compactas dentro do card -->
+                  <div
+                    class="pf-c-card__body"
+                    style="
+                      background-color: #f5f5f5;
+                      border-bottom: 1px solid
+                        var(--pf-global--BorderColor--100);
+                    "
+                  >
+                    <div class="pf-l-grid pf-m-gutter">
+                      <div
+                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
+                        style="text-align: center"
+                      >
+                        <div style="font-size: 1.5rem">📜</div>
+                        <strong
+                          id="automation-stat-total-scripts"
+                          style="display: block; font-size: 1.5rem"
+                          >0</strong
+                        >
+                        <small style="color: var(--pf-global--Color--200)"
+                          >Total</small
+                        >
+                      </div>
+                      <div
+                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
+                        style="text-align: center"
+                      >
+                        <div style="font-size: 1.5rem">⏰</div>
+                        <strong
+                          id="automation-stat-scheduled"
+                          style="display: block; font-size: 1.5rem"
+                          >0</strong
+                        >
+                        <small style="color: var(--pf-global--Color--200)"
+                          >Agendados</small
+                        >
+                      </div>
+                      <div
+                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
+                        style="text-align: center"
+                      >
+                        <div style="font-size: 1.5rem">🔄</div>
+                        <strong
+                          id="automation-stat-running"
+                          style="display: block; font-size: 1.5rem"
+                          >0</strong
+                        >
+                        <small style="color: var(--pf-global--Color--200)"
+                          >Executando</small
+                        >
+                      </div>
+                      <div
+                        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col"
+                        style="text-align: center"
+                      >
+                        <div style="font-size: 1.5rem">❌</div>
+                        <strong
+                          id="automation-stat-failures"
+                          style="display: block; font-size: 1.5rem"
+                          >0</strong
+                        >
+                        <small style="color: var(--pf-global--Color--200)"
+                          >Falhas</small
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="pf-c-card__body"
+                    style="
+                      border-bottom: 1px solid
+                        var(--pf-global--BorderColor--100);
+                    "
+                  >
+                    <div class="pf-l-grid pf-m-gutter">
+                      <div class="pf-l-grid__item pf-m-6-col-on-md pf-m-12-col">
+                        <div class="pf-c-form__group" style="margin-bottom: 0">
+                          <input
+                            class="pf-c-form-control"
+                            type="text"
+                            id="automation-filter-search"
+                            placeholder="🔍 Buscar por nome do script..."
+                            onkeyup="automationApplyFilters()"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+                        <select
+                          class="pf-c-form-control"
+                          id="automation-filter-sort"
+                          onchange="automationApplyFilters()"
+                        >
+                          <option value="name-asc">Nome (A-Z)</option>
+                          <option value="name-desc">Nome (Z-A)</option>
+                          <option value="created-desc">Mais Recente</option>
+                          <option value="created-asc">Mais Antigo</option>
+                          <option value="executions-desc">
+                            Mais Executado
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+                        <select
+                          class="pf-c-form-control"
+                          id="automation-filter-status"
+                          onchange="automationApplyFilters()"
+                        >
+                          <option value="all">Todos</option>
+                          <option value="scheduled">Agendados</option>
+                          <option value="not-scheduled">Sem Agendamento</option>
+                          <option value="running">Em Execução</option>
+                          <option value="failed">Com Falhas</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tabela de Scripts -->
+                  <div class="pf-c-card__body">
+                    <!-- Loading -->
+                    <div
+                      id="automation-loading"
+                      class="pf-c-empty-state"
+                      style="display: none"
+                    >
+                      <div class="pf-c-empty-state__content">
+                        <div class="pf-c-spinner pf-m-xl" role="progressbar">
+                          <span class="pf-c-spinner__clipper"></span>
+                          <span class="pf-c-spinner__lead-ball"></span>
+                          <span class="pf-c-spinner__tail-ball"></span>
+                        </div>
+                        <h2 class="pf-c-title pf-m-lg">
+                          Carregando scripts...
+                        </h2>
+                      </div>
+                    </div>
+
+                    <!-- Erro -->
+                    <div
+                      id="automation-error-message"
+                      class="pf-c-alert pf-m-danger pf-m-inline"
+                      style="
+                        display: none;
+                        margin-bottom: var(--pf-global--spacer--md);
+                      "
+                    >
+                      <p class="pf-c-alert__title">
+                        <span class="pf-screen-reader">Erro: </span>
+                        <span id="automation-error-text"></span>
+                      </p>
+                    </div>
+
+                    <!-- Tabela -->
+                    <div class="backup-table-wrapper">
+                      <table
+                        class="pf-c-table pf-m-grid-md"
+                        role="grid"
+                        id="automation-scripts-table"
+                      >
+                        <thead>
+                          <tr role="row">
+                            <th role="columnheader" scope="col">
+                              Nome do Script
+                            </th>
+                            <th role="columnheader" scope="col">Diretório</th>
+                            <th role="columnheader" scope="col">
+                              Próxima Execução
+                            </th>
+                            <th role="columnheader" scope="col">
+                              Última Execução
+                            </th>
+                            <th
+                              role="columnheader"
+                              scope="col"
+                              class="pf-m-center"
+                            >
+                              Execuções
+                            </th>
+                            <th
+                              role="columnheader"
+                              scope="col"
+                              class="pf-m-center"
+                            >
+                              Sucessos
+                            </th>
+                            <th
+                              role="columnheader"
+                              scope="col"
+                              class="pf-m-center"
+                            >
+                              Ações
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody role="rowgroup" id="automation-scripts-body">
+                          <!-- Scripts serão carregados aqui -->
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div
+                      id="automation-empty-state"
+                      class="pf-c-empty-state"
+                      style="display: none"
+                    >
+                      <div class="pf-c-empty-state__content">
+                        <h2 class="pf-c-title pf-m-lg">
+                          Nenhum script encontrado
+                        </h2>
+                        <div class="pf-c-empty-state__body">
+                          Crie seu primeiro script personalizado para começar!
+                        </div>
+                        <button
+                          class="pf-c-button pf-m-primary"
+                          onclick="automationOpenCreateModal()"
+                        >
+                          ➕ Criar Primeiro Script
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
