@@ -502,15 +502,6 @@
             <li class="pf-c-tabs__item">
               <button
                 class="pf-c-tabs__link"
-                id="tab-config"
-                onclick="switchTab('config')"
-              >
-                <span class="pf-c-tabs__item-text">⚙️ Configurações</span>
-              </button>
-            </li>
-            <li class="pf-c-tabs__item">
-              <button
-                class="pf-c-tabs__link"
                 id="tab-vms"
                 onclick="switchTab('vms')"
               >
@@ -533,6 +524,15 @@
                 onclick="switchTab('schedules')"
               >
                 <span class="pf-c-tabs__item-text">📅 Agendamentos</span>
+              </button>
+            </li>
+            <li class="pf-c-tabs__item">
+              <button
+                class="pf-c-tabs__link"
+                id="tab-config"
+                onclick="switchTab('config')"
+              >
+                <span class="pf-c-tabs__item-text">⚙️ Configurações</span>
               </button>
             </li>
           </ul>
@@ -1186,145 +1186,144 @@
           class="tab-content"
           style="display: none"
         >
-          <div class="pf-l-grid pf-m-gutter">
-            <!-- Cards de Estatísticas de Scripts -->
+          <div
+            class="pf-l-grid pf-m-gutter"
+            style="margin-top: var(--pf-global--spacer--md)"
+          >
+            <!-- Cards de Estatísticas - Row 1 -->
             <div class="pf-l-grid__item pf-m-12-col">
-              <div
-                class="stats-grid"
-                style="
-                  display: grid;
-                  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                  gap: var(--pf-global--spacer--lg);
-                  margin-bottom: var(--pf-global--spacer--xl);
-                "
-              >
-                <!-- Total Scripts -->
-                <div class="pf-c-card" style="border-top: 4px solid #667eea">
-                  <div class="pf-c-card__body">
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: var(--pf-global--spacer--md);
-                      "
-                    >
-                      <div style="font-size: 2rem">📜</div>
-                      <div>
-                        <h3
-                          id="automation-stat-total-scripts"
-                          class="pf-c-title pf-m-2xl"
-                          style="margin: 0; font-weight: bold"
-                        >
-                          0
-                        </h3>
-                        <p
-                          style="
-                            margin: 0;
-                            color: var(--pf-global--Color--200);
-                            font-size: var(--pf-global--FontSize--sm);
-                          "
-                        >
-                          Total de Scripts
-                        </p>
+              <div class="pf-l-grid pf-m-gutter">
+                <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                  <div class="pf-c-card" style="border-top: 4px solid #667eea">
+                    <div class="pf-c-card__body">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: var(--pf-global--spacer--md);
+                        "
+                      >
+                        <div style="font-size: 2rem">📜</div>
+                        <div>
+                          <h3
+                            id="automation-stat-total-scripts"
+                            class="pf-c-title pf-m-2xl"
+                            style="margin: 0; font-weight: bold"
+                          >
+                            0
+                          </h3>
+                          <p
+                            style="
+                              margin: 0;
+                              color: var(--pf-global--Color--200);
+                              font-size: var(--pf-global--FontSize--sm);
+                            "
+                          >
+                            Total de Scripts
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Scripts Agendados -->
-                <div class="pf-c-card" style="border-top: 4px solid #4facfe">
-                  <div class="pf-c-card__body">
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: var(--pf-global--spacer--md);
-                      "
-                    >
-                      <div style="font-size: 2rem">⏰</div>
-                      <div>
-                        <h3
-                          id="automation-stat-scheduled"
-                          class="pf-c-title pf-m-2xl"
-                          style="margin: 0; font-weight: bold"
-                        >
-                          0
-                        </h3>
-                        <p
-                          style="
-                            margin: 0;
-                            color: var(--pf-global--Color--200);
-                            font-size: var(--pf-global--FontSize--sm);
-                          "
-                        >
-                          Agendados
-                        </p>
+                <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                  <div class="pf-c-card" style="border-top: 4px solid #4facfe">
+                    <div class="pf-c-card__body">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: var(--pf-global--spacer--md);
+                        "
+                      >
+                        <div style="font-size: 2rem">⏰</div>
+                        <div>
+                          <h3
+                            id="automation-stat-scheduled"
+                            class="pf-c-title pf-m-2xl"
+                            style="margin: 0; font-weight: bold"
+                          >
+                            0
+                          </h3>
+                          <p
+                            style="
+                              margin: 0;
+                              color: var(--pf-global--Color--200);
+                              font-size: var(--pf-global--FontSize--sm);
+                            "
+                          >
+                            Agendados
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Executando -->
-                <div class="pf-c-card" style="border-top: 4px solid #43e97b">
-                  <div class="pf-c-card__body">
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: var(--pf-global--spacer--md);
-                      "
-                    >
-                      <div style="font-size: 2rem">🔄</div>
-                      <div>
-                        <h3
-                          id="automation-stat-running"
-                          class="pf-c-title pf-m-2xl"
-                          style="margin: 0; font-weight: bold"
-                        >
-                          0
-                        </h3>
-                        <p
-                          style="
-                            margin: 0;
-                            color: var(--pf-global--Color--200);
-                            font-size: var(--pf-global--FontSize--sm);
-                          "
-                        >
-                          Em Execução
-                        </p>
+                <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                  <div class="pf-c-card" style="border-top: 4px solid #43e97b">
+                    <div class="pf-c-card__body">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: var(--pf-global--spacer--md);
+                        "
+                      >
+                        <div style="font-size: 2rem">🔄</div>
+                        <div>
+                          <h3
+                            id="automation-stat-running"
+                            class="pf-c-title pf-m-2xl"
+                            style="margin: 0; font-weight: bold"
+                          >
+                            0
+                          </h3>
+                          <p
+                            style="
+                              margin: 0;
+                              color: var(--pf-global--Color--200);
+                              font-size: var(--pf-global--FontSize--sm);
+                            "
+                          >
+                            Em Execução
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Últimas Falhas -->
-                <div class="pf-c-card" style="border-top: 4px solid #fa709a">
-                  <div class="pf-c-card__body">
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: var(--pf-global--spacer--md);
-                      "
-                    >
-                      <div style="font-size: 2rem">❌</div>
-                      <div>
-                        <h3
-                          id="automation-stat-failures"
-                          class="pf-c-title pf-m-2xl"
-                          style="margin: 0; font-weight: bold"
-                        >
-                          0
-                        </h3>
-                        <p
-                          style="
-                            margin: 0;
-                            color: var(--pf-global--Color--200);
-                            font-size: var(--pf-global--FontSize--sm);
-                          "
-                        >
-                          Últimas Falhas
-                        </p>
+                <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+                  <div class="pf-c-card" style="border-top: 4px solid #fa709a">
+                    <div class="pf-c-card__body">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: var(--pf-global--spacer--md);
+                        "
+                      >
+                        <div style="font-size: 2rem">❌</div>
+                        <div>
+                          <h3
+                            id="automation-stat-failures"
+                            class="pf-c-title pf-m-2xl"
+                            style="margin: 0; font-weight: bold"
+                          >
+                            0
+                          </h3>
+                          <p
+                            style="
+                              margin: 0;
+                              color: var(--pf-global--Color--200);
+                              font-size: var(--pf-global--FontSize--sm);
+                            "
+                          >
+                            Últimas Falhas
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1332,137 +1331,80 @@
               </div>
             </div>
 
-            <!-- Ações Principais -->
+            <!-- Lista de Scripts com Header -->
             <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card" style="border-top: 4px solid #667eea">
-                <div class="pf-c-card__body">
-                  <div
-                    style="
-                      display: flex;
-                      gap: var(--pf-global--spacer--sm);
-                      flex-wrap: wrap;
-                    "
-                  >
+              <div class="pf-c-card">
+                <div class="pf-c-card__header">
+                  <div class="pf-c-card__header-main">
+                    <h2 class="pf-c-card__title">⚡ Scripts Disponíveis</h2>
+                  </div>
+                  <div class="pf-c-card__header-actions">
                     <button
                       class="pf-c-button pf-m-primary"
-                      type="button"
                       onclick="automationOpenCreateModal()"
                     >
                       ➕ Novo Script
                     </button>
                     <button
                       class="pf-c-button pf-m-secondary"
-                      type="button"
-                      onclick="automationOpenImportModal()"
-                    >
-                      📥 Buscar Scripts
-                    </button>
-                    <button
-                      class="pf-c-button pf-m-secondary"
-                      type="button"
-                      onclick="automationOpenCronManagerModal()"
-                    >
-                      ⏰ Agendamentos
-                    </button>
-                    <button
-                      class="pf-c-button pf-m-tertiary"
-                      type="button"
-                      onclick="automationOpenEnvModal()"
-                    >
-                      🔧 Variáveis Globais (.env)
-                    </button>
-                    <button
-                      class="pf-c-button pf-m-secondary"
-                      type="button"
                       onclick="automationLoadScripts()"
                     >
                       🔄 Atualizar
                     </button>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- Filtros -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card" style="border-top: 4px solid #4facfe">
-                <div class="pf-c-card__body">
+                <!-- Filtros dentro do card -->
+                <div
+                  class="pf-c-card__body"
+                  style="
+                    border-bottom: 1px solid var(--pf-global--BorderColor--100);
+                  "
+                >
                   <div class="pf-l-grid pf-m-gutter">
-                    <!-- Busca -->
                     <div class="pf-l-grid__item pf-m-6-col-on-md pf-m-12-col">
-                      <div class="pf-c-form__group">
-                        <label
-                          class="pf-c-form__label"
-                          for="automation-filter-search"
-                        >
-                          <span class="pf-c-form__label-text">🔍 Buscar</span>
-                        </label>
+                      <div class="pf-c-form__group" style="margin-bottom: 0">
                         <input
                           class="pf-c-form-control"
                           type="text"
                           id="automation-filter-search"
-                          placeholder="Buscar por nome do script..."
+                          placeholder="🔍 Buscar por nome do script..."
                           onkeyup="automationApplyFilters()"
                         />
                       </div>
                     </div>
 
-                    <!-- Ordenar por -->
                     <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
-                      <div class="pf-c-form__group">
-                        <label
-                          class="pf-c-form__label"
-                          for="automation-filter-sort"
-                        >
-                          <span class="pf-c-form__label-text">↕️ Ordenar</span>
-                        </label>
-                        <select
-                          class="pf-c-form-control"
-                          id="automation-filter-sort"
-                          onchange="automationApplyFilters()"
-                        >
-                          <option value="name-asc">Nome (A-Z)</option>
-                          <option value="name-desc">Nome (Z-A)</option>
-                          <option value="created-desc">Mais Recente</option>
-                          <option value="created-asc">Mais Antigo</option>
-                          <option value="executions-desc">
-                            Mais Executado
-                          </option>
-                          <option value="next-asc">Próxima Execução</option>
-                        </select>
-                      </div>
+                      <select
+                        class="pf-c-form-control"
+                        id="automation-filter-sort"
+                        onchange="automationApplyFilters()"
+                      >
+                        <option value="name-asc">Nome (A-Z)</option>
+                        <option value="name-desc">Nome (Z-A)</option>
+                        <option value="created-desc">Mais Recente</option>
+                        <option value="created-asc">Mais Antigo</option>
+                        <option value="executions-desc">Mais Executado</option>
+                      </select>
                     </div>
 
-                    <!-- Filtrar por Status -->
                     <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
-                      <div class="pf-c-form__group">
-                        <label
-                          class="pf-c-form__label"
-                          for="automation-filter-status"
-                        >
-                          <span class="pf-c-form__label-text">📊 Status</span>
-                        </label>
-                        <select
-                          class="pf-c-form-control"
-                          id="automation-filter-status"
-                          onchange="automationApplyFilters()"
-                        >
-                          <option value="all">Todos</option>
-                          <option value="scheduled">Agendados</option>
-                          <option value="not-scheduled">Sem Agendamento</option>
-                          <option value="running">Em Execução</option>
-                          <option value="failed">Com Falhas</option>
-                        </select>
-                      </div>
+                      <select
+                        class="pf-c-form-control"
+                        id="automation-filter-status"
+                        onchange="automationApplyFilters()"
+                      >
+                        <option value="all">Todos</option>
+                        <option value="scheduled">Agendados</option>
+                        <option value="not-scheduled">Sem Agendamento</option>
+                        <option value="running">Em Execução</option>
+                        <option value="failed">Com Falhas</option>
+                      </select>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- Tabela de Scripts -->
-            <div class="pf-l-grid__item pf-m-12-col">
-              <div class="pf-c-card" style="border-top: 4px solid #43e97b">
+                <!-- Tabela de Scripts -->
                 <div class="pf-c-card__body">
                   <!-- Loading -->
                   <div
@@ -1896,9 +1838,13 @@
     </div>
 
     <!-- Tab: Agendamentos -->
+    <!-- Tab: Agendamentos -->
     <div id="schedules-tab-content" class="tab-content" style="display: none">
-      <div class="pf-l-grid pf-m-gutter">
-        <!-- Estatísticas -->
+      <!-- Estatísticas -->
+      <div
+        class="pf-l-grid pf-m-gutter"
+        style="margin-top: var(--pf-global--spacer--md)"
+      >
         <div class="pf-l-grid__item pf-m-12-col">
           <div class="pf-l-grid pf-m-gutter">
             <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
