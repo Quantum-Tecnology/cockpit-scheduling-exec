@@ -843,6 +843,86 @@
               </div>
             </div>
 
+            <!-- Configurações de Backup de VMs -->
+            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+              <div class="pf-c-card">
+                <div class="pf-c-card__header">
+                  <div class="pf-c-card__header-main">
+                    <h2 class="pf-c-card__title">💿 Backup de VMs</h2>
+                  </div>
+                </div>
+                <div class="pf-c-card__body">
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="vm-dest-dir">
+                      <span class="pf-c-form__label-text"
+                        >📁 Diretório de Destino</span
+                      >
+                      <span class="pf-c-form__label-required" aria-hidden="true"
+                        >*</span
+                      >
+                    </label>
+                    <input
+                      class="pf-c-form-control"
+                      type="text"
+                      id="vm-dest-dir"
+                      value="/mnt/storage/backups/vm_backups"
+                      onchange="updateVMBackupConfig()"
+                    />
+                    <p class="pf-c-form__helper-text">
+                      Onde os backups das VMs serão armazenados
+                    </p>
+                  </div>
+
+                  <div class="pf-c-form__group">
+                    <label class="pf-c-form__label" for="vm-retention-days">
+                      <span class="pf-c-form__label-text"
+                        >🗓️ Dias de Retenção</span
+                      >
+                    </label>
+                    <input
+                      class="pf-c-form-control"
+                      type="number"
+                      id="vm-retention-days"
+                      value="7"
+                      min="0"
+                      max="365"
+                      onchange="updateVMBackupConfig()"
+                    />
+                    <p class="pf-c-form__helper-text">
+                      Backups mais antigos que este período serão removidos
+                      automaticamente
+                    </p>
+                  </div>
+
+                  <div class="pf-c-form__group">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: var(--pf-global--spacer--sm);
+                      "
+                    >
+                      <input
+                        type="checkbox"
+                        id="vm-verify-checksum"
+                        class="custom-checkbox"
+                        onchange="updateVMBackupConfig()"
+                      />
+                      <label
+                        for="vm-verify-checksum"
+                        style="margin: 0; cursor: pointer"
+                      >
+                        <strong>🔐 Verificar Checksum (SHA256)</strong>
+                      </label>
+                    </div>
+                    <p class="pf-c-form__helper-text" style="margin-left: 26px">
+                      Verifica integridade do backup (aumenta o tempo de backup)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Ações em lote -->
             <div class="pf-l-grid__item pf-m-12-col">
               <div class="pf-c-card">
@@ -999,88 +1079,8 @@
               </div>
             </div>
 
-            <!-- Configurações de Backup de VMs -->
-            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-              <div class="pf-c-card">
-                <div class="pf-c-card__header">
-                  <div class="pf-c-card__header-main">
-                    <h2 class="pf-c-card__title">⚙️ Configurações</h2>
-                  </div>
-                </div>
-                <div class="pf-c-card__body">
-                  <div class="pf-c-form__group">
-                    <label class="pf-c-form__label" for="vm-dest-dir">
-                      <span class="pf-c-form__label-text"
-                        >📁 Diretório de Destino</span
-                      >
-                      <span class="pf-c-form__label-required" aria-hidden="true"
-                        >*</span
-                      >
-                    </label>
-                    <input
-                      class="pf-c-form-control"
-                      type="text"
-                      id="vm-dest-dir"
-                      value="/mnt/storage/backups/vm_backups"
-                      onchange="updateVMBackupConfig()"
-                    />
-                    <p class="pf-c-form__helper-text">
-                      Onde os backups das VMs serão armazenados
-                    </p>
-                  </div>
-
-                  <div class="pf-c-form__group">
-                    <label class="pf-c-form__label" for="vm-retention-days">
-                      <span class="pf-c-form__label-text"
-                        >🗓️ Dias de Retenção</span
-                      >
-                    </label>
-                    <input
-                      class="pf-c-form-control"
-                      type="number"
-                      id="vm-retention-days"
-                      value="7"
-                      min="0"
-                      max="365"
-                      onchange="updateVMBackupConfig()"
-                    />
-                    <p class="pf-c-form__helper-text">
-                      Backups mais antigos que este período serão removidos
-                      automaticamente
-                    </p>
-                  </div>
-
-                  <div class="pf-c-form__group">
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: var(--pf-global--spacer--sm);
-                      "
-                    >
-                      <input
-                        type="checkbox"
-                        id="vm-verify-checksum"
-                        class="custom-checkbox"
-                        onchange="updateVMBackupConfig()"
-                      />
-                      <label
-                        for="vm-verify-checksum"
-                        style="margin: 0; cursor: pointer"
-                      >
-                        <strong>🔐 Verificar Checksum (SHA256)</strong>
-                      </label>
-                    </div>
-                    <p class="pf-c-form__helper-text" style="margin-left: 26px">
-                      Verifica integridade do backup (aumenta o tempo de backup)
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Ações de Backup de VMs -->
-            <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+            <div class="pf-l-grid__item pf-m-12-col">
               <div class="pf-c-card">
                 <div class="pf-c-card__header">
                   <div class="pf-c-card__header-main">
@@ -1546,6 +1546,104 @@
             Cancelar
           </button>
           <button class="pf-c-button pf-m-primary" onclick="addDirectory()">
+            ➕ Adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Adicionar Diretório de Scripts -->
+    <div id="add-script-directory-modal" class="modal">
+      <div class="modal-content">
+        <div class="pf-c-modal-box__header">
+          <h2 class="pf-c-modal-box__title">
+            📂 Adicionar Diretório de Scripts
+          </h2>
+          <button class="close" onclick="closeAddScriptDirectoryModal()">
+            &times;
+          </button>
+        </div>
+        <div class="pf-c-modal-box__body">
+          <form id="add-script-directory-form">
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="script-directory-path">
+                <span class="pf-c-form__label-text">Caminho do Diretório</span>
+                <span class="pf-c-form__label-required" aria-hidden="true"
+                  >*</span
+                >
+              </label>
+              <div style="display: flex; gap: var(--pf-global--spacer--sm)">
+                <input
+                  class="pf-c-form-control"
+                  type="text"
+                  id="script-directory-path"
+                  placeholder="/home/user/scripts ou ~/meus-scripts"
+                  required
+                  style="flex: 1"
+                />
+                <button
+                  class="pf-c-button pf-m-secondary"
+                  type="button"
+                  onclick="browseScriptDirectory()"
+                  title="Navegar pelos diretórios do sistema"
+                >
+                  📂 Navegar
+                </button>
+              </div>
+              <p class="pf-c-form__helper-text">
+                Caminho completo do diretório onde seus scripts estão
+                localizados
+              </p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="script-directory-label">
+                <span class="pf-c-form__label-text">Rótulo (opcional)</span>
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="text"
+                id="script-directory-label"
+                placeholder="Ex: Scripts de Automação"
+              />
+              <p class="pf-c-form__helper-text">
+                Nome amigável para identificar este diretório
+              </p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="script-max-depth">
+                <span class="pf-c-form__label-text"
+                  >Profundidade Máxima de Busca</span
+                >
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="number"
+                id="script-max-depth"
+                placeholder="10"
+                value="10"
+                min="1"
+                max="50"
+              />
+              <p class="pf-c-form__helper-text">
+                Número de níveis de subdiretórios a serem pesquisados (1 =
+                apenas diretório raiz, 10 = até 10 níveis de profundidade)
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="pf-c-modal-box__footer">
+          <button
+            class="pf-c-button pf-m-secondary"
+            onclick="closeAddScriptDirectoryModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="pf-c-button pf-m-primary"
+            onclick="addScriptDirectory()"
+          >
             ➕ Adicionar
           </button>
         </div>

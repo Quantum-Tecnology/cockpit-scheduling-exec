@@ -302,9 +302,17 @@ async function loadDirectoryContents(path) {
 }
 
 function selectDirectory(path) {
-  document.getElementById("directory-path").value = path;
-  closeDirectoryBrowser();
-  showAlert("success", `✅ Diretório selecionado: ${path}`);
+  // Se existir um callback personalizado (para scripts), usar ele
+  if (window.scriptDirectoryCallback) {
+    window.scriptDirectoryCallback(path);
+    window.scriptDirectoryCallback = null; // Limpar o callback
+    showAlert("success", `✅ Diretório selecionado: ${path}`);
+  } else {
+    // Comportamento padrão (para backups)
+    document.getElementById("directory-path").value = path;
+    closeDirectoryBrowser();
+    showAlert("success", `✅ Diretório selecionado: ${path}`);
+  }
 }
 
 function navigateToParent() {
@@ -2347,71 +2355,86 @@ function automationRenderScriptDirectoriesList() {
 }
 
 // Adicionar diretório de script
+// Adicionar diretório de script
 async function automationAddScriptDirectory() {
-  console.log("Automation: Abrindo prompt para adicionar diretório");
+  console.log("Automation: Abrindo modal para adicionar diretório");
+  const modal = document.getElementById("add-script-directory-modal");
+  if (modal) {
+    modal.style.display = "block";
+    // Limpar formulário
+    document.getElementById("script-directory-path").value = "";
+    document.getElementById("script-directory-label").value = "";
+    document.getElementById("script-max-depth").value = "10";
+  }
+}
 
-  // Obter caminho do diretório
-  const path = prompt(
-    "Digite o caminho do diretório onde estão seus scripts:\n\n(ex: /home/user/scripts, /opt/scripts, ~/meus-scripts, etc.)"
-  );
+// Fechar modal de adicionar diretório de script
+function closeAddScriptDirectoryModal() {
+  const modal = document.getElementById("add-script-directory-modal");
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
 
-  if (!path || path.trim() === "") {
-    console.log("Automation: Operação cancelada pelo usuário");
+// Navegar por diretórios para scripts
+function browseScriptDirectory() {
+  const pathInput = document.getElementById("script-directory-path");
+  const currentPath = pathInput.value || userHome;
+
+  // Guardar callback para quando selecionar o diretório
+  window.scriptDirectoryCallback = (selectedPath) => {
+    document.getElementById("script-directory-path").value = selectedPath;
+    closeDirectoryBrowser();
+  };
+
+  // Abrir modal de navegação de diretórios
+  document.getElementById("directory-browser-modal").style.display = "block";
+  loadDirectoryContents(currentPath);
+}
+
+// Salvar diretório de script
+async function addScriptDirectory() {
+  const pathInput = document.getElementById("script-directory-path");
+  const labelInput = document.getElementById("script-directory-label");
+  const maxDepthInput = document.getElementById("script-max-depth");
+
+  const path = pathInput.value.trim();
+  const label = labelInput.value.trim();
+  const maxDepth = parseInt(maxDepthInput.value) || 10;
+
+  if (!path) {
+    showAlert("warning", "⚠️ Por favor, informe o caminho do diretório!");
     return;
   }
 
-  const trimmedPath = path.trim();
-
   // Verificar se o diretório já existe na lista
-  const exists = scriptDirectories.some((d) => d.path === trimmedPath);
+  const exists = scriptDirectories.some((d) => d.path === path);
   if (exists) {
     showAlert("warning", "⚠️ Este diretório já está configurado!");
     return;
   }
 
-  // Obter rótulo
-  const defaultLabel =
-    trimmedPath
-      .split("/")
-      .filter((x) => x)
-      .pop() || trimmedPath;
-  const label = prompt(
-    "Digite um rótulo para identificar este diretório (opcional):",
-    defaultLabel
-  );
-
-  // Perguntar sobre recursividade
-  const recursive = confirm(
-    "Deseja buscar scripts em subdiretórios também?\n\n• OK = Sim (busca recursiva)\n• Cancelar = Não (somente o diretório principal)"
-  );
-
   // Adicionar à lista
   scriptDirectories.push({
-    path: trimmedPath,
-    label: label && label.trim() !== "" ? label.trim() : defaultLabel,
-    maxDepth: recursive ? 10 : 1,
+    path: path,
+    label:
+      label ||
+      path
+        .split("/")
+        .filter((x) => x)
+        .pop() ||
+      path,
+    maxDepth: maxDepth,
   });
 
-  console.log("Automation: Diretório adicionado:", {
-    path: trimmedPath,
-    label,
-    maxDepth: recursive ? 10 : 1,
-  });
+  await saveConfiguration();
+  automationRenderScriptDirectoriesList();
+  closeAddScriptDirectoryModal();
 
-  // Salvar configuração
-  try {
-    await saveConfiguration();
-    automationRenderScriptDirectoriesList();
-    showAlert("success", "✅ Diretório adicionado! Recarregando scripts...");
+  showAlert("success", "✅ Diretório adicionado! Recarregando scripts...");
 
-    // Auto-recarregar scripts
-    await automationLoadScripts();
-  } catch (error) {
-    console.error("Automation: Erro ao salvar configuração:", error);
-    showAlert("danger", "❌ Erro ao salvar: " + (error.message || error));
-    // Remover o diretório que foi adicionado
-    scriptDirectories.pop();
-  }
+  // Auto-recarregar scripts
+  await automationLoadScripts();
 }
 
 // Remover diretório de script
