@@ -6,8 +6,35 @@
       <button class="close" onclick="closeDirectoryBrowser()">&times;</button>
     </div>
     <div class="pf-c-modal-box__body">
-      <div id="directory-browser-content">
-        <!-- Conteúdo será carregado dinamicamente -->
+      <div class="pf-c-form__group" style="margin-bottom: 1rem">
+        <label class="pf-c-form__label">
+          <span class="pf-c-form__label-text">Caminho Atual</span>
+        </label>
+        <div
+          class="pf-c-form-control"
+          style="
+            padding: 0.5rem;
+            background-color: var(--pf-global--BackgroundColor--100);
+            border: 1px solid var(--pf-global--BorderColor--100);
+            border-radius: 3px;
+          "
+        >
+          <span id="current-path" style="word-break: break-all">/</span>
+        </div>
+      </div>
+      <div
+        id="directory-browser-content"
+        style="
+          max-height: 400px;
+          overflow-y: auto;
+          border: 1px solid var(--pf-global--BorderColor--100);
+          border-radius: 3px;
+          padding: 0.5rem;
+        "
+      >
+        <div id="directory-list">
+          <!-- Lista de diretórios será carregada aqui -->
+        </div>
       </div>
     </div>
     <div class="pf-c-modal-box__footer">

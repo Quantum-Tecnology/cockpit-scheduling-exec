@@ -1,4 +1,5 @@
-<!-- Modal Schedule - será expandido -->
+<!-- Modal Schedule -->
+<div id="schedule-modal-backdrop" class="modal-backdrop"></div>
 <div id="schedule-modal" class="modal">
   <div class="modal-content">
     <div class="pf-c-modal-box__header">
@@ -9,7 +10,110 @@
     </div>
     <div class="pf-c-modal-box__body">
       <form id="schedule-form">
-        <!-- Formulário de agendamento -->
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="schedule-type">
+            <span class="pf-c-form__label-text">Tipo de Agendamento</span>
+            <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+          </label>
+          <select
+            class="pf-c-form-control"
+            id="schedule-type"
+            required
+            onchange="updateScheduleOptions()"
+          >
+            <option value="">Selecione...</option>
+            <option value="backup">📦 Backup de Diretório</option>
+            <option value="vm">💿 Backup de VM</option>
+            <option value="script">⚡ Execução de Script</option>
+          </select>
+        </div>
+
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="schedule-description">
+            <span class="pf-c-form__label-text">Descrição</span>
+            <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="text"
+            id="schedule-description"
+            placeholder="Ex: Backup diário do banco de dados"
+            required
+          />
+        </div>
+
+        <div
+          class="pf-c-form__group"
+          id="schedule-target-group"
+          style="display: none"
+        >
+          <label class="pf-c-form__label" for="schedule-target">
+            <span class="pf-c-form__label-text" id="schedule-target-label"
+              >Alvo</span
+            >
+            <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+          </label>
+          <select class="pf-c-form-control" id="schedule-target" required>
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="schedule-cron">
+            <span class="pf-c-form__label-text">Expressão Cron</span>
+            <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="text"
+            id="schedule-cron"
+            placeholder="0 2 * * *"
+            required
+          />
+          <div class="pf-c-form__helper-text">
+            <span class="pf-c-form__helper-text-icon">
+              <i class="fas fa-info-circle"></i>
+            </span>
+            Formato: minuto hora dia mês dia-da-semana
+          </div>
+          <div style="margin-top: 0.5rem">
+            <button
+              type="button"
+              class="pf-c-button pf-m-link"
+              onclick="setCronPreset('0 2 * * *')"
+            >
+              Diário (2h)
+            </button>
+            <button
+              type="button"
+              class="pf-c-button pf-m-link"
+              onclick="setCronPreset('0 2 * * 0')"
+            >
+              Semanal
+            </button>
+            <button
+              type="button"
+              class="pf-c-button pf-m-link"
+              onclick="setCronPreset('0 2 1 * *')"
+            >
+              Mensal
+            </button>
+          </div>
+        </div>
+
+        <div class="pf-c-form__group">
+          <div class="pf-c-check">
+            <input
+              class="pf-c-check__input"
+              type="checkbox"
+              id="schedule-enabled"
+              checked
+            />
+            <label class="pf-c-check__label" for="schedule-enabled">
+              Ativar agendamento
+            </label>
+          </div>
+        </div>
       </form>
     </div>
     <div class="pf-c-modal-box__footer">
