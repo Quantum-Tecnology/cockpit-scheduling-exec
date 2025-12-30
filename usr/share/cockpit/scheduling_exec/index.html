@@ -2,10 +2,10 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <title>Scripts & Agendamentos</title>
+    <title>Gerenciador de Backups</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- PatternFly 4 CSS (CDN com integridade) -->
+    <!-- PatternFly 4 CSS -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/@patternfly/patternfly@4.224.5/patternfly.min.css"
@@ -15,1820 +15,334 @@
     <!-- Branding do Cockpit -->
     <link rel="stylesheet" href="../../static/branding.css" />
 
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="css/backup-manager.css" />
+
     <!-- Cockpit JS API -->
     <script src="../base1/cockpit.js"></script>
-    <script src="index.js" defer></script>
-    <style>
-      html,
-      body {
-        height: 100%;
-      }
 
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: var(--pf-global--BackgroundColor--light-300);
-      }
-
-      .pf-c-page {
-        min-height: 100vh;
-        background-color: var(--pf-global--BackgroundColor--light-300);
-      }
-
-      .pf-c-page__main {
-        padding: var(--pf-global--spacer--md);
-        background-color: var(--pf-global--BackgroundColor--light-300);
-      }
-
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(4px);
-        animation: fadeIn 0.3s ease;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(50px) scale(0.95);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-
-      .modal-content {
-        background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-        margin: 3% auto;
-        padding: 0;
-        border: none;
-        width: 90%;
-        max-width: 1000px;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
-          0 0 0 1px rgba(0, 0, 0, 0.05);
-        animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        overflow: hidden;
-      }
-
-      .pf-c-modal-box__header {
-        padding: var(--pf-global--spacer--lg);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-bottom: none;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .pf-c-modal-box__header::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(
-          45deg,
-          transparent 30%,
-          rgba(255, 255, 255, 0.1) 50%,
-          transparent 70%
-        );
-        animation: shimmer 3s infinite;
-      }
-
-      @keyframes shimmer {
-        0% {
-          transform: translateX(-100%);
-        }
-        100% {
-          transform: translateX(100%);
-        }
-      }
-
-      .pf-c-modal-box__title {
-        color: white !important;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        font-weight: 600;
-        position: relative;
-        z-index: 1;
-      }
-
-      .pf-c-modal-box__body {
-        padding: var(--pf-global--spacer--xl);
-        max-height: 65vh;
-        overflow-y: auto;
-      }
-
-      .pf-c-modal-box__body::-webkit-scrollbar {
-        width: 10px;
-      }
-
-      .pf-c-modal-box__body::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-      }
-
-      .pf-c-modal-box__body::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
-      }
-
-      .pf-c-modal-box__body::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-      }
-
-      .pf-c-modal-box__footer {
-        padding: var(--pf-global--spacer--lg);
-        border-top: 2px solid var(--pf-global--BorderColor--100);
-        background-color: #f8f9fa;
-        display: flex;
-        gap: var(--pf-global--spacer--sm);
-        justify-content: flex-end;
-      }
-
-      .close {
-        position: absolute;
-        right: var(--pf-global--spacer--lg);
-        top: var(--pf-global--spacer--lg);
-        color: white;
-        font-size: 1.8rem;
-        font-weight: bold;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.2);
-        border: none;
-        padding: 0.5rem;
-        line-height: 1;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s;
-        z-index: 2;
-      }
-
-      .close:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: rotate(90deg) scale(1.1);
-      }
-
-      /* Melhorias nos formulários */
-      .pf-c-form__group {
-        margin-bottom: var(--pf-global--spacer--lg);
-      }
-
-      .pf-c-form__label {
-        font-weight: 600;
-        color: var(--pf-global--Color--100);
-        margin-bottom: var(--pf-global--spacer--xs);
-      }
-
-      .pf-c-form-control {
-        transition: all 0.3s;
-        border: 2px solid var(--pf-global--BorderColor--100);
-        border-radius: 8px;
-      }
-
-      .pf-c-form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        outline: none;
-      }
-
-      .pf-c-form-control:hover {
-        border-color: var(--pf-global--BorderColor--200);
-      }
-
-      /* Botões melhorados */
-      .pf-c-button {
-        border-radius: 8px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.3s;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .pf-c-button::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-      }
-
-      .pf-c-button:hover::before {
-        width: 300px;
-        height: 300px;
-      }
-
-      .pf-c-button.pf-m-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-      }
-
-      .pf-c-button.pf-m-primary:hover {
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        transform: translateY(-2px);
-      }
-
-      .pf-c-button.pf-m-secondary {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        border: none;
-        color: white;
-        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
-      }
-
-      .pf-c-button.pf-m-secondary:hover {
-        box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5);
-        transform: translateY(-2px);
-      }
-
-      .pf-c-button.pf-m-tertiary {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        border: none;
-        color: white;
-        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-      }
-
-      .pf-c-button.pf-m-tertiary:hover {
-        box-shadow: 0 6px 20px rgba(79, 172, 254, 0.5);
-        transform: translateY(-2px);
-      }
-
-      .pf-c-button.pf-m-danger {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-        border: none;
-        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-      }
-
-      .pf-c-button.pf-m-danger:hover {
-        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
-        transform: translateY(-2px);
-      }
-
-      /* Alertas melhorados */
-      .pf-c-alert {
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        animation: slideDown 0.3s ease;
-      }
-
-      @keyframes slideDown {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .pf-c-alert.pf-m-info {
-        background: linear-gradient(135deg, #d4f1f9 0%, #b5e7f5 100%);
-        border-left: 4px solid #4facfe;
-      }
-
-      .pf-c-alert.pf-m-success {
-        background: linear-gradient(135deg, #d4f8e8 0%, #b5f5d8 100%);
-        border-left: 4px solid #51cf66;
-      }
-
-      .pf-c-alert.pf-m-warning {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeb9c 100%);
-        border-left: 4px solid #fab005;
-      }
-
-      .pf-c-alert.pf-m-danger {
-        background: linear-gradient(135deg, #ffe0e0 0%, #ffcccc 100%);
-        border-left: 4px solid #ff6b6b;
-      }
-
-      .cron-fields {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: var(--pf-global--spacer--md);
-      }
-
-      .cron-helper {
-        margin-top: var(--pf-global--spacer--md);
-        padding: var(--pf-global--spacer--lg);
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        border-left: 5px solid #2196f3;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
-      }
-
-      .cron-helper strong {
-        color: #1976d2;
-        font-size: 1.1rem;
-      }
-
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: var(--pf-global--spacer--lg);
-        margin-bottom: var(--pf-global--spacer--xl);
-      }
-
-      .pf-c-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: 16px;
-        border: none;
-        overflow: hidden;
-      }
-
-      .pf-c-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-      }
-
-      /* Cards de estatísticas com gradientes */
-      .stats-grid .pf-c-card {
-        background: white;
-        border-radius: 16px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .stats-grid .pf-c-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      }
-
-      .stats-grid .pf-c-card:nth-child(2)::before {
-        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-      }
-
-      .stats-grid .pf-c-card:nth-child(3)::before {
-        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-      }
-
-      .stats-grid .pf-c-card:nth-child(4)::before {
-        background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
-      }
-
-      /* Melhorias na tabela */
-      .pf-c-table {
-        background-color: white;
-        border-radius: 12px;
-        overflow: visible;
-        position: relative;
-        width: 100%;
-        border-collapse: collapse;
-        display: table !important;
-        visibility: visible !important;
-      }
-
-      .pf-c-table thead {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-        position: relative;
-        z-index: 1;
-        display: table-header-group !important;
-      }
-
-      .pf-c-table thead th {
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.85rem;
-        color: #495057;
-        padding: 1rem;
-        display: table-cell !important;
-      }
-
-      .pf-c-table tbody {
-        display: table-row-group !important;
-      }
-
-      .pf-c-table tbody tr {
-        transition: background 0.2s, box-shadow 0.2s;
-        border-bottom: 1px solid #f1f3f5;
-        position: relative;
-        z-index: 1;
-        display: table-row !important;
-      }
-
-      .pf-c-table tbody tr:hover {
-        background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        z-index: 2;
-      }
-
-      .pf-c-table tbody td {
-        position: relative;
-        padding: 1rem;
-        vertical-align: middle;
-        display: table-cell !important;
-      }
-
-      .pf-c-table tbody td:last-child {
-        overflow: visible;
-        position: relative;
-      }
-
-      /* Badges melhoradas com efeitos */
-      .pf-c-badge {
-        font-weight: var(--pf-global--FontWeight--bold);
-        padding: 0.35rem 0.75rem;
-        border-radius: 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s;
-      }
-
-      .pf-c-badge:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      }
-
-      .pf-c-badge.pf-m-success {
-        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
-        color: white;
-      }
-
-      .pf-c-badge.pf-m-read {
-        background: linear-gradient(135deg, #748ffc 0%, #5c7cfa 100%);
-        color: white;
-      }
-
-      /* Dropdown de ações com transição */
-      .js-row-actions {
-        position: relative;
-        display: inline-block;
-        z-index: 100;
-      }
-
-      .js-row-actions.is-open {
-        z-index: 10000;
-      }
-
-      .js-row-actions-toggle {
-        transition: all 0.3s;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        cursor: pointer;
-        font-size: 1.1rem;
-        padding: 0;
-        position: relative;
-        z-index: 101;
-      }
-
-      .js-row-actions-toggle:hover {
-        transform: rotate(90deg) scale(1.1);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-      }
-
-      .js-row-actions-toggle:focus {
-        outline: 2px solid #667eea;
-        outline-offset: 2px;
-      }
-
-      .js-row-actions-menu {
-        position: fixed !important;
-        z-index: 999999 !important;
-        min-width: 12rem;
-        margin: 0;
-        padding: 0.5rem 0;
-        list-style: none;
-        background-color: white !important;
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25),
-          0 0 0 1px rgba(0, 0, 0, 0.05) !important;
-        animation: dropDown 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        pointer-events: auto !important;
-        will-change: transform, opacity;
-        isolation: isolate;
-        transform: translateZ(0);
-      }
-
-      .js-row-actions-menu[hidden] {
-        display: none !important;
-        pointer-events: none;
-      }
-
-      .js-row-actions-menu li {
-        margin: 0;
-        padding: 0;
-      }
-
-      @keyframes dropDown {
-        from {
-          opacity: 0;
-          transform: translateY(-10px) scale(0.95);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-
-      .js-row-actions-menu .pf-c-dropdown__menu-item {
-        display: block;
-        width: 100%;
-        transition: all 0.2s ease;
-        padding: 0.75rem 1.25rem;
-        text-align: left;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 0.9rem;
-        color: var(--pf-global--Color--100);
-        white-space: nowrap;
-        position: relative;
-      }
-
-      .js-row-actions-menu .pf-c-dropdown__menu-item:hover {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        transform: translateX(4px);
-      }
-
-      .js-row-actions-menu .pf-c-dropdown__menu-item:active {
-        transform: translateX(2px) scale(0.98);
-      }
-
-      /* Inputs com ícones e efeitos */
-      .pf-c-form-control::placeholder {
-        color: #adb5bd;
-        font-style: italic;
-      }
-
-      textarea.pf-c-form-control {
-        resize: vertical;
-        min-height: 120px;
-        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
-        line-height: 1.6;
-      }
-
-      /* Loading spinner melhorado */
-      .pf-c-spinner {
-        animation: pulse 1.5s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          transform: scale(1);
-          opacity: 1;
-        }
-        50% {
-          transform: scale(1.1);
-          opacity: 0.8;
-        }
-      }
-
-      /* Empty state melhorado */
-      .pf-c-empty-state {
-        padding: var(--pf-global--spacer--2xl);
-        text-align: center;
-      }
-
-      .pf-c-empty-state__content {
-        animation: fadeIn 0.6s ease;
-      }
-
-      /* Cabeçalho com efeito */
-      .pf-l-split__item h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 800;
-      }
-
-      /* Seção de filtros melhorada */
-      .pf-c-page__main-section .pf-c-card {
-        border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e9ecef;
-      }
-
-      .plugin-footer {
-        position: fixed;
-        right: var(--pf-global--spacer--md);
-        bottom: var(--pf-global--spacer--sm);
-        z-index: 10;
-        font-size: var(--pf-global--FontSize--xs);
-        color: var(--pf-global--Color--200);
-        user-select: text;
-      }
-    </style>
+    <!-- Template Loader -->
+    <script src="js/template-loader.js"></script>
+
+    <!-- Módulos JavaScript (sem defer - funções exportadas imediatamente para onclick) -->
+    <script src="js/utils.js"></script>
+    <script src="js/directory-browser.js"></script>
+    <script src="js/email.js"></script>
+    <script src="js/backups.js"></script>
+    <script src="js/vm-backup.js"></script>
+    <script src="js/automation.js"></script>
+    <script src="js/automation-actions.js"></script>
+    <script src="js/automation-scripts.js"></script>
+    <script src="js/schedules.js"></script>
+
+    <!-- Core do Backup Manager -->
+    <script src="backup-manager.js"></script>
   </head>
+
   <body>
     <div class="pf-c-page">
-      <main class="pf-c-page__main">
-        <!-- Cabeçalho -->
-        <section class="pf-c-page__main-section">
-          <div class="pf-l-split pf-m-gutter">
-            <div class="pf-l-split__item pf-m-fill">
-              <h1 class="pf-c-title pf-m-2xl">
-                Gerenciador de Scripts Personalizados
+      <!-- Header -->
+      <header class="pf-c-page__header">
+        <div class="pf-c-page__header-brand">
+          <div class="pf-c-page__header-brand-toggle"></div>
+          <a class="pf-c-page__header-brand-link">
+            <div class="pf-c-brand">
+              <h1 style="margin: 0; color: white; font-size: 1.5rem">
+                🗄️ Gerenciador de Backups
               </h1>
-              <p class="pf-c-content">
-                <small
-                  >Crie, edite e agende scripts personalizados para execução
-                  automática</small
-                >
-              </p>
             </div>
-            <div class="pf-l-split__item">
-              <div style="display: flex; gap: var(--pf-global--spacer--sm)">
-                <button
-                  class="pf-c-button pf-m-secondary"
-                  type="button"
-                  onclick="openImportModal()"
-                >
-                  Buscar scripts
-                </button>
-                <button
-                  class="pf-c-button pf-m-secondary"
-                  type="button"
-                  onclick="openCronManagerModal()"
-                >
-                  Agendamentos
-                </button>
-                <button
-                  class="pf-c-button pf-m-tertiary"
-                  type="button"
-                  onclick="openEnvModal()"
-                >
-                  Variáveis globais (.env)
-                </button>
-                <button
-                  class="pf-c-button pf-m-primary"
-                  type="button"
-                  onclick="openCreateModal()"
-                >
-                  Novo Script
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+          </a>
+        </div>
+      </header>
 
-        <!-- Mensagens -->
-        <section class="pf-c-page__main-section" style="padding-top: 0">
-          <div id="loading" class="pf-c-empty-state" style="display: none">
-            <div class="pf-c-empty-state__content">
-              <div class="pf-c-spinner pf-m-xl" role="progressbar">
-                <span class="pf-c-spinner__clipper"></span>
-                <span class="pf-c-spinner__lead-ball"></span>
-                <span class="pf-c-spinner__tail-ball"></span>
-              </div>
-              <h2 class="pf-c-title pf-m-lg">Carregando scripts...</h2>
-            </div>
+      <!-- Main content -->
+      <main class="pf-c-page__main">
+        <div class="pf-l-grid pf-m-gutter" style="width: 100%">
+          <div class="pf-l-grid__item pf-m-12-col">
+            <div id="status-message"></div>
           </div>
 
-          <div
-            id="error-message"
-            class="pf-c-alert pf-m-danger pf-m-inline"
-            style="display: none; margin-bottom: var(--pf-global--spacer--md)"
-          >
-            <p class="pf-c-alert__title">
-              <span class="pf-screen-reader">Erro: </span>
-              <span id="error-text"></span>
-            </p>
-          </div>
-        </section>
+          <!-- Alertas -->
+          <div class="pf-l-grid__item pf-m-12-col" id="alerts-container"></div>
 
-        <!-- Cards de Estatísticas -->
-        <section class="pf-c-page__main-section" style="padding-top: 0">
-          <div class="stats-grid">
-            <!-- Total Scripts -->
-            <div class="pf-c-card">
-              <div class="pf-c-card__body">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: var(--pf-global--spacer--md);
-                  "
-                >
-                  <div
-                    style="
-                      font-size: 2rem;
-                      color: var(--pf-global--primary-color--100);
-                    "
+          <!-- Tabs -->
+          <div class="pf-l-grid__item pf-m-12-col">
+            <div class="pf-c-tabs" id="backup-tabs">
+              <ul class="pf-c-tabs__list">
+                <li class="pf-c-tabs__item pf-m-current">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-backups"
+                    onclick="switchTab('backups')"
                   >
-                    📜
-                  </div>
-                  <div>
-                    <h3
-                      id="stat-total-scripts"
-                      class="pf-c-title pf-m-2xl"
-                      style="margin: 0; font-weight: bold"
+                    <span class="pf-c-tabs__item-text"
+                      >📦 Lista de Backups</span
                     >
-                      0
-                    </h3>
-                    <p
-                      style="
-                        margin: 0;
-                        color: var(--pf-global--Color--200);
-                        font-size: var(--pf-global--FontSize--sm);
-                      "
-                    >
-                      Total de Scripts
-                    </p>
-                  </div>
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-vms"
+                    onclick="switchTab('vms')"
+                  >
+                    <span class="pf-c-tabs__item-text">💿 Backup de VMs</span>
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-automation"
+                    onclick="switchTab('automation')"
+                  >
+                    <span class="pf-c-tabs__item-text">⚡ Automação</span>
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-schedules"
+                    onclick="switchTab('schedules')"
+                  >
+                    <span class="pf-c-tabs__item-text">📅 Agendamentos</span>
+                  </button>
+                </li>
+                <li class="pf-c-tabs__item">
+                  <button
+                    class="pf-c-tabs__link"
+                    id="tab-config"
+                    onclick="switchTab('config')"
+                  >
+                    <span class="pf-c-tabs__item-text">⚙️ Configurações</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Container para templates das abas -->
+          <div class="pf-l-grid__item pf-m-12-col">
+            <!-- Botão para toggle do log -->
+            <button
+              id="log-toggle-btn"
+              class="pf-c-button pf-m-secondary log-toggle-btn"
+              onclick="toggleGlobalLog()"
+              title="Mostrar/Ocultar Log"
+            >
+              📋
+            </button>
+
+            <!-- Layout de 2 colunas: Conteúdo Principal + Log Global -->
+            <div class="two-column-layout">
+              <!-- Coluna Principal: Conteúdo das Tabs -->
+              <div class="main-content-column">
+                <div id="tab-content-container">
+                  <!-- Templates das abas são carregados dinamicamente aqui -->
                 </div>
               </div>
-            </div>
 
-            <!-- Scripts Agendados -->
-            <div class="pf-c-card">
-              <div class="pf-c-card__body">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: var(--pf-global--spacer--md);
-                  "
-                >
-                  <div
-                    style="
-                      font-size: 2rem;
-                      color: var(--pf-global--info-color--100);
-                    "
-                  >
-                    ⏰
-                  </div>
-                  <div>
-                    <h3
-                      id="stat-scheduled"
-                      class="pf-c-title pf-m-2xl"
-                      style="margin: 0; font-weight: bold"
-                    >
-                      0
-                    </h3>
-                    <p
-                      style="
-                        margin: 0;
-                        color: var(--pf-global--Color--200);
-                        font-size: var(--pf-global--FontSize--sm);
-                      "
-                    >
-                      Agendados
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              <!-- Redimensionador -->
+              <div class="resize-handle" id="resize-handle"></div>
 
-            <!-- Executando -->
-            <div class="pf-c-card">
-              <div class="pf-c-card__body">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: var(--pf-global--spacer--md);
-                  "
-                >
-                  <div
-                    style="
-                      font-size: 2rem;
-                      color: var(--pf-global--success-color--100);
-                    "
-                  >
-                    🔄
+              <!-- Coluna do Log Global -->
+              <div class="log-column" id="log-column">
+                <div class="global-log-container">
+                  <div class="global-log-header">
+                    <h3>📋 Log de Atividades</h3>
+                    <div class="global-log-actions">
+                      <button
+                        class="pf-c-button pf-m-plain"
+                        onclick="clearGlobalLog()"
+                        title="Limpar Log"
+                      >
+                        🗑️
+                      </button>
+                      <button
+                        class="pf-c-button pf-m-plain"
+                        onclick="downloadGlobalLog()"
+                        title="Baixar Log"
+                      >
+                        💾
+                      </button>
+                      <button
+                        class="pf-c-button pf-m-plain"
+                        onclick="toggleGlobalLog()"
+                        title="Ocultar Log"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <h3
-                      id="stat-running"
-                      class="pf-c-title pf-m-2xl"
-                      style="margin: 0; font-weight: bold"
-                    >
-                      0
-                    </h3>
-                    <p
-                      style="
-                        margin: 0;
-                        color: var(--pf-global--Color--200);
-                        font-size: var(--pf-global--FontSize--sm);
-                      "
-                    >
-                      Em Execução
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Últimas Falhas -->
-            <div class="pf-c-card">
-              <div class="pf-c-card__body">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: var(--pf-global--spacer--md);
-                  "
-                >
-                  <div
-                    style="
-                      font-size: 2rem;
-                      color: var(--pf-global--danger-color--100);
-                    "
-                  >
-                    ❌
-                  </div>
-                  <div>
-                    <h3
-                      id="stat-failures"
-                      class="pf-c-title pf-m-2xl"
-                      style="margin: 0; font-weight: bold"
-                    >
-                      0
-                    </h3>
-                    <p
-                      style="
-                        margin: 0;
-                        color: var(--pf-global--Color--200);
-                        font-size: var(--pf-global--FontSize--sm);
-                      "
-                    >
-                      Últimas Falhas
-                    </p>
+                  <div class="global-log-body" id="global-log-body">
+                    <div class="log-entry info">
+                      [${new Date().toLocaleTimeString()}] Sistema iniciado
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
-
-        <!-- Filtros -->
-        <section class="pf-c-page__main-section" style="padding-top: 0">
-          <div class="pf-c-card">
-            <div class="pf-c-card__body">
-              <div class="pf-l-grid pf-m-gutter">
-                <!-- Busca -->
-                <div class="pf-l-grid__item pf-m-6-col-on-md pf-m-12-col">
-                  <div class="pf-c-form__group">
-                    <label class="pf-c-form__label" for="filter-search">
-                      <span class="pf-c-form__label-text">🔍 Buscar</span>
-                    </label>
-                    <input
-                      class="pf-c-form-control"
-                      type="text"
-                      id="filter-search"
-                      placeholder="Buscar por nome do script..."
-                      onkeyup="applyFilters()"
-                    />
-                  </div>
-                </div>
-
-                <!-- Ordenar por -->
-                <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
-                  <div class="pf-c-form__group">
-                    <label class="pf-c-form__label" for="filter-sort">
-                      <span class="pf-c-form__label-text">↕️ Ordenar</span>
-                    </label>
-                    <select
-                      class="pf-c-form-control"
-                      id="filter-sort"
-                      onchange="applyFilters()"
-                    >
-                      <option value="name-asc">Nome (A-Z)</option>
-                      <option value="name-desc">Nome (Z-A)</option>
-                      <option value="created-desc">Mais Recente</option>
-                      <option value="created-asc">Mais Antigo</option>
-                      <option value="executions-desc">Mais Executado</option>
-                      <option value="next-asc">Próxima Execução</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Filtrar por Status -->
-                <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
-                  <div class="pf-c-form__group">
-                    <label class="pf-c-form__label" for="filter-status">
-                      <span class="pf-c-form__label-text">📊 Status</span>
-                    </label>
-                    <select
-                      class="pf-c-form-control"
-                      id="filter-status"
-                      onchange="applyFilters()"
-                    >
-                      <option value="all">Todos</option>
-                      <option value="scheduled">Agendados</option>
-                      <option value="not-scheduled">Sem Agendamento</option>
-                      <option value="running">Em Execução</option>
-                      <option value="failed">Com Falhas</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tabela de Scripts -->
-        <section class="pf-c-page__main-section">
-          <div class="pf-c-card">
-            <div class="pf-c-card__body">
-              <table
-                class="pf-c-table pf-m-compact pf-m-grid-md"
-                role="grid"
-                id="scripts-table"
-              >
-                <thead>
-                  <tr role="row">
-                    <th role="columnheader" scope="col">Nome do Script</th>
-                    <th role="columnheader" scope="col">Próxima Execução</th>
-                    <th role="columnheader" scope="col">Última Execução</th>
-                    <th role="columnheader" scope="col">Criado Em</th>
-                    <th role="columnheader" scope="col">Atualizado Em</th>
-                    <th role="columnheader" scope="col" class="pf-m-center">
-                      Execuções
-                    </th>
-                    <th role="columnheader" scope="col" class="pf-m-center">
-                      Sucessos
-                    </th>
-                    <th role="columnheader" scope="col" class="pf-m-center">
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody role="rowgroup" id="scripts-body">
-                  <!-- Scripts serão carregados aqui -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
     </div>
 
-    <!-- Modal Criar/Editar Script -->
-    <div id="scriptModal" class="modal">
-      <div class="modal-content">
-        <div class="pf-c-modal-box__header">
-          <h2
-            class="pf-c-modal-box__title pf-c-title pf-m-2xl"
-            id="modal-title"
-          >
-            Novo Script
-          </h2>
-          <button
-            class="close"
-            onclick="closeScriptModal()"
-            aria-label="Fechar"
-          >
-            &times;
-          </button>
-        </div>
-
-        <div class="pf-c-modal-box__body">
-          <form id="script-form">
-            <div class="pf-c-form">
-              <div
-                class="pf-c-alert pf-m-info pf-m-inline"
-                style="margin-bottom: var(--pf-global--spacer--md)"
-              >
-                <p class="pf-c-alert__title">
-                  <span class="pf-screen-reader">Informação: </span>
-                  Ao executar/agendar, este plugin carrega as variáveis de
-                  <code>~/scripts/.env</code> e também de
-                  <code>~/scripts/.env.&lt;script&gt;</code> (se existir).
-                </p>
-              </div>
-
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="script-name">
-                    <span class="pf-c-form__label-text">Nome do Script</span>
-                    <span class="pf-c-form__label-required" aria-hidden="true"
-                      >*</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <input
-                    class="pf-c-form-control"
-                    type="text"
-                    id="script-name"
-                    name="script-name"
-                    required
-                    placeholder="meu-script.sh"
-                    pattern="[a-zA-Z0-9._-]+\.sh$"
-                  />
-                  <p class="pf-c-form__helper-text">
-                    <span class="pf-c-form__helper-text-icon">
-                      <i class="fas fa-info-circle" aria-hidden="true"></i>
-                    </span>
-                    O nome deve terminar com .sh
-                  </p>
-                </div>
-              </div>
-
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="script-path">
-                    <span class="pf-c-form__label-text">Caminho</span>
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <input
-                    class="pf-c-form-control"
-                    type="text"
-                    id="script-path"
-                    name="script-path"
-                    readonly
-                    aria-readonly="true"
-                  />
-                  <p class="pf-c-form__helper-text">
-                    <span class="pf-c-form__helper-text-icon">
-                      <i class="fas fa-info-circle" aria-hidden="true"></i>
-                    </span>
-                    Informação (somente leitura).
-                  </p>
-                </div>
-              </div>
-
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="script-content">
-                    <span class="pf-c-form__label-text"
-                      >Conteúdo do Script</span
-                    >
-                    <span class="pf-c-form__label-required" aria-hidden="true"
-                      >*</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <textarea
-                    class="pf-c-form-control"
-                    id="script-content"
-                    name="script-content"
-                    required
-                    rows="15"
-                    style="
-                      font-family: 'Red Hat Mono', 'Courier New', monospace;
-                    "
-                    placeholder="#!/bin/bash&#10;&#10;echo 'Olá Mundo'"
-                  ></textarea>
-                  <p class="pf-c-form__helper-text" id="script-vars-summary">
-                    Variáveis referenciadas detectadas: <code>-</code>
-                  </p>
-                </div>
-              </div>
-
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="script-modal-global-env">
-                    <span class="pf-c-form__label-text"
-                      >Variáveis globais carregadas (~/.env)</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <textarea
-                    class="pf-c-form-control"
-                    id="script-modal-global-env"
-                    name="script-modal-global-env"
-                    readonly
-                    aria-readonly="true"
-                    rows="6"
-                    style="
-                      font-family: 'Red Hat Mono', 'Courier New', monospace;
-                      background: var(--pf-global--BackgroundColor--200);
-                    "
-                    placeholder="Carregando..."
-                  ></textarea>
-                  <p class="pf-c-form__helper-text">
-                    Informação (somente leitura). Use o botão de copiar para
-                    enviar tudo junto.
-                  </p>
-                </div>
-              </div>
-
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="script-modal-script-env">
-                    <span class="pf-c-form__label-text"
-                      >Variáveis do script (~/.env.&lt;script&gt;)</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <textarea
-                    class="pf-c-form-control"
-                    id="script-modal-script-env"
-                    name="script-modal-script-env"
-                    readonly
-                    aria-readonly="true"
-                    rows="6"
-                    style="
-                      font-family: 'Red Hat Mono', 'Courier New', monospace;
-                      background: var(--pf-global--BackgroundColor--200);
-                    "
-                    placeholder="(vazio)"
-                  ></textarea>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="pf-c-modal-box__footer">
-          <button
-            type="button"
-            class="pf-c-button pf-m-secondary"
-            onclick="copyScriptWithVariables()"
-          >
-            Copiar (script + variáveis)
-          </button>
-          <button
-            type="button"
-            class="pf-c-button pf-m-secondary"
-            onclick="closeScriptModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            class="pf-c-button pf-m-primary"
-            onclick="document.getElementById('script-form').requestSubmit()"
-          >
-            Salvar
-          </button>
-        </div>
-      </div>
+    <!-- Container para modais -->
+    <div id="modals-container">
+      <!-- Modais são carregados dinamicamente aqui -->
     </div>
 
+    <!-- Footer -->
     <div id="plugin-footer" class="plugin-footer">
-      v1.3.3 — Luis Gustavo Santarosa Pinto
-    </div>
-
-    <!-- Modal Variáveis de Ambiente (.env) -->
-    <div id="envModal" class="modal">
-      <div class="modal-content">
-        <div class="pf-c-modal-box__header">
-          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">
-            Variáveis globais de ambiente (.env)
-          </h2>
-          <button class="close" onclick="closeEnvModal()" aria-label="Fechar">
-            &times;
-          </button>
-        </div>
-
-        <div class="pf-c-modal-box__body">
-          <form id="env-form">
-            <div class="pf-c-form">
-              <div class="cron-helper" style="margin-top: 0">
-                <strong>Como funciona</strong>
-                <div style="margin-top: 6px">
-                  Estas variáveis são carregadas
-                  <strong>para todos os scripts</strong>. Você também pode
-                  definir <strong>variáveis por script</strong> no botão
-                  “Variáveis (script)” na linha do script.
-                </div>
-              </div>
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="env-content">
-                    <span class="pf-c-form__label-text"
-                      >Conteúdo do ~/scripts/.env</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <textarea
-                    class="pf-c-form-control"
-                    id="env-content"
-                    name="env-content"
-                    rows="12"
-                    placeholder="MINHA_VARIAVEL=valor\nOUTRA_VARIAVEL=123"
-                    style="
-                      font-family: 'Red Hat Mono', 'Courier New', monospace;
-                      background-color: var(
-                        --pf-global--BackgroundColor--light-300
-                      );
-                    "
-                  ></textarea>
-                  <p class="pf-c-form__helper-text">
-                    As variáveis serão carregadas antes de executar/agendar
-                    scripts. Use o formato <code>CHAVE=VALOR</code>.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="pf-c-modal-box__footer">
-          <button
-            type="button"
-            class="pf-c-button pf-m-secondary"
-            onclick="closeEnvModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            class="pf-c-button pf-m-primary"
-            onclick="document.getElementById('env-form').requestSubmit()"
-          >
-            Salvar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Variáveis do Script -->
-    <div id="scriptEnvModal" class="modal">
-      <div class="modal-content">
-        <div class="pf-c-modal-box__header">
-          <h2
-            class="pf-c-modal-box__title pf-c-title pf-m-2xl"
-            id="script-env-title"
-          >
-            Variáveis do script
-          </h2>
-          <button
-            class="close"
-            onclick="closeScriptEnvModal()"
-            aria-label="Fechar"
-          >
-            &times;
-          </button>
-        </div>
-
-        <div class="pf-c-modal-box__body">
-          <form id="script-env-form">
-            <div class="pf-c-form">
-              <div class="cron-helper" style="margin-top: 0">
-                <strong>Escopo</strong>
-                <div style="margin-top: 6px">
-                  Estas variáveis são carregadas <strong>somente</strong> para
-                  este script, após as variáveis globais.
-                </div>
-              </div>
-
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="script-env-content">
-                    <span class="pf-c-form__label-text">Conteúdo</span>
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <textarea
-                    class="pf-c-form-control"
-                    id="script-env-content"
-                    name="script-env-content"
-                    rows="12"
-                    placeholder="CHAVE=VALOR\nOUTRA=123"
-                    style="
-                      font-family: 'Red Hat Mono', 'Courier New', monospace;
-                      background-color: var(
-                        --pf-global--BackgroundColor--light-300
-                      );
-                    "
-                  ></textarea>
-                  <p class="pf-c-form__helper-text">
-                    Use o formato <code>CHAVE=VALOR</code>. Comentários
-                    (<code>#</code>) são permitidos.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="pf-c-modal-box__footer">
-          <button
-            type="button"
-            class="pf-c-button pf-m-secondary"
-            onclick="closeScriptEnvModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            class="pf-c-button pf-m-primary"
-            onclick="document.getElementById('script-env-form').requestSubmit()"
-          >
-            Salvar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Logs do Script -->
-    <div id="logModal" class="modal">
-      <div class="modal-content">
-        <div class="pf-c-modal-box__header">
-          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl" id="log-title">
-            Logs
-          </h2>
-          <button class="close" onclick="closeLogModal()" aria-label="Fechar">
-            &times;
-          </button>
-        </div>
-
-        <div class="pf-c-modal-box__body">
-          <div id="log-loading" class="pf-c-empty-state" style="display: none">
-            <div class="pf-c-empty-state__content">
-              <div class="pf-c-spinner pf-m-xl" role="progressbar">
-                <span class="pf-c-spinner__clipper"></span>
-                <span class="pf-c-spinner__lead-ball"></span>
-                <span class="pf-c-spinner__tail-ball"></span>
-              </div>
-              <h2 class="pf-c-title pf-m-lg">Carregando logs...</h2>
-            </div>
-          </div>
-
-          <div class="pf-c-form">
-            <div class="pf-c-form__group">
-              <div class="pf-c-form__group-control">
-                <textarea
-                  class="pf-c-form-control"
-                  id="log-content"
-                  rows="18"
-                  readonly
-                  style="font-family: 'Red Hat Mono', 'Courier New', monospace"
-                  placeholder="Sem logs ainda"
-                ></textarea>
-                <p class="pf-c-form__helper-text">
-                  Logs em ordem desc (mais recentes no topo).
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="pf-c-modal-box__footer">
-          <button
-            type="button"
-            class="pf-c-button pf-m-secondary"
-            onclick="closeLogModal()"
-          >
-            Fechar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Executar como Admin (sudo) -->
-    <div id="sudoModal" class="modal">
-      <div class="modal-content">
-        <div class="pf-c-modal-box__header">
-          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl" id="sudo-title">
-            Executar como admin
-          </h2>
-          <button class="close" onclick="closeSudoModal()" aria-label="Fechar">
-            &times;
-          </button>
-        </div>
-
-        <div class="pf-c-modal-box__body">
-          <form id="sudo-form">
-            <div class="pf-c-form">
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="sudo-password">
-                    <span class="pf-c-form__label-text">Senha do sudo</span>
-                    <span class="pf-c-form__label-required" aria-hidden="true"
-                      >*</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <input
-                    class="pf-c-form-control"
-                    type="password"
-                    id="sudo-password"
-                    name="sudo-password"
-                    autocomplete="current-password"
-                    required
-                  />
-                  <p class="pf-c-form__helper-text">
-                    A senha será enviada via stdin apenas para esta execução.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="pf-c-modal-box__footer">
-          <button
-            type="button"
-            class="pf-c-button pf-m-secondary"
-            onclick="closeSudoModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            class="pf-c-button pf-m-primary"
-            onclick="document.getElementById('sudo-form').requestSubmit()"
-          >
-            Executar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Importar Scripts -->
-    <div id="importModal" class="modal">
-      <div class="modal-content">
-        <div class="pf-c-modal-box__header">
-          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">
-            Importar scripts
-          </h2>
-          <button
-            class="close"
-            onclick="closeImportModal()"
-            aria-label="Fechar"
-          >
-            &times;
-          </button>
-        </div>
-
-        <div class="pf-c-modal-box__body">
-          <p class="pf-c-content">
-            Selecione scripts <strong>.sh</strong> encontrados no seu
-            <strong>HOME</strong> para copiar para <code>~/scripts</code>.
-          </p>
-
-          <div
-            id="import-loading"
-            class="pf-c-empty-state"
-            style="display: none"
-          >
-            <div class="pf-c-empty-state__content">
-              <div class="pf-c-spinner pf-m-xl" role="progressbar">
-                <span class="pf-c-spinner__clipper"></span>
-                <span class="pf-c-spinner__lead-ball"></span>
-                <span class="pf-c-spinner__tail-ball"></span>
-              </div>
-              <h2 class="pf-c-title pf-m-lg">Buscando scripts...</h2>
-            </div>
-          </div>
-
-          <div
-            id="import-empty"
-            class="pf-c-empty-state pf-m-sm"
-            style="display: none"
-          >
-            <div class="pf-c-empty-state__content">
-              <h2 class="pf-c-title pf-m-lg">Nenhum script encontrado</h2>
-              <div class="pf-c-empty-state__body">
-                Nenhum arquivo .sh elegível foi encontrado para importação.
-                <br />
-                <small>
-                  Obs.: scripts que já estão em <code>~/scripts</code> não
-                  aparecem aqui.
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <div id="import-table-wrap" style="display: none">
-            <table class="pf-c-table pf-m-compact pf-m-grid-md" role="grid">
-              <thead>
-                <tr role="row">
-                  <th
-                    role="columnheader"
-                    scope="col"
-                    class="pf-m-fit-content"
-                  ></th>
-                  <th role="columnheader" scope="col">Nome</th>
-                  <th role="columnheader" scope="col">Caminho</th>
-                </tr>
-              </thead>
-              <tbody role="rowgroup" id="import-body"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="pf-c-modal-box__footer">
-          <button
-            class="pf-c-button pf-m-secondary"
-            type="button"
-            onclick="closeImportModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            class="pf-c-button pf-m-primary"
-            type="button"
-            onclick="importSelectedScripts()"
-          >
-            Importar selecionados
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Configurar Cron -->
-    <div id="cronModal" class="modal">
-      <div class="modal-content">
-        <div class="pf-c-modal-box__header">
-          <h2 class="pf-c-modal-box__title pf-c-title pf-m-2xl">
-            Configurar Agendamento
-          </h2>
-          <button class="close" onclick="closeCronModal()" aria-label="Fechar">
-            &times;
-          </button>
-        </div>
-
-        <div class="pf-c-modal-box__body">
-          <form id="cron-form">
-            <input
-              type="hidden"
-              id="cron-script-name"
-              name="cron-script-name"
-            />
-
-            <div class="pf-c-form">
-              <div
-                class="pf-c-form__group"
-                id="cron-script-select-group"
-                style="display: none"
-              >
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="cron-script-select">
-                    <span class="pf-c-form__label-text">Script</span>
-                    <span class="pf-c-form__label-required" aria-hidden="true"
-                      >*</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <select
-                    class="pf-c-form-control"
-                    id="cron-script-select"
-                    onchange="onCronScriptSelectChange()"
-                  >
-                    <option value="">-- Selecione um script --</option>
-                  </select>
-                  <p class="pf-c-form__helper-text">
-                    No modo global, selecione um script para criar um novo
-                    agendamento.
-                  </p>
-                </div>
-              </div>
-
-              <div class="cron-helper" style="margin-top: 0">
-                <strong>Agendamentos existentes</strong>
-                <div id="cron-existing-empty" style="margin-top: 6px">
-                  Nenhum agendamento encontrado para este filtro.
-                </div>
-                <div
-                  id="cron-existing-table-wrap"
-                  style="display: none; margin-top: 10px"
-                >
-                  <table
-                    class="pf-c-table pf-m-compact pf-m-grid-md"
-                    role="grid"
-                  >
-                    <thead>
-                      <tr role="row">
-                        <th role="columnheader" scope="col">Script</th>
-                        <th role="columnheader" scope="col">Expressão</th>
-                        <th role="columnheader" scope="col">Comando</th>
-                      </tr>
-                    </thead>
-                    <tbody role="rowgroup" id="cron-existing-body"></tbody>
-                  </table>
-                </div>
-                <p class="pf-c-form__helper-text" style="margin-top: 10px">
-                  Observação: o botão “Remover” remove <strong>todos</strong> os
-                  agendamentos do script selecionado.
-                </p>
-              </div>
-            </div>
-
-            <div
-              class="pf-c-form"
-              style="margin-top: var(--pf-global--spacer--md)"
-            >
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label">
-                    <span class="pf-c-form__label-text">Expressão Cron</span>
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <div class="cron-fields">
-                    <div>
-                      <label class="pf-c-form__label" for="cron-minute">
-                        <span class="pf-c-form__label-text">Minuto</span>
-                      </label>
-                      <input
-                        class="pf-c-form-control"
-                        type="text"
-                        id="cron-minute"
-                        placeholder="*"
-                        value="*"
-                      />
-                      <p class="pf-c-form__helper-text">
-                        <span class="pf-c-form__helper-text-icon">
-                          <i class="fas fa-info-circle" aria-hidden="true"></i>
-                        </span>
-                        0-59
-                      </p>
-                    </div>
-                    <div>
-                      <label class="pf-c-form__label" for="cron-hour">
-                        <span class="pf-c-form__label-text">Hora</span>
-                      </label>
-                      <input
-                        class="pf-c-form-control"
-                        type="text"
-                        id="cron-hour"
-                        placeholder="*"
-                        value="*"
-                      />
-                      <p class="pf-c-form__helper-text">
-                        <span class="pf-c-form__helper-text-icon">
-                          <i class="fas fa-info-circle" aria-hidden="true"></i>
-                        </span>
-                        0-23
-                      </p>
-                    </div>
-                    <div>
-                      <label class="pf-c-form__label" for="cron-day">
-                        <span class="pf-c-form__label-text">Dia</span>
-                      </label>
-                      <input
-                        class="pf-c-form-control"
-                        type="text"
-                        id="cron-day"
-                        placeholder="*"
-                        value="*"
-                      />
-                      <p class="pf-c-form__helper-text">
-                        <span class="pf-c-form__helper-text-icon">
-                          <i class="fas fa-info-circle" aria-hidden="true"></i>
-                        </span>
-                        1-31
-                      </p>
-                    </div>
-                    <div>
-                      <label class="pf-c-form__label" for="cron-month">
-                        <span class="pf-c-form__label-text">Mês</span>
-                      </label>
-                      <input
-                        class="pf-c-form-control"
-                        type="text"
-                        id="cron-month"
-                        placeholder="*"
-                        value="*"
-                      />
-                      <p class="pf-c-form__helper-text">
-                        <span class="pf-c-form__helper-text-icon">
-                          <i class="fas fa-info-circle" aria-hidden="true"></i>
-                        </span>
-                        1-12
-                      </p>
-                    </div>
-                    <div>
-                      <label class="pf-c-form__label" for="cron-weekday">
-                        <span class="pf-c-form__label-text">Dia Semana</span>
-                      </label>
-                      <input
-                        class="pf-c-form-control"
-                        type="text"
-                        id="cron-weekday"
-                        placeholder="*"
-                        value="*"
-                      />
-                      <p class="pf-c-form__helper-text">
-                        <span class="pf-c-form__helper-text-icon">
-                          <i class="fas fa-info-circle" aria-hidden="true"></i>
-                        </span>
-                        0-7
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="cron-helper">
-                    <strong>Exemplos de expressões cron:</strong>
-                    <ul style="margin: 8px 0; padding-left: 20px">
-                      <li><code>* * * * *</code> - A cada minuto</li>
-                      <li><code>0 * * * *</code> - A cada hora</li>
-                      <li><code>0 0 * * *</code> - Diariamente à meia-noite</li>
-                      <li>
-                        <code>0 0 * * 0</code> - Semanalmente aos domingos à
-                        meia-noite
-                      </li>
-                      <li>
-                        <code>0 0 1 * *</code> - Mensalmente no dia 1 à
-                        meia-noite
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pf-c-form__group">
-                <div class="pf-c-form__group-label">
-                  <label class="pf-c-form__label" for="cron-preset">
-                    <span class="pf-c-form__label-text"
-                      >Ou escolha um modelo</span
-                    >
-                  </label>
-                </div>
-                <div class="pf-c-form__group-control">
-                  <select
-                    class="pf-c-form-control"
-                    id="cron-preset"
-                    onchange="applyCronPreset()"
-                  >
-                    <option value="">-- Selecione um modelo --</option>
-                    <option value="* * * * *">A cada minuto</option>
-                    <option value="*/5 * * * *">A cada 5 minutos</option>
-                    <option value="0 * * * *">A cada hora</option>
-                    <option value="0 0 * * *">Diariamente (meia-noite)</option>
-                    <option value="0 12 * * *">Diariamente (meio-dia)</option>
-                    <option value="0 0 * * 0">Semanalmente (domingo)</option>
-                    <option value="0 0 1 * *">Mensalmente (dia 1)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="pf-c-modal-box__footer">
-          <button
-            type="button"
-            class="pf-c-button pf-m-link"
-            onclick="closeCronModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            class="pf-c-button pf-m-warning"
-            onclick="removeCron()"
-          >
-            Remover Agendamentos
-          </button>
-          <button
-            type="button"
-            class="pf-c-button pf-m-primary"
-            onclick="document.getElementById('cron-form').requestSubmit()"
-          >
-            Salvar Agendamento
-          </button>
-        </div>
-      </div>
+      v1.5.0 — Luis Gustavo Santarosa Pinto
     </div>
 
     <script>
-      // Inicializar ao carregar a página
-      document.addEventListener("DOMContentLoaded", function () {
-        if (typeof initEventHandlers === "function") {
-          initEventHandlers();
+      // Inicialização: carrega templates ao iniciar
+      document.addEventListener("DOMContentLoaded", async () => {
+        console.log(
+          "DOMContentLoaded - Iniciando carregamento de templates..."
+        );
+
+        // Carregar templates das abas
+        console.log("Carregando templates de abas...");
+        await TemplateLoader.loadMultiple([
+          {
+            name: "tab-backups",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-config",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-vms",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-automation",
+            target: "#tab-content-container",
+            position: "append",
+          },
+          {
+            name: "tab-schedules",
+            target: "#tab-content-container",
+            position: "append",
+          },
+        ]);
+
+        console.log("Templates de abas carregados!");
+        console.log("Verificando elementos:", {
+          backups: !!document.getElementById("backups-tab-content"),
+          config: !!document.getElementById("config-tab-content"),
+          vms: !!document.getElementById("vms-tab-content"),
+          automation: !!document.getElementById("automation-tab-content"),
+          schedules: !!document.getElementById("schedules-tab-content"),
+        });
+
+        // Carregar modais
+        console.log("Carregando modais...");
+        await TemplateLoader.loadMultiple([
+          {
+            name: "modals/modal-add-directory",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-add-script-directory",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-confirm-delete",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-email",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-directory-browser",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-cron",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-script",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-env",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-script-env",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-log",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-sudo",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-import",
+            target: "#modals-container",
+            position: "append",
+          },
+          {
+            name: "modals/modal-schedule",
+            target: "#modals-container",
+            position: "append",
+          },
+        ]);
+
+        console.log("Modais carregados!");
+
+        // Aguardar um momento para garantir que tudo foi renderizado
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Verificar disponibilidade de funções
+        console.log("Verificando funções disponíveis:", {
+          switchTab: typeof window.switchTab,
+          init: typeof window.init,
+        });
+
+        // Exibir aba inicial (backups)
+        console.log("Chamando window.switchTab('backups')...");
+        if (typeof window.switchTab === "function") {
+          window.switchTab("backups");
+        } else {
+          console.error(
+            "window.switchTab não está definida! Tipo:",
+            typeof window.switchTab
+          );
         }
-        if (typeof updatePluginFooter === "function") {
-          updatePluginFooter();
+
+        // Inicializar a aplicação após carregar templates
+        if (typeof window.init === "function") {
+          console.log("Chamando init()...");
+          window.init();
+        } else {
+          console.log("Função init() não encontrada - OK, pode não existir");
         }
-        loadScripts();
+
+        console.log("✅ Inicialização completa!");
       });
     </script>
   </body>
