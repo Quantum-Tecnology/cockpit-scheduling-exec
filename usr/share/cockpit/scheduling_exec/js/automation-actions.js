@@ -29,7 +29,7 @@ function automationOpenCreateModal() {
 async function automationExecuteScript(scriptName) {
   console.log(`Automation: Executando script ${scriptName}`);
 
-  const script = allScripts.find((s) => s.name === scriptName);
+  const script = window.allScripts.find((s) => s.name === scriptName);
   if (!script) {
     showAlert("danger", `❌ Script "${scriptName}" não encontrado!`);
     return;
@@ -108,7 +108,9 @@ async function automationExecuteWithSudo() {
     return;
   }
 
-  const script = allScripts.find((s) => s.name === automationCurrentSudoScript);
+  const script = window.allScripts.find(
+    (s) => s.name === automationCurrentSudoScript
+  );
   if (!script) {
     showAlert(
       "danger",
@@ -210,7 +212,7 @@ function automationCloseLogModal() {
 }
 
 async function automationLoadScriptLogs(scriptName) {
-  const script = allScripts.find((s) => s.name === scriptName);
+  const script = window.allScripts.find((s) => s.name === scriptName);
   if (!script) {
     document.getElementById("log-content").textContent =
       "Script não encontrado!";
@@ -233,7 +235,7 @@ async function automationLoadScriptLogs(scriptName) {
 async function automationEditScript(scriptName) {
   console.log(`Automation: Editando script ${scriptName}`);
 
-  const script = allScripts.find((s) => s.name === scriptName);
+  const script = window.allScripts.find((s) => s.name === scriptName);
   if (!script) {
     showAlert("danger", `❌ Script "${scriptName}" não encontrado!`);
     return;
@@ -269,7 +271,7 @@ function automationOpenCronModal(scriptName, mode = "script") {
   console.log(`Automation: Abrindo modal cron para ${scriptName}`);
   automationCronModalMode = mode;
 
-  const script = allScripts.find((s) => s.name === scriptName);
+  const script = window.allScripts.find((s) => s.name === scriptName);
   if (!script) {
     showAlert("danger", `❌ Script "${scriptName}" não encontrado!`);
     return;
@@ -297,7 +299,7 @@ async function automationSaveCron() {
     .getElementById("cron-expression")
     .value.trim();
 
-  const script = allScripts.find((s) => s.name === scriptName);
+  const script = window.allScripts.find((s) => s.name === scriptName);
   if (!script) {
     showAlert("danger", `❌ Script "${scriptName}" não encontrado!`);
     return;
@@ -405,7 +407,7 @@ async function automationSaveScript() {
 // ============================================================================
 
 async function automationDeleteScript(scriptName) {
-  const script = allScripts.find((s) => s.name === scriptName);
+  const script = window.allScripts.find((s) => s.name === scriptName);
   if (!script) {
     showAlert("danger", `❌ Script "${scriptName}" não encontrado!`);
     return;

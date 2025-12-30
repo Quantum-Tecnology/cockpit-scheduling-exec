@@ -317,11 +317,11 @@ function browseScriptDirectory() {
 
   window.scriptDirectoryCallback = (selectedPath) => {
     document.getElementById("script-directory-path").value = selectedPath;
-    closeDirectoryBrowser();
+    window.closeDirectoryBrowser();
   };
 
   document.getElementById("directory-browser-modal").style.display = "block";
-  loadDirectoryContents(currentPath);
+  window.loadDirectoryContents(currentPath);
 }
 
 async function addScriptDirectory() {
