@@ -64,13 +64,13 @@ async function loadDirectoryContents(path) {
         const name = dir.split("/").pop();
         return `
           <div class="directory-item" style="padding: 0.75rem; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onmouseenter="this.style.backgroundColor='#f8f9fa'" onmouseleave="this.style.backgroundColor='white'">
-            <div style="display: flex; align-items: center; flex: 1;" onclick="loadDirectoryContents('${escapeHtml(
+            <div style="display: flex; align-items: center; flex: 1;" onclick="loadDirectoryContents('${window.escapeHtml(
               dir
             )}')">
               <span style="font-size: 1.5rem; margin-right: 0.75rem;">📁</span>
-              <span style="font-family: monospace;">${escapeHtml(name)}</span>
+              <span style="font-family: monospace;">${window.escapeHtml(name)}</span>
             </div>
-            <button class="pf-c-button pf-m-primary pf-m-small" onclick="selectDirectory('${escapeHtml(
+            <button class="pf-c-button pf-m-primary pf-m-small" onclick="selectDirectory('${window.escapeHtml(
               dir
             )}')">Selecionar</button>
           </div>
@@ -78,7 +78,7 @@ async function loadDirectoryContents(path) {
       })
       .join("");
   } catch (error) {
-    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #c9190b;">Erro ao listar diretórios: ${escapeHtml(
+    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #c9190b;">Erro ao listar diretórios: ${window.escapeHtml(
       error?.message || "Caminho inválido"
     )}</div>`;
   }
@@ -89,11 +89,11 @@ function selectDirectory(path) {
   if (window.scriptDirectoryCallback) {
     window.scriptDirectoryCallback(path);
     window.scriptDirectoryCallback = null;
-    showAlert("success", `✅ Diretório selecionado: ${path}`);
+    window.showAlert("success", `✅ Diretório selecionado: ${path}`);
   } else {
     document.getElementById("directory-path").value = path;
     closeDirectoryBrowser();
-    showAlert("success", `✅ Diretório selecionado: ${path}`);
+    window.showAlert("success", `✅ Diretório selecionado: ${path}`);
   }
 }
 
@@ -131,15 +131,15 @@ function showCommonDirectories() {
     .map(
       (dir) => `
       <div class="directory-item" style="padding: 0.75rem; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onmouseenter="this.style.backgroundColor='#f8f9fa'" onmouseleave="this.style.backgroundColor='white'">
-        <div style="display: flex; align-items: center; flex: 1;" onclick="loadDirectoryContents('${escapeHtml(
+        <div style="display: flex; align-items: center; flex: 1;" onclick="loadDirectoryContents('${window.escapeHtml(
           dir.path
         )}')">
           <span style="font-size: 1.5rem; margin-right: 0.75rem;">${
             dir.icon
           }</span>
-          <span>${escapeHtml(dir.label)}</span>
+          <span>${window.escapeHtml(dir.label)}</span>
         </div>
-        <button class="pf-c-button pf-m-primary pf-m-small" onclick="selectDirectory('${escapeHtml(
+        <button class="pf-c-button pf-m-primary pf-m-small" onclick="selectDirectory('${window.escapeHtml(
           dir.path
         )}')">Selecionar</button>
       </div>
