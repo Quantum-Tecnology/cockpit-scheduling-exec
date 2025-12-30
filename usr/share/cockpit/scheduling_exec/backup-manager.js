@@ -1,6 +1,25 @@
 ﻿// Inicializar conexÃ£o com Cockpit
 const cockpit = window.cockpit;
 
+// Aliases para funções dos módulos (carregados via js/utils.js, js/backups.js, etc.)
+// Estas funções são definidas nos módulos e exportadas para window.*
+const showAlert = (...args) => window.showAlert?.(...args);
+const escapeHtml = (text) => window.escapeHtml?.(text) || text;
+const formatDate = (date) => window.formatDate?.(date) || date;
+const formatSize = (bytes) => window.formatSize?.(bytes) || `${bytes} B`;
+const formatRelativeTime = (date) => window.formatRelativeTime?.(date) || date;
+const getFileIcon = (filename) => window.getFileIcon?.(filename) || "📄";
+const loadBackups = (...args) => window.loadBackups?.(...args);
+const loadSchedules = (...args) => window.loadSchedules?.(...args);
+const updateVMConfigForm = (...args) => window.updateVMConfigForm?.(...args);
+const checkAndFixVMScriptPermissions = (...args) =>
+  window.checkAndFixVMScriptPermissions?.(...args);
+const discoverVMs = (...args) => window.discoverVMs?.(...args);
+const automationLoadScripts = (...args) =>
+  window.automationLoadScripts?.(...args);
+const automationRenderScriptDirectoriesList = (...args) =>
+  window.automationRenderScriptDirectoriesList?.(...args);
+
 // Estado da aplicaÃ§Ã£o - exportados para window para acesso pelos mÃ³dulos
 let backupDirectories = [];
 let allBackups = [];
@@ -724,7 +743,6 @@ function updateUI() {
   }
 }
 
-
 // ============================================================================
 // FORMATTERS E HELPERS - Funções movidas para js/utils.js
 // As seguintes funções estão definidas no módulo e são exportadas via window.*:
@@ -740,8 +758,6 @@ function updateUI() {
 // cleanOldVMBackups, updateVMBackupConfig, updateVMConfigForm, addVMLog, clearVMLog
 // ============================================================================
 
-
-
 // ============================================================================
 // AUTOMAÇÃO, SCRIPTS E AGENDAMENTOS - Funções movidas para módulos:
 // - js/automation.js: automationShowLoading, automationShowError, automationFormatDate, etc.
@@ -749,7 +765,6 @@ function updateUI() {
 // - js/schedules.js: loadSchedules, renderSchedulesTable, openScheduleModal, etc.
 // Todas as funções são exportadas via window.* pelos respectivos módulos.
 // ============================================================================
-
 
 // ============================================================================
 // EXPORTAR FUNÃ‡Ã•ES PARA USO GLOBAL (onclick no HTML)
