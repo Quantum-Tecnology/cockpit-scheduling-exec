@@ -12,6 +12,42 @@ function getAllScripts() {
   return window.allScripts || [];
 }
 
+// Getters/Setters para variáveis compartilhadas com automation.js
+function getAutomationCurrentSudoScript() {
+  return window.automationCurrentSudoScript;
+}
+function setAutomationCurrentSudoScript(val) {
+  window.automationCurrentSudoScript = val;
+}
+
+function getAutomationCurrentScriptEnv() {
+  return window.automationCurrentScriptEnv;
+}
+function setAutomationCurrentScriptEnv(val) {
+  window.automationCurrentScriptEnv = val;
+}
+
+function getAutomationCurrentLogScript() {
+  return window.automationCurrentLogScript;
+}
+function setAutomationCurrentLogScript(val) {
+  window.automationCurrentLogScript = val;
+}
+
+function getAutomationImportCandidates() {
+  return window.automationImportCandidates || [];
+}
+function setAutomationImportCandidates(val) {
+  window.automationImportCandidates = val;
+}
+
+function getAutomationCronModalMode() {
+  return window.automationCronModalMode || "script";
+}
+function setAutomationCronModalMode(val) {
+  window.automationCronModalMode = val;
+}
+
 // ============================================================================
 // MODAIS - CRIAR/EDITAR SCRIPT
 // ============================================================================
@@ -297,10 +333,10 @@ function automationExecuteScript(scriptName, sudoPassword = null) {
 // MODAL SUDO
 // ============================================================================
 
-let automationCurrentSudoScript = null;
+// automationCurrentSudoScript definido em automation.js
 
 function automationOpenSudoModal(scriptName) {
-  automationCurrentSudoScript = scriptName;
+  setAutomationCurrentSudoScript(scriptName);
   document.getElementById(
     "automation-sudo-title"
   ).textContent = `Executar como Admin: ${scriptName}`;
@@ -314,7 +350,7 @@ function automationOpenSudoModal(scriptName) {
 
 function automationCloseSudoModal() {
   document.getElementById("automation-sudoModal").style.display = "none";
-  automationCurrentSudoScript = null;
+  setAutomationCurrentSudoScript(null);
   document.getElementById("automation-sudo-password").value = "";
 }
 
@@ -325,18 +361,18 @@ function automationExecuteSudo() {
     return;
   }
   automationCloseSudoModal();
-  automationExecuteScript(automationCurrentSudoScript, password);
+  automationExecuteScript(getAutomationCurrentSudoScript(), password);
 }
 
 // ============================================================================
 // MODAL VARIÁVEIS DO SCRIPT
 // ============================================================================
 
-let automationCurrentScriptEnv = null;
+// automationCurrentScriptEnv definido em automation.js
 
 function automationOpenScriptEnvModal(scriptName) {
   console.log("Automation: Abrindo modal de variáveis do script:", scriptName);
-  automationCurrentScriptEnv = scriptName;
+  setAutomationCurrentScriptEnv(scriptName);
   document.getElementById(
     "automation-script-env-title"
   ).textContent = `Variáveis do script: ${scriptName}`;
@@ -347,7 +383,7 @@ function automationOpenScriptEnvModal(scriptName) {
 
 function automationCloseScriptEnvModal() {
   document.getElementById("automation-scriptEnvModal").style.display = "none";
-  automationCurrentScriptEnv = null;
+  setAutomationCurrentScriptEnv(null);
 }
 
 function automationLoadScriptEnvFile(scriptName) {
@@ -375,7 +411,7 @@ function automationLoadScriptEnvFile(scriptName) {
 }
 
 function automationSaveScriptEnv() {
-  const scriptName = automationCurrentScriptEnv;
+  const scriptName = getAutomationCurrentScriptEnv();
   const envContent = document.getElementById(
     "automation-script-env-content"
   ).value;
@@ -420,11 +456,11 @@ function automationSaveScriptEnv() {
 // MODAL LOGS
 // ============================================================================
 
-let automationCurrentLogScript = null;
+// automationCurrentLogScript definido em automation.js
 
 function automationOpenLogModal(scriptName) {
   console.log("Automation: Abrindo modal de logs:", scriptName);
-  automationCurrentLogScript = scriptName;
+  setAutomationCurrentLogScript(scriptName);
   document.getElementById(
     "automation-log-title"
   ).textContent = `Logs: ${scriptName}`;
@@ -435,7 +471,7 @@ function automationOpenLogModal(scriptName) {
 
 function automationCloseLogModal() {
   document.getElementById("automation-logModal").style.display = "none";
-  automationCurrentLogScript = null;
+  setAutomationCurrentLogScript(null);
 }
 
 function automationLoadScriptLog(scriptName) {
@@ -522,7 +558,7 @@ function automationSaveEnv() {
 // MODAL IMPORTAR SCRIPTS
 // ============================================================================
 
-let automationImportCandidates = [];
+// automationImportCandidates definido em automation.js
 
 function automationOpenImportModal() {
   console.log("Automation: Abrindo modal de importação");
@@ -532,7 +568,7 @@ function automationOpenImportModal() {
 
 function automationCloseImportModal() {
   document.getElementById("automation-importModal").style.display = "none";
-  automationImportCandidates = [];
+  setAutomationImportCandidates([]);
 }
 
 function automationLoadImportCandidates() {
@@ -550,7 +586,7 @@ function automationLoadImportCandidates() {
       document.getElementById("automation-import-loading").style.display =
         "none";
       const candidates = JSON.parse(output);
-      automationImportCandidates = candidates;
+      setAutomationImportCandidates(candidates);
 
       if (!candidates || candidates.length === 0) {
         document.getElementById("automation-import-empty").style.display =
@@ -587,7 +623,7 @@ function automationLoadImportCandidates() {
 
 function automationImportSelectedScripts() {
   const selected = [];
-  automationImportCandidates.forEach((c, idx) => {
+  getAutomationImportCandidates().forEach((c, idx) => {
     const checkbox = document.getElementById(`automation-import-check-${idx}`);
     if (checkbox && checkbox.checked) selected.push(c);
   });
@@ -639,11 +675,11 @@ function automationImportSelectedScripts() {
 // MODAL CRON
 // ============================================================================
 
-let automationCronModalMode = "script";
+// automationCronModalMode definido em automation.js
 
 function automationOpenCronModal(scriptName) {
   console.log("Automation: Abrindo modal de agendamento para:", scriptName);
-  automationCronModalMode = "script";
+  setAutomationCronModalMode("script");
   document.getElementById("automation-cron-script-name").value = scriptName;
   document.getElementById("automation-cron-script-select-group").style.display =
     "none";
@@ -661,7 +697,7 @@ function automationOpenCronModal(scriptName) {
 
 function automationOpenCronManagerModal() {
   console.log("Automation: Abrindo modal de gerenciamento de agendamentos");
-  automationCronModalMode = "global";
+  setAutomationCronModalMode("global");
   document.getElementById("automation-cron-script-name").value = "";
   document.getElementById("automation-cron-script-select-group").style.display =
     "block";
@@ -679,7 +715,7 @@ function automationOpenCronManagerModal() {
 
 function automationCloseCronModal() {
   document.getElementById("automation-cronModal").style.display = "none";
-  automationCronModalMode = "script";
+  setAutomationCronModalMode("script");
 }
 
 function automationLoadCronScriptsSelect() {

@@ -21,6 +21,20 @@
     <!-- Cockpit JS API -->
     <script src="../base1/cockpit.js"></script>
 
+    <!-- Função global switchTab disponível imediatamente para onclick inline -->
+    <script>
+      function switchTab(tab) {
+        if (window.switchTab && window.switchTab !== switchTab) {
+          window.switchTab(tab);
+        } else {
+          console.warn("switchTab: Função ainda não carregada, aguardando...");
+          setTimeout(function () {
+            switchTab(tab);
+          }, 100);
+        }
+      }
+    </script>
+
     <!-- Módulos JavaScript -->
     <script src="js/utils.js" defer></script>
     <script src="js/directory-browser.js" defer></script>
