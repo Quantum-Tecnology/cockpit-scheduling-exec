@@ -357,7 +357,7 @@ async function backupSelectedVMs() {
     '<span class="loading-spinner"></span> Fazendo backup...';
 
   try {
-    clearVMLog();
+    window.clearGlobalLog();
     window.addGlobalLog("========================================");
     window.addGlobalLog("🚀 INICIANDO BACKUP DE VMs");
     window.addGlobalLog("========================================");
