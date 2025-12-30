@@ -796,8 +796,6 @@ window.updateUI = updateUI;
 // window.updateStats - exportado por js/backups.js
 window.updateDirectoriesList = updateDirectoriesList;
 window.updateDirectoryFilter = updateDirectoryFilter;
-window.openAddDirectoryModal = openAddDirectoryModal;
-window.closeAddDirectoryModal = closeAddDirectoryModal;
 window.addDirectory = addDirectory;
 window.removeDirectory = removeDirectory;
 window.exportGlobals = exportGlobals;
