@@ -1,0 +1,18 @@
+Package: cockpit-scheduling-exec
+Version: 1.6.32
+Architecture: all
+Maintainer: Gustavo Santarosa <gustavo@quantumtecnology.com.br>
+Depends: cockpit, cron
+Filename: pool/main/c/cockpit-scheduling-exec/cockpit-scheduling-exec_1.6.32_all.deb
+Size: 69496
+MD5sum: f9794aa1a9d026b5f7f072493c5f4a06
+SHA1: bf415d2d20255b5486ccb5755f3e0cd1020a8b8b
+SHA256: 4757567c2bcad14204391aebda0e828d22568adaf07c71d0111d932fc3baa651
+Section: admin
+Priority: optional
+Description: Plugin Cockpit para executar e agendar rotinas personalizadas
+ Este plugin permite criar, editar, executar e agendar scripts shell
+ personalizados através da interface web do Cockpit. Os scripts são
+ armazenados no diretório home/$USER/scripts e podem ser agendados
+ usando crontab com uma interface amigável.
+

@@ -1,0 +1,28 @@
+Origin: QuantumTecnology
+Label: cockpit-scheduling-exec
+Suite: stable
+Codename: stable
+Architectures: amd64 all
+Components: main
+Description: cockpit-scheduling-exec APT repository
+Date: Tue, 30 Dec 2025 20:54:24 +0000
+MD5Sum:
+ 173ec5cc06c1cbd3c5aeb108e926979c              774 main/binary-all/Packages
+ c5956be115dd34add883fdeeb37914fc              522 main/binary-all/Packages.gz
+ 173ec5cc06c1cbd3c5aeb108e926979c              774 main/binary-amd64/Packages
+ c5956be115dd34add883fdeeb37914fc              522 main/binary-amd64/Packages.gz
+SHA1:
+ 5df09502cdbab335a10040d3ad05a718f02ac2ae              774 main/binary-all/Packages
+ 5fc20bf8448afbfb039d6a9a5f5cf2d32ee11940              522 main/binary-all/Packages.gz
+ 5df09502cdbab335a10040d3ad05a718f02ac2ae              774 main/binary-amd64/Packages
+ 5fc20bf8448afbfb039d6a9a5f5cf2d32ee11940              522 main/binary-amd64/Packages.gz
+SHA256:
+ 5f8d3281e1e210c3cae37dd32236fc1403a070de8d8eaad52ab38aeb6db3d929              774 main/binary-all/Packages
+ 8aa94514eccedad2e4a3d12d4f76ab9b57b9f69bd672d4eca8646bebe877d4f7              522 main/binary-all/Packages.gz
+ 5f8d3281e1e210c3cae37dd32236fc1403a070de8d8eaad52ab38aeb6db3d929              774 main/binary-amd64/Packages
+ 8aa94514eccedad2e4a3d12d4f76ab9b57b9f69bd672d4eca8646bebe877d4f7              522 main/binary-amd64/Packages.gz
+SHA512:
+ decc1fa551ff06fc668069881c6acc6245b2d9c29a4acb4cfb2d87fdd50185f4b5938c3469e6c6a5dc2d23b16af2febf5a80e5f5461944c7dcde8bdcf9953b9d              774 main/binary-all/Packages
+ b95a288731521660cfeb141f4098f0fd905e9fce805dae3c1674edcd8ef15affcf5be64f3dab0855d3b8a150f8edb130229cdb14154f994fa10d433e0ffd6392              522 main/binary-all/Packages.gz
+ decc1fa551ff06fc668069881c6acc6245b2d9c29a4acb4cfb2d87fdd50185f4b5938c3469e6c6a5dc2d23b16af2febf5a80e5f5461944c7dcde8bdcf9953b9d              774 main/binary-amd64/Packages
+ b95a288731521660cfeb141f4098f0fd905e9fce805dae3c1674edcd8ef15affcf5be64f3dab0855d3b8a150f8edb130229cdb14154f994fa10d433e0ffd6392              522 main/binary-amd64/Packages.gz
