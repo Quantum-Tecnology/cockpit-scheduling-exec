@@ -38,9 +38,44 @@ async function automationExecuteScript(scriptName) {
   try {
     showAlert("info", `⏳ Executando script "${scriptName}"...`);
 
+    // Carregar variáveis de ambiente do script
+    let env = {};
+    try {
+      const envContent = await cockpit.spawn(
+        [
+          "/usr/share/cockpit/scheduling_exec/scripts/get-script-env.sh",
+          scriptName,
+        ],
+        { err: "message" }
+      );
+
+      if (envContent && envContent.trim()) {
+        envContent.split("\n").forEach((line) => {
+          const trimmed = line.trim();
+          if (trimmed && !trimmed.startsWith("#")) {
+            const [key, ...valueParts] = trimmed.split("=");
+            if (key) {
+              let value = valueParts.join("=");
+              if (
+                (value.startsWith('"') && value.endsWith('"')) ||
+                (value.startsWith("'") && value.endsWith("'"))
+              ) {
+                value = value.slice(1, -1);
+              }
+              env[key.trim()] = value;
+            }
+          }
+        });
+      }
+      console.log("Automation: Variáveis de ambiente carregadas:", env);
+    } catch (error) {
+      console.warn("Automation: Sem variáveis de ambiente para o script");
+    }
+
     const result = await cockpit.spawn(["bash", script.path], {
       err: "message",
       superuser: "try",
+      environ: env, // Passar as variáveis de ambiente
     });
 
     console.log(`Automation: Script executado com sucesso:`, result);

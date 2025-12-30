@@ -287,18 +287,55 @@ function automationExecuteScript(scriptName, sudoPassword = null) {
     `▶️ Executando script: ${scriptName}${sudoPassword ? " (com sudo)" : ""}`
   );
 
-  const args = ["bash", scriptPath];
+  // Primeiro, carregar as variáveis de ambiente do script
+  cockpit
+    .spawn(
+      [
+        "/usr/share/cockpit/scheduling_exec/scripts/get-script-env.sh",
+        scriptName,
+      ],
+      { err: "message" }
+    )
+    .then((envContent) => {
+      // Parsear as variáveis de ambiente
+      const env = {};
+      if (envContent && envContent.trim()) {
+        envContent.split("\n").forEach((line) => {
+          const trimmed = line.trim();
+          if (trimmed && !trimmed.startsWith("#")) {
+            const [key, ...valueParts] = trimmed.split("=");
+            if (key) {
+              // Remove aspas se existirem
+              let value = valueParts.join("=");
+              if (
+                (value.startsWith('"') && value.endsWith('"')) ||
+                (value.startsWith("'") && value.endsWith("'"))
+              ) {
+                value = value.slice(1, -1);
+              }
+              env[key.trim()] = value;
+            }
+          }
+        });
+      }
 
-  let proc = cockpit.spawn(args, {
-    err: "message",
-    superuser: sudoPassword ? "require" : "try",
-  });
+      console.log("Automation: Variáveis de ambiente carregadas:", env);
 
-  if (sudoPassword) {
-    proc = proc.input(sudoPassword + "\n");
-  }
+      // Executar o script com as variáveis de ambiente
+      const args = ["bash", scriptPath];
 
-  proc
+      let proc = cockpit.spawn(args, {
+        err: "message",
+        superuser: sudoPassword ? "require" : "try",
+        environ: env, // Passar as variáveis de ambiente
+      });
+
+      if (sudoPassword) {
+        proc = proc.input(sudoPassword + "\n");
+      }
+
+      return proc;
+    })
     .then((output) => {
       automationShowLoading(false);
       console.log("Automation: Script executado com sucesso");
