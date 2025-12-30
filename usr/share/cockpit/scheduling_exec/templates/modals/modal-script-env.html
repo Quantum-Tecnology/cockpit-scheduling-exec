@@ -10,6 +10,19 @@
       </button>
     </div>
     <div class="pf-c-modal-box__body">
+      <div
+        class="pf-c-alert pf-m-info pf-m-inline"
+        style="margin-bottom: var(--pf-global--spacer--md)"
+      >
+        <p class="pf-c-alert__title">
+          📝 Este arquivo será salvo como
+          <code>~/scripts/.env.&lt;nome-do-script&gt;</code>
+        </p>
+        <p class="pf-c-alert__description">
+          Variáveis definidas aqui são carregadas apenas quando este script
+          específico é executado.
+        </p>
+      </div>
       <form id="automation-script-env-form">
         <div class="pf-c-form__group">
           <label class="pf-c-form__label" for="automation-script-env-content">
@@ -22,9 +35,11 @@
             id="automation-script-env-content"
             rows="15"
             style="font-family: 'Courier New', monospace"
+            placeholder="# Exemplo:&#10;DATABASE_NAME=meu_banco&#10;BACKUP_DIR=/backups/mysql&#10;RETENTION_DAYS=7"
           ></textarea>
           <p class="pf-c-form__helper-text">
-            Estas variáveis só estarão disponíveis para este script
+            Formato: VARIAVEL=valor (uma por linha). Se o arquivo não existir
+            ainda, será criado ao salvar.
           </p>
         </div>
       </form>

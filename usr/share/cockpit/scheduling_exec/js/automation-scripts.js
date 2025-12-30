@@ -356,9 +356,16 @@ function automationCloseSudoModal() {
 
 function automationExecuteSudo() {
   const password = document.getElementById("automation-sudo-password").value;
+  const scriptName = getAutomationCurrentSudoScript();
+  console.log(
+    "Automation: Executando script via modal:",
+    scriptName,
+    "com senha:",
+    password ? "sim" : "não"
+  );
   automationCloseSudoModal();
   // Se não tiver senha, executa normalmente; se tiver senha, executa com sudo
-  automationExecuteScript(getAutomationCurrentSudoScript(), password || null);
+  automationExecuteScript(scriptName, password || null);
 }
 
 // ============================================================================

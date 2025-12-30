@@ -433,7 +433,19 @@ async function automationLoadScripts() {
 
       const findCmd =
         dir.maxDepth === 1
-          ? ["find", dir.path, "-maxdepth", "1", "-type", "f", "-name", "*.sh"]
+          ? [
+              "find",
+              dir.path,
+              "-maxdepth",
+              "1",
+              "-type",
+              "f",
+              "-name",
+              "*.sh",
+              "!",
+              "-name",
+              ".*",
+            ]
           : [
               "find",
               dir.path,
@@ -443,6 +455,9 @@ async function automationLoadScripts() {
               "f",
               "-name",
               "*.sh",
+              "!",
+              "-name",
+              ".*",
             ];
 
       try {
