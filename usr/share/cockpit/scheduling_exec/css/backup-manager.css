@@ -3,41 +3,49 @@
  * v1.5.0 - Luis Gustavo Santarosa Pinto
  */
 
-/* ===== Layout Base ===== */
+/* ===== Layout Base - Forçar largura total ===== */
 html,
 body {
-  height: 100%;
-  width: 100%;
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 body {
-  margin: 0;
-  padding: 0;
   background-color: var(--pf-global--BackgroundColor--light-300);
+}
+
+/* Garantir que o Cockpit use toda a largura */
+.pf-c-page,
+.pf-c-page > *,
+.pf-c-page > main,
+.pf-c-page > main > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
 }
 
 .pf-c-page {
   min-height: 100vh;
-  width: 100%;
   background-color: var(--pf-global--BackgroundColor--light-300);
 }
 
 .pf-c-page > main {
-  width: 100%;
-  max-width: 100%;
   display: block;
+  flex: 1;
 }
 
-.pf-c-page > main > .pf-l-grid {
-  width: 100%;
-  max-width: 100%;
+.pf-l-grid {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .pf-c-page__main {
   padding: var(--pf-global--spacer--md);
   padding-top: calc(var(--pf-global--spacer--md) + 60px);
   background-color: var(--pf-global--BackgroundColor--light-300);
-  width: 100%;
+  width: 100% !important;
 }
 
 .pf-c-page__header {

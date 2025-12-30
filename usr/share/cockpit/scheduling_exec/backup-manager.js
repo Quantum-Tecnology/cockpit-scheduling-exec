@@ -1,6 +1,109 @@
 ﻿// Inicializar conexÃ£o com Cockpit
 const cockpit = window.cockpit;
 
+// ============================================================================
+// EXPORTAR switchTab IMEDIATAMENTE para evitar erros de onclick no HTML
+// ============================================================================
+window.switchTab = function (tab) {
+  console.log(`Backup Manager: Mudando para aba ${tab}`);
+
+  // Garantir que as abas estejam visÃ­veis
+  const tabsContainer = document.getElementById("backup-tabs");
+  if (tabsContainer) {
+    tabsContainer.style.display = "block";
+    tabsContainer.style.visibility = "visible";
+    tabsContainer.style.opacity = "1";
+  } else {
+    console.error(
+      "Backup Manager: Elemento #backup-tabs nÃ£o encontrado em switchTab!"
+    );
+  }
+
+  // Atualizar abas
+  document.querySelectorAll(".pf-c-tabs__item").forEach((item) => {
+    item.classList.remove("pf-m-current");
+  });
+
+  const tabElement = document.getElementById(`tab-${tab}`);
+  if (tabElement && tabElement.parentElement) {
+    tabElement.parentElement.classList.add("pf-m-current");
+    console.log(`Backup Manager: Aba ${tab} marcada como ativa`);
+  } else {
+    console.error(`Backup Manager: Elemento #tab-${tab} nÃ£o encontrado!`);
+  }
+
+  // Atualizar conteÃºdo
+  const backupsTab = document.getElementById("backups-tab-content");
+  const configTab = document.getElementById("config-tab-content");
+  const vmsTab = document.getElementById("vms-tab-content");
+  const automationTab = document.getElementById("automation-tab-content");
+  const schedulesTab = document.getElementById("schedules-tab-content");
+
+  if (backupsTab) {
+    backupsTab.style.display = tab === "backups" ? "block" : "none";
+  }
+  if (configTab) {
+    configTab.style.display = tab === "config" ? "block" : "none";
+    if (
+      tab === "config" &&
+      typeof window.automationRenderScriptDirectoriesList === "function"
+    ) {
+      window.automationRenderScriptDirectoriesList();
+    }
+  }
+  if (vmsTab) {
+    vmsTab.style.display = tab === "vms" ? "block" : "none";
+    if (tab === "vms") {
+      const permissionsChecked = sessionStorage.getItem(
+        "vm-permissions-checked"
+      );
+      if (
+        !permissionsChecked &&
+        typeof window.checkAndFixVMScriptPermissions === "function"
+      ) {
+        setTimeout(() => window.checkAndFixVMScriptPermissions(), 500);
+        sessionStorage.setItem("vm-permissions-checked", "true");
+      }
+      const allVMsLocal = window.allVMs || [];
+      if (allVMsLocal.length === 0) {
+        const discoveryRan = sessionStorage.getItem("vm-discovery-ran");
+        if (!discoveryRan && typeof window.discoverVMs === "function") {
+          setTimeout(() => window.discoverVMs(), 1000);
+          sessionStorage.setItem("vm-discovery-ran", "true");
+        }
+      }
+    }
+  }
+  if (automationTab) {
+    automationTab.style.display = tab === "automation" ? "block" : "none";
+    if (tab === "automation") {
+      const allScriptsLocal = window.allScripts || [];
+      if (allScriptsLocal.length === 0) {
+        const scriptsLoaded = sessionStorage.getItem("scripts-loaded");
+        if (
+          !scriptsLoaded &&
+          typeof window.automationLoadScripts === "function"
+        ) {
+          console.log("Backup Manager: Carregando scripts automaticamente...");
+          setTimeout(() => window.automationLoadScripts(), 500);
+          sessionStorage.setItem("scripts-loaded", "true");
+        }
+      }
+    }
+  }
+  if (schedulesTab) {
+    schedulesTab.style.display = tab === "schedules" ? "block" : "none";
+    if (tab === "schedules" && typeof window.loadSchedules === "function") {
+      window.loadSchedules();
+    }
+  }
+
+  console.log(`Backup Manager: ConteÃºdo da aba ${tab} exibido`);
+};
+
+// Alias local para switchTab
+const switchTab = window.switchTab;
+
 // Aliases para funções dos módulos (carregados via js/utils.js, js/backups.js, etc.)
 // Estas funções são definidas nos módulos e exportadas para window.*
 const showAlert = (...args) => window.showAlert?.(...args);
@@ -638,97 +741,7 @@ function setupEventListeners() {
 // UI HELPERS
 // ============================================================================
 
-function switchTab(tab) {
-  console.log(`Backup Manager: Mudando para aba ${tab}`);
-
-  // Garantir que as abas estejam visÃ­veis
-  const tabsContainer = document.getElementById("backup-tabs");
-  if (tabsContainer) {
-    tabsContainer.style.display = "block";
-    tabsContainer.style.visibility = "visible";
-    tabsContainer.style.opacity = "1";
-  } else {
-    console.error(
-      "Backup Manager: Elemento #backup-tabs nÃ£o encontrado em switchTab!"
-    );
-  }
-
-  // Atualizar abas
-  document.querySelectorAll(".pf-c-tabs__item").forEach((item) => {
-    item.classList.remove("pf-m-current");
-  });
-
-  const tabElement = document.getElementById(`tab-${tab}`);
-  if (tabElement && tabElement.parentElement) {
-    tabElement.parentElement.classList.add("pf-m-current");
-    console.log(`Backup Manager: Aba ${tab} marcada como ativa`);
-  } else {
-    console.error(`Backup Manager: Elemento #tab-${tab} nÃ£o encontrado!`);
-  }
-
-  // Atualizar conteÃºdo
-  const backupsTab = document.getElementById("backups-tab-content");
-  const configTab = document.getElementById("config-tab-content");
-  const vmsTab = document.getElementById("vms-tab-content");
-  const automationTab = document.getElementById("automation-tab-content");
-  const schedulesTab = document.getElementById("schedules-tab-content");
-
-  if (backupsTab) {
-    backupsTab.style.display = tab === "backups" ? "block" : "none";
-  }
-  if (configTab) {
-    configTab.style.display = tab === "config" ? "block" : "none";
-    // Renderizar lista de diretÃ³rios de scripts quando entrar na aba
-    if (tab === "config") {
-      automationRenderScriptDirectoriesList();
-    }
-  }
-  if (vmsTab) {
-    vmsTab.style.display = tab === "vms" ? "block" : "none";
-    // Verificar permissÃµes e auto-descobrir VMs
-    if (tab === "vms") {
-      const permissionsChecked = sessionStorage.getItem(
-        "vm-permissions-checked"
-      );
-      if (!permissionsChecked) {
-        setTimeout(() => checkAndFixVMScriptPermissions(), 500);
-        sessionStorage.setItem("vm-permissions-checked", "true");
-      }
-
-      // Auto-descobrir VMs apÃ³s verificar permissÃµes
-      if (allVMs.length === 0) {
-        const discoveryRan = sessionStorage.getItem("vm-discovery-ran");
-        if (!discoveryRan) {
-          setTimeout(() => discoverVMs(), 1000);
-          sessionStorage.setItem("vm-discovery-ran", "true");
-        }
-      }
-    }
-  }
-  if (automationTab) {
-    automationTab.style.display = tab === "automation" ? "block" : "none";
-    // Auto-carregar scripts
-    if (tab === "automation") {
-      // Auto-carregar scripts se ainda nÃ£o carregou
-      if (allScripts.length === 0) {
-        const scriptsLoaded = sessionStorage.getItem("scripts-loaded");
-        if (!scriptsLoaded) {
-          console.log("Backup Manager: Carregando scripts automaticamente...");
-          setTimeout(() => automationLoadScripts(), 500);
-          sessionStorage.setItem("scripts-loaded", "true");
-        }
-      }
-    }
-  }
-  if (schedulesTab) {
-    schedulesTab.style.display = tab === "schedules" ? "block" : "none";
-    if (tab === "schedules") {
-      loadSchedules();
-    }
-  }
-
-  console.log(`Backup Manager: ConteÃºdo da aba ${tab} exibido`);
-}
+// switchTab está definida no topo do arquivo e exportada para window.switchTab
 
 // updateStats está definida em js/backups.js e exportada via window.updateStats
 
