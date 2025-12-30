@@ -1,0 +1,41 @@
+<!-- Modal: Variáveis Globais (.env) -->
+<div id="automation-envModal" class="modal">
+  <div class="modal-content">
+    <div class="pf-c-modal-box__header">
+      <h2 class="pf-c-modal-box__title">🔧 Variáveis Globais (.env)</h2>
+      <button class="close" onclick="automationCloseEnvModal()">&times;</button>
+    </div>
+    <div class="pf-c-modal-box__body">
+      <form id="automation-env-form">
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="automation-env-content">
+            <span class="pf-c-form__label-text"
+              >Conteúdo do arquivo ~/scripts/.env</span
+            >
+          </label>
+          <textarea
+            class="pf-c-form-control"
+            id="automation-env-content"
+            rows="15"
+            style="font-family: 'Courier New', monospace"
+            placeholder="VARIAVEL1=valor1&#10;VARIAVEL2=valor2"
+          ></textarea>
+          <p class="pf-c-form__helper-text">
+            Estas variáveis estarão disponíveis em todos os scripts
+          </p>
+        </div>
+      </form>
+    </div>
+    <div class="pf-c-modal-box__footer">
+      <button
+        class="pf-c-button pf-m-secondary"
+        onclick="automationCloseEnvModal()"
+      >
+        Cancelar
+      </button>
+      <button class="pf-c-button pf-m-primary" onclick="automationSaveEnv()">
+        💾 Salvar
+      </button>
+    </div>
+  </div>
+</div>

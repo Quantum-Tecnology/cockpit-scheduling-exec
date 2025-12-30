@@ -1,0 +1,47 @@
+<!-- Modal: Variáveis do Script -->
+<div id="automation-scriptEnvModal" class="modal">
+  <div class="modal-content">
+    <div class="pf-c-modal-box__header">
+      <h2 class="pf-c-modal-box__title" id="automation-script-env-title">
+        Variáveis do Script
+      </h2>
+      <button class="close" onclick="automationCloseScriptEnvModal()">
+        &times;
+      </button>
+    </div>
+    <div class="pf-c-modal-box__body">
+      <form id="automation-script-env-form">
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="automation-script-env-content">
+            <span class="pf-c-form__label-text"
+              >Variáveis específicas deste script</span
+            >
+          </label>
+          <textarea
+            class="pf-c-form-control"
+            id="automation-script-env-content"
+            rows="15"
+            style="font-family: 'Courier New', monospace"
+          ></textarea>
+          <p class="pf-c-form__helper-text">
+            Estas variáveis só estarão disponíveis para este script
+          </p>
+        </div>
+      </form>
+    </div>
+    <div class="pf-c-modal-box__footer">
+      <button
+        class="pf-c-button pf-m-secondary"
+        onclick="automationCloseScriptEnvModal()"
+      >
+        Cancelar
+      </button>
+      <button
+        class="pf-c-button pf-m-primary"
+        onclick="automationSaveScriptEnv()"
+      >
+        💾 Salvar
+      </button>
+    </div>
+  </div>
+</div>

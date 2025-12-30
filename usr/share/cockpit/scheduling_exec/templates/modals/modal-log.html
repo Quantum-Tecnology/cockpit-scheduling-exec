@@ -1,0 +1,39 @@
+<!-- Modal: Logs do Script -->
+<div id="automation-logModal" class="modal">
+  <div class="modal-content" style="max-width: 1200px">
+    <div class="pf-c-modal-box__header">
+      <h2 class="pf-c-modal-box__title" id="automation-log-title">
+        Logs do Script
+      </h2>
+      <button class="close" onclick="automationCloseLogModal()">&times;</button>
+    </div>
+    <div class="pf-c-modal-box__body">
+      <div
+        id="automation-log-loading"
+        style="display: none; text-align: center; padding: 2rem"
+      >
+        <div class="loading-spinner"></div>
+        <p>Carregando logs...</p>
+      </div>
+      <textarea
+        class="pf-c-form-control"
+        id="automation-log-content"
+        readonly
+        rows="20"
+        style="
+          font-family: 'Courier New', monospace;
+          background: #1a1a1a;
+          color: #00ff00;
+        "
+      ></textarea>
+    </div>
+    <div class="pf-c-modal-box__footer">
+      <button
+        class="pf-c-button pf-m-secondary"
+        onclick="automationCloseLogModal()"
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>

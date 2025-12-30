@@ -1,4 +1,4 @@
-﻿// Inicializar conexÃ£o com Cockpit
+// Inicializar conexÃ£o com Cockpit
 const cockpit = window.cockpit;
 
 // ============================================================================

@@ -1,17 +1,73 @@
-<!-- Modal Script - será expandido -->
+<!-- Modal: Criar/Editar Script -->
 <div id="automation-scriptModal" class="modal">
   <div class="modal-content" style="max-width: 1000px">
     <div class="pf-c-modal-box__header">
-      <h2 class="pf-c-modal-box__title" id="automation-script-title">
-        ✏️ Criar Script
+      <h2 class="pf-c-modal-box__title" id="automation-modal-title">
+        Novo Script
       </h2>
       <button class="close" onclick="automationCloseScriptModal()">
         &times;
       </button>
     </div>
     <div class="pf-c-modal-box__body">
+      <div
+        class="pf-c-alert pf-m-info pf-m-inline"
+        style="margin-bottom: var(--pf-global--spacer--md)"
+      >
+        <p class="pf-c-alert__title">
+          Ao executar/agendar, este plugin carrega as variáveis de
+          <code>~/scripts/.env</code> e também de
+          <code>~/scripts/.env.&lt;script&gt;</code> (se existir).
+        </p>
+      </div>
+
       <form id="automation-script-form">
-        <!-- Formulário de script -->
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="automation-script-name">
+            <span class="pf-c-form__label-text">Nome do Script</span>
+            <span class="pf-c-form__label-required">*</span>
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="text"
+            id="automation-script-name"
+            required
+            placeholder="meu-script.sh"
+            pattern="[a-zA-Z0-9._-]+\.sh$"
+          />
+          <p class="pf-c-form__helper-text">O nome deve terminar com .sh</p>
+        </div>
+
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="automation-script-path">
+            <span class="pf-c-form__label-text">Caminho</span>
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="text"
+            id="automation-script-path"
+            readonly
+          />
+          <p class="pf-c-form__helper-text">Informação (somente leitura)</p>
+        </div>
+
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="automation-script-content">
+            <span class="pf-c-form__label-text">Conteúdo do Script</span>
+            <span class="pf-c-form__label-required">*</span>
+          </label>
+          <textarea
+            class="pf-c-form-control"
+            id="automation-script-content"
+            required
+            rows="15"
+            style="font-family: 'Courier New', monospace"
+            placeholder="#!/bin/bash&#10;&#10;echo 'Olá Mundo'"
+          ></textarea>
+          <p class="pf-c-form__helper-text" id="automation-script-vars-summary">
+            Variáveis referenciadas detectadas: <code>-</code>
+          </p>
+        </div>
       </form>
     </div>
     <div class="pf-c-modal-box__footer">
