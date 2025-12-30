@@ -154,7 +154,7 @@ const automationRenderScriptDirectoriesList = (...args) =>
 
 // Estado da aplicaÃ§Ã£o - apenas variÃ¡veis locais nÃ£o exportadas pelos mÃ³dulos
 let backupDirectories = [];
-let currentDeleteTarget = null;
+// currentDeleteTarget já está definido em backups.js
 let emailConfig = {
   recipient: "",
   subject: "Backup do Sistema - {{date}}",
