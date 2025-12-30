@@ -1,9 +1,9 @@
-<!-- Modal: Executar como Admin (sudo) -->
+<!-- Modal: Executar Script -->
 <div id="automation-sudoModal" class="modal">
   <div class="modal-content">
     <div class="pf-c-modal-box__header">
       <h2 class="pf-c-modal-box__title" id="automation-sudo-title">
-        Executar como Admin
+        Executar Script
       </h2>
       <button class="close" onclick="automationCloseSudoModal()">
         &times;
@@ -13,18 +13,18 @@
       <form id="automation-sudo-form">
         <div class="pf-c-form__group">
           <label class="pf-c-form__label" for="automation-sudo-password">
-            <span class="pf-c-form__label-text">Senha do sudo</span>
-            <span class="pf-c-form__label-required">*</span>
+            <span class="pf-c-form__label-text">Senha do sudo (opcional)</span>
           </label>
           <input
             class="pf-c-form-control"
             type="password"
             id="automation-sudo-password"
-            required
+            placeholder="Deixe vazio para executar sem privilégios de admin"
             autocomplete="current-password"
           />
           <p class="pf-c-form__helper-text">
-            A senha será enviada via stdin apenas para esta execução
+            💡 Deixe em branco para executar normalmente, ou informe a senha
+            para executar com privilégios de administrador
           </p>
         </div>
       </form>

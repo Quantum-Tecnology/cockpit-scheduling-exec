@@ -640,12 +640,9 @@ function automationRenderScripts(scripts) {
             <ul class="pf-c-dropdown__menu js-row-actions-menu" id="${automationEscapeHtml(
               menuId
             )}" hidden style="position: fixed; z-index: 9999; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 12rem;">
-              <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationExecuteScript('${automationEscapeJs(
-                scriptName
-              )}');">▶️ Executar</button></li>
               <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenSudoModal('${automationEscapeJs(
                 scriptName
-              )}');">🔐 Executar (admin)</button></li>
+              )}');">▶️ Executar</button></li>
               <li><button class="pf-c-dropdown__menu-item" onclick="automationCloseAllRowActionsMenus(); automationOpenScriptEnvModal('${automationEscapeJs(
                 scriptName
               )}');">🔧 Variáveis (script)</button></li>

@@ -339,7 +339,7 @@ function automationOpenSudoModal(scriptName) {
   setAutomationCurrentSudoScript(scriptName);
   document.getElementById(
     "automation-sudo-title"
-  ).textContent = `Executar como Admin: ${scriptName}`;
+  ).textContent = `Executar: ${scriptName}`;
   document.getElementById("automation-sudo-password").value = "";
   document.getElementById("automation-sudoModal").style.display = "block";
   setTimeout(
@@ -356,12 +356,9 @@ function automationCloseSudoModal() {
 
 function automationExecuteSudo() {
   const password = document.getElementById("automation-sudo-password").value;
-  if (!password) {
-    automationShowError("Informe a senha do sudo");
-    return;
-  }
   automationCloseSudoModal();
-  automationExecuteScript(getAutomationCurrentSudoScript(), password);
+  // Se não tiver senha, executa normalmente; se tiver senha, executa com sudo
+  automationExecuteScript(getAutomationCurrentSudoScript(), password || null);
 }
 
 // ============================================================================
