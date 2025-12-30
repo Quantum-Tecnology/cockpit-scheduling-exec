@@ -4,7 +4,7 @@ const cockpit = window.cockpit;
 // ============================================================================
 // EXPORTAR switchTab IMEDIATAMENTE para evitar erros de onclick no HTML
 // ============================================================================
-window.switchTabReal = function (tab) {
+window.switchTab = function (tab) {
   console.log(`Backup Manager: Mudando para aba ${tab}`);
 
   // Garantir que as abas estejam visÃ­veis
@@ -101,11 +101,8 @@ window.switchTabReal = function (tab) {
   console.log(`Backup Manager: ConteÃºdo da aba ${tab} exibido`);
 };
 
-// Sinalizar que a função real foi carregada
-window.switchTabLoaded = true;
-
 // Alias local para switchTab
-const switchTab = window.switchTabReal;
+const switchTab = window.switchTab;
 
 // Aliases para funções dos módulos (carregados via js/utils.js, js/backups.js, etc.)
 // Estas funções são definidas nos módulos e exportadas para window.*
@@ -126,10 +123,8 @@ const automationLoadScripts = (...args) =>
 const automationRenderScriptDirectoriesList = (...args) =>
   window.automationRenderScriptDirectoriesList?.(...args);
 
-// Estado da aplicaÃ§Ã£o - exportados para window para acesso pelos mÃ³dulos
+// Estado da aplicaÃ§Ã£o - apenas variÃ¡veis locais nÃ£o exportadas pelos mÃ³dulos
 let backupDirectories = [];
-let allBackups = [];
-let selectedBackups = new Set();
 let currentDeleteTarget = null;
 let emailConfig = {
   recipient: "",
@@ -139,45 +134,23 @@ let emailConfig = {
 let userHome = null;
 let configFile = null;
 
-// VariÃ¡veis globais para VMs
-// VariÃ¡veis globais para AutomaÃ§Ã£o/Scripts e Agendamentos
-// Estas variÃ¡veis sÃ£o definidas nos mÃ³dulos respectivos (js/automation.js, js/schedules.js, js/vm-backup.js)
-// e nÃ£o devem ser redeclaradas aqui para evitar SyntaxError.
+// Nota: allBackups, selectedBackups - definidos em js/backups.js
+// Nota: allVMs, selectedVMs, vmBackupConfig - definidos em js/vm-backup.js
+// Nota: scriptDirectories, allScripts, selectedScripts, etc - definidos em js/automation.js
+// Nota: allSchedules, editingScheduleId - definidos em js/schedules.js
 
 // Constantes
 const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
 const VM_SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/vm";
 
-// Exportar variÃ¡veis para window (acesso pelos mÃ³dulos)
+// Exportar variÃ¡veis locais para window (apenas as declaradas neste arquivo)
 function exportGlobals() {
   window.backupDirectories = backupDirectories;
-  window.allBackups = allBackups;
-  window.selectedBackups = selectedBackups;
   window.currentDeleteTarget = currentDeleteTarget;
   window.emailConfig = emailConfig;
   window.userHome = userHome;
   window.configFile = configFile;
-  window.allVMs = allVMs;
-  window.selectedVMs = selectedVMs;
-  window.vmBackupConfig = vmBackupConfig;
-  window.scriptDirectories = scriptDirectories;
-  window.allScripts = allScripts;
-  window.selectedScripts = selectedScripts;
-  window.automationCurrentEditingScript = automationCurrentEditingScript;
-  window.allSchedules = allSchedules;
-  window.editingScheduleId = editingScheduleId;
-}
-
-// Sincronizar de volta do window para variÃ¡veis locais
-function syncFromWindow() {
-  backupDirectories = window.backupDirectories || backupDirectories;
-  allBackups = window.allBackups || allBackups;
-  selectedBackups = window.selectedBackups || selectedBackups;
-  allVMs = window.allVMs || allVMs;
-  selectedVMs = window.selectedVMs || selectedVMs;
-  scriptDirectories = window.scriptDirectories || scriptDirectories;
-  allScripts = window.allScripts || allScripts;
-  allSchedules = window.allSchedules || allSchedules;
+  // As outras variáveis são gerenciadas pelos respectivos módulos
 }
 
 // InicializaÃ§Ã£o
@@ -250,9 +223,12 @@ async function loadConfiguration() {
     });
     const config = JSON.parse(result);
     backupDirectories = config.directories || [];
-    scriptDirectories = config.scriptDirectories || [];
+    window.scriptDirectories = config.scriptDirectories || [];
     emailConfig = { ...emailConfig, ...config.email };
-    vmBackupConfig = { ...vmBackupConfig, ...(config.vmBackupConfig || {}) };
+    window.vmBackupConfig = {
+      ...(window.vmBackupConfig || {}),
+      ...(config.vmBackupConfig || {}),
+    };
 
     // Atualizar referÃªncia global
     configFile = systemConfigFile;
@@ -287,9 +263,9 @@ async function loadConfiguration() {
 async function saveConfiguration() {
   const config = {
     directories: backupDirectories,
-    scriptDirectories: scriptDirectories,
+    scriptDirectories: window.scriptDirectories || [],
     email: emailConfig,
-    vmBackupConfig: vmBackupConfig,
+    vmBackupConfig: window.vmBackupConfig || {},
     version: "1.0.0",
     lastUpdated: new Date().toISOString(),
   };

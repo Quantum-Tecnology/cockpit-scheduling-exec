@@ -21,42 +21,6 @@
     <!-- Cockpit JS API -->
     <script src="../base1/cockpit.js"></script>
 
-    <!-- Função global switchTab disponível imediatamente para onclick inline -->
-    <script>
-      // Salvar referência da função wrapper original
-      var switchTabWrapper = function (tab) {
-        // Verifica se o backup-manager.js já carregou (setando a flag)
-        if (window.switchTabLoaded && window.switchTabReal) {
-          // Chama diretamente a função real
-          window.switchTabReal(tab);
-          return;
-        }
-
-        // Script ainda não carregou, vamos tentar novamente
-        var attempts = 0;
-        var maxAttempts = 50;
-
-        function trySwitch() {
-          if (window.switchTabLoaded && window.switchTabReal) {
-            // Agora sim, chamar a função real
-            window.switchTabReal(tab);
-          } else if (attempts < maxAttempts) {
-            attempts++;
-            console.warn("switchTab: Aguardando... Tentativa " + attempts);
-            setTimeout(trySwitch, 100);
-          } else {
-            console.error("switchTab: Timeout ao carregar aplicação.");
-            alert("A aplicação não carregou. Verifique o console para erros.");
-          }
-        }
-
-        trySwitch();
-      };
-
-      // Exportar como window.switchTab
-      window.switchTab = switchTabWrapper;
-    </script>
-
     <!-- Módulos JavaScript -->
     <script src="js/utils.js" defer></script>
     <script src="js/directory-browser.js" defer></script>
