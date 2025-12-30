@@ -24,15 +24,15 @@
     <!-- Template Loader -->
     <script src="js/template-loader.js"></script>
 
-    <!-- Módulos JavaScript -->
-    <script src="js/utils.js" defer></script>
-    <script src="js/directory-browser.js" defer></script>
-    <script src="js/email.js" defer></script>
-    <script src="js/backups.js" defer></script>
-    <script src="js/vm-backup.js" defer></script>
-    <script src="js/automation.js" defer></script>
-    <script src="js/automation-scripts.js" defer></script>
-    <script src="js/schedules.js" defer></script>
+    <!-- Módulos JavaScript (sem defer para exportar funções imediatamente) -->
+    <script src="js/utils.js"></script>
+    <script src="js/directory-browser.js"></script>
+    <script src="js/email.js"></script>
+    <script src="js/backups.js"></script>
+    <script src="js/vm-backup.js"></script>
+    <script src="js/automation.js"></script>
+    <script src="js/automation-scripts.js"></script>
+    <script src="js/schedules.js"></script>
 
     <!-- Core do Backup Manager (sem defer para garantir que switchTab esteja disponível) -->
     <script src="backup-manager.js"></script>
