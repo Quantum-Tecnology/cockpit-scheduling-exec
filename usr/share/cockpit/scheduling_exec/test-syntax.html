@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test Script Loading</title>
+    <script>
+      console.log("=".repeat(80));
+      console.log("TESTE DE CARREGAMENTO DE SCRIPTS");
+      console.log("=".repeat(80));
+
+      // Mock Cockpit API
+      window.cockpit = {
+        spawn: () => Promise.resolve(""),
+        file: () => ({
+          read: () => Promise.resolve(""),
+          replace: () => Promise.resolve(),
+        }),
+      };
+
+      window.addEventListener("error", function (e) {
+        console.error(
+          "❌ ERRO DE SCRIPT:",
+          e.filename,
+          "linha",
+          e.lineno,
+          "-",
+          e.message
+        );
+      });
+
+      let scriptsLoaded = 0;
+      let scriptsTotal = 0;
+
+      function checkAllLoaded() {
+        scriptsLoaded++;
+        console.log(`📦 Script ${scriptsLoaded}/${scriptsTotal} carregado`);
+
+        if (scriptsLoaded === scriptsTotal) {
+          console.log("=".repeat(80));
+          console.log("✅ TODOS OS SCRIPTS CARREGADOS!");
+          console.log("=".repeat(80));
+          console.log("window.switchTab:", typeof window.switchTab);
+          console.log("window.loadBackups:", typeof window.loadBackups);
+          console.log("window.showAlert:", typeof window.showAlert);
+          console.log(
+            "window.automationLoadScripts:",
+            typeof window.automationLoadScripts
+          );
+          console.log("=".repeat(80));
+        }
+      }
+    </script>
+
+    <!-- Template Loader -->
+    <script
+      src="js/template-loader.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: template-loader.js')"
+    ></script>
+
+    <!-- Módulos JavaScript -->
+    <script
+      src="js/utils.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: utils.js')"
+    ></script>
+    <script
+      src="js/directory-browser.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: directory-browser.js')"
+    ></script>
+    <script
+      src="js/email.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: email.js')"
+    ></script>
+    <script
+      src="js/backups.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: backups.js')"
+    ></script>
+    <script
+      src="js/vm-backup.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: vm-backup.js')"
+    ></script>
+    <script
+      src="js/automation.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: automation.js')"
+    ></script>
+    <script
+      src="js/automation-actions.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: automation-actions.js')"
+    ></script>
+    <script
+      src="js/automation-scripts.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: automation-scripts.js')"
+    ></script>
+    <script
+      src="js/schedules.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: schedules.js')"
+    ></script>
+
+    <!-- Core do Backup Manager -->
+    <script
+      src="backup-manager.js"
+      onload="checkAllLoaded()"
+      onerror="console.error('❌ ERRO: backup-manager.js')"
+    ></script>
+
+    <script>
+      scriptsTotal = 11;
+    </script>
+  </head>
+  <body>
+    <h1>Test Script Loading</h1>
+    <p>Abra o console (F12) para ver os resultados</p>
+
+    <div id="backup-tabs" style="display: none"></div>
+    <div id="backups-tab-content" style="display: none"></div>
+    <div id="config-tab-content" style="display: none"></div>
+    <div id="vms-tab-content" style="display: none"></div>
+    <div id="automation-tab-content" style="display: none"></div>
+    <div id="schedules-tab-content" style="display: none"></div>
+  </body>
+</html>

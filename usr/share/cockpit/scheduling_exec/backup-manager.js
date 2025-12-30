@@ -1,9 +1,15 @@
+// ============================================================================
+// INÍCIO DO BACKUP-MANAGER.JS
+// ============================================================================
+console.log("🚀 BACKUP-MANAGER.JS: Carregando...");
+
 // Inicializar conexÃ£o com Cockpit
 const cockpit = window.cockpit;
 
 // ============================================================================
 // EXPORTAR switchTab IMEDIATAMENTE para evitar erros de onclick no HTML
 // ============================================================================
+console.log("🔧 BACKUP-MANAGER.JS: Definindo window.switchTab...");
 window.switchTab = function (tab) {
   console.log(`Backup Manager: Mudando para aba ${tab}`);
 
@@ -130,53 +136,38 @@ window.switchTab = function (tab) {
   }
 };
 
-// Alias local para switchTab
-const switchTab = window.switchTab;
+console.log(
+  "✅ BACKUP-MANAGER.JS: window.switchTab definida!",
+  typeof window.switchTab
+);
 
-// Aliases para funções dos módulos (carregados via js/utils.js, js/backups.js, etc.)
-// Estas funções são definidas nos módulos e exportadas para window.*
-const showAlert = (...args) => window.showAlert?.(...args);
-const escapeHtml = (text) => window.escapeHtml?.(text) || text;
-const formatDate = (date) => window.formatDate?.(date) || date;
-const formatSize = (bytes) => window.formatSize?.(bytes) || `${bytes} B`;
-const formatRelativeTime = (date) => window.formatRelativeTime?.(date) || date;
-const getFileIcon = (filename) => window.getFileIcon?.(filename) || "📄";
-const loadBackups = (...args) => window.loadBackups?.(...args);
-const loadSchedules = (...args) => window.loadSchedules?.(...args);
-const updateVMConfigForm = (...args) => window.updateVMConfigForm?.(...args);
-const checkAndFixVMScriptPermissions = (...args) =>
-  window.checkAndFixVMScriptPermissions?.(...args);
-const discoverVMs = (...args) => window.discoverVMs?.(...args);
-const automationLoadScripts = (...args) =>
-  window.automationLoadScripts?.(...args);
-const automationRenderScriptDirectoriesList = (...args) =>
-  window.automationRenderScriptDirectoriesList?.(...args);
+// ============================================================================
+// NOTA: Não criamos aliases locais (const x = window.x) porque isso causa
+// erros de redeclaração quando os módulos já exportaram as propriedades.
+// Use window.* diretamente no código ou acesse via optional chaining.
+// ============================================================================
 
-// Estado da aplicaÃ§Ã£o - apenas variÃ¡veis locais nÃ£o exportadas pelos mÃ³dulos
+// ============================================================================
+// ESTADO DA APLICAÇÃO
+// ============================================================================
+// NOTA: A maioria das variáveis de estado são definidas e exportadas pelos módulos:
+// - currentDeleteTarget: definido em js/backups.js
+// - emailConfig: definido em js/email.js (acessível via window.emailConfig)
+// - allBackups, selectedBackups: definidos em js/backups.js
+// - allVMs, selectedVMs, vmBackupConfig: definidos em js/vm-backup.js
+// - scriptDirectories, allScripts, selectedScripts: definidos em js/automation.js
+// - allSchedules, editingScheduleId: definidos em js/schedules.js
+
+// Variáveis locais do backup-manager.js
 let backupDirectories = [];
-// currentDeleteTarget já está definido em backups.js
-let emailConfig = {
-  recipient: "",
-  subject: "Backup do Sistema - {{date}}",
-  maxSize: 25,
-};
 let userHome = null;
 let configFile = null;
-
-// Nota: allBackups, selectedBackups - definidos em js/backups.js
-// Nota: allVMs, selectedVMs, vmBackupConfig - definidos em js/vm-backup.js
-// Nota: scriptDirectories, allScripts, selectedScripts, etc - definidos em js/automation.js
-// Nota: allSchedules, editingScheduleId - definidos em js/schedules.js
-
-// Constantes
-const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";
-const VM_SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/vm";
 
 // Exportar variÃ¡veis locais para window (apenas as declaradas neste arquivo)
 function exportGlobals() {
   window.backupDirectories = backupDirectories;
-  window.currentDeleteTarget = currentDeleteTarget;
-  window.emailConfig = emailConfig;
+  // window.currentDeleteTarget - exportado por js/backups.js
+  // window.emailConfig - exportado por js/email.js
   window.userHome = userHome;
   window.configFile = configFile;
   // As outras variáveis são gerenciadas pelos respectivos módulos
@@ -233,11 +224,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Carregar configuraÃ§Ã£o primeiro, depois os backups
   await loadConfiguration();
-  await loadBackups();
+  await window.loadBackups();
   setupEventListeners();
 
   // Garantir que a aba de backups esteja visÃ­vel inicialmente
-  switchTab("backups");
+  window.switchTab("backups");
 
   console.log("Backup Manager: InicializaÃ§Ã£o completa");
   if (window.addGlobalLog) {
@@ -261,7 +252,10 @@ async function loadConfiguration() {
     const config = JSON.parse(result);
     backupDirectories = config.directories || [];
     window.scriptDirectories = config.scriptDirectories || [];
-    emailConfig = { ...emailConfig, ...config.email };
+    window.emailConfig = {
+      ...(window.emailConfig || {}),
+      ...(config.email || {}),
+    };
     window.vmBackupConfig = {
       ...(window.vmBackupConfig || {}),
       ...(config.vmBackupConfig || {}),
@@ -290,7 +284,7 @@ async function loadConfiguration() {
     updateDirectoriesList();
     updateDirectoryFilter();
     updateEmailForm();
-    updateVMConfigForm();
+    window.updateVMConfigForm();
   } catch (error) {
     console.log(
       "Backup Manager: Arquivo de configuraÃ§Ã£o nÃ£o encontrado, criando novo..."
@@ -308,7 +302,7 @@ async function saveConfiguration() {
   const config = {
     directories: backupDirectories,
     scriptDirectories: window.scriptDirectories || [],
-    email: emailConfig,
+    email: window.emailConfig || {},
     vmBackupConfig: window.vmBackupConfig || {},
     version: "1.0.0",
     lastUpdated: new Date().toISOString(),
@@ -360,7 +354,7 @@ async function saveConfiguration() {
     });
 
     console.log("Backup Manager: âœ“ ConfiguraÃ§Ã£o salva em", targetFile);
-    showAlert("success", "âœ… ConfiguraÃ§Ã£o salva com sucesso!");
+    window.showAlert("success", "âœ… ConfiguraÃ§Ã£o salva com sucesso!");
 
     // Atualizar referÃªncia global
     configFile = targetFile;
@@ -381,7 +375,7 @@ async function saveConfiguration() {
       error?.toString() ||
       JSON.stringify(error) ||
       "Erro desconhecido";
-    showAlert("danger", `âŒ Erro ao salvar configuraÃ§Ã£o: ${errorMsg}`);
+    window.showAlert("danger", `âŒ Erro ao salvar configuraÃ§Ã£o: ${errorMsg}`);
     throw error; // Re-lanÃ§ar para debug
   }
 }
@@ -471,12 +465,12 @@ function selectDirectory(path) {
   if (window.scriptDirectoryCallback) {
     window.scriptDirectoryCallback(path);
     window.scriptDirectoryCallback = null; // Limpar o callback
-    showAlert("success", `âœ… DiretÃ³rio selecionado: ${path}`);
+    window.showAlert("success", `âœ… DiretÃ³rio selecionado: ${path}`);
   } else {
     // Comportamento padrÃ£o (para backups)
     document.getElementById("directory-path").value = path;
     closeDirectoryBrowser();
-    showAlert("success", `âœ… DiretÃ³rio selecionado: ${path}`);
+    window.showAlert("success", `âœ… DiretÃ³rio selecionado: ${path}`);
   }
 }
 
@@ -536,7 +530,7 @@ async function addDirectory() {
   const maxDepth = document.getElementById("max-depth").value.trim() || "10";
 
   if (!path) {
-    showAlert("warning", "Por favor, informe o caminho do diretÃ³rio.");
+    window.showAlert("warning", "Por favor, informe o caminho do diretÃ³rio.");
     return;
   }
 
@@ -544,13 +538,13 @@ async function addDirectory() {
   try {
     await cockpit.spawn(["test", "-d", path]);
   } catch (error) {
-    showAlert("danger", `DiretÃ³rio nÃ£o encontrado: ${path}`);
+    window.showAlert("danger", `DiretÃ³rio nÃ£o encontrado: ${path}`);
     return;
   }
 
   // Verificar se jÃ¡ existe
   if (backupDirectories.some((d) => d.path === path)) {
-    showAlert("warning", "Este diretÃ³rio jÃ¡ estÃ¡ na lista.");
+    window.showAlert("warning", "Este diretÃ³rio jÃ¡ estÃ¡ na lista.");
     return;
   }
 
@@ -571,7 +565,7 @@ async function addDirectory() {
 
   // Recarregar backups automaticamente
   console.log("Backup Manager: Recarregando lista de backups...");
-  await loadBackups();
+  await window.loadBackups();
   console.log("Backup Manager: Lista de backups atualizada");
 }
 
@@ -663,14 +657,16 @@ function updateDirectoryFilter() {
 // ============================================================================
 
 function updateEmailForm() {
-  document.getElementById("email-recipient").value = emailConfig.recipient;
-  document.getElementById("email-subject").value = emailConfig.subject;
-  document.getElementById("max-email-size").value = emailConfig.maxSize;
+  const cfg = window.emailConfig || {};
+  document.getElementById("email-recipient").value = cfg.recipient || "";
+  document.getElementById("email-subject").value =
+    cfg.subject || "Backup do Sistema - {{date}}";
+  document.getElementById("max-email-size").value = cfg.maxSize || 25;
 }
 
 async function testEmailConfiguration() {
   try {
-    showAlert("info", "ðŸ”§ Testando configuraÃ§Ã£o de email...", 0);
+    window.showAlert("info", "ðŸ”§ Testando configuraÃ§Ã£o de email...", 0);
 
     const script =
       "/usr/share/cockpit/scheduling_exec/scripts/backup/test-email.sh";
@@ -701,18 +697,26 @@ async function testEmailConfiguration() {
     }
 
     if (hasError) {
-      showAlert(
+      window.showAlert(
         "warning",
         `âš ï¸ Problemas encontrados:\n${errorMessage}\n${successMessage}`,
         15000
       );
     } else {
-      showAlert("success", `âœ… ConfiguraÃ§Ã£o OK!\n${successMessage}`, 10000);
+      window.showAlert(
+        "success",
+        `âœ… ConfiguraÃ§Ã£o OK!\n${successMessage}`,
+        10000
+      );
     }
   } catch (error) {
     console.error("Erro ao testar configuraÃ§Ã£o:", error);
     const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
-    showAlert("danger", `âŒ Erro ao testar configuraÃ§Ã£o: ${errorMsg}`, 10000);
+    window.showAlert(
+      "danger",
+      `âŒ Erro ao testar configuraÃ§Ã£o: ${errorMsg}`,
+      10000
+    );
   }
 }
 
@@ -722,13 +726,14 @@ function setupEventListeners() {
     .addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      emailConfig.recipient = document
+      if (!window.emailConfig) window.emailConfig = {};
+      window.emailConfig.recipient = document
         .getElementById("email-recipient")
         .value.trim();
-      emailConfig.subject = document
+      window.emailConfig.subject = document
         .getElementById("email-subject")
         .value.trim();
-      emailConfig.maxSize = parseInt(
+      window.emailConfig.maxSize = parseInt(
         document.getElementById("max-email-size").value
       );
 
@@ -928,3 +933,9 @@ document.addEventListener("DOMContentLoaded", () => {
     logColumn.style.width = savedWidth + "px";
   }
 });
+
+// ============================================================================
+// FIM DO BACKUP-MANAGER.JS
+// ============================================================================
+console.log("✅ BACKUP-MANAGER.JS: Carregado completamente!");
+console.log("✅ window.switchTab disponível:", typeof window.switchTab);
