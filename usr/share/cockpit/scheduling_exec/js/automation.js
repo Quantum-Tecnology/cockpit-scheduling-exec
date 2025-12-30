@@ -365,6 +365,7 @@ async function addScriptDirectory() {
   automationRenderScriptDirectoriesList();
   closeAddScriptDirectoryModal();
 
+  window.addGlobalLog(`📁 Diretório adicionado: ${path}`);
   showAlert("success", "✅ Diretório adicionado! Recarregando scripts...");
   await automationLoadScripts();
 }
@@ -391,6 +392,7 @@ async function automationRemoveScriptDirectory(index) {
   try {
     await saveConfiguration();
     automationRenderScriptDirectoriesList();
+    window.addGlobalLog(`🗑️ Diretório removido: ${dir.path}`);
     showAlert("success", "✅ Diretório removido! Recarregando scripts...");
     await automationLoadScripts();
   } catch (error) {
@@ -532,12 +534,18 @@ async function automationLoadScripts() {
     automationUpdateStatCards(allScripts);
 
     if (allScripts.length === 0) {
+      window.addGlobalLog(
+        "ℹ️ Nenhum script (.sh) encontrado nos diretórios configurados"
+      );
       showAlert(
         "info",
         "ℹ️ Nenhum script (.sh) encontrado nos diretórios configurados.",
         5000
       );
     } else {
+      window.addGlobalLog(
+        `✅ ${allScripts.length} script(s) carregado(s) com sucesso`
+      );
       showAlert(
         "success",
         `✅ ${allScripts.length} script(s) carregado(s) com sucesso!`,

@@ -140,6 +140,9 @@ function automationSaveScript() {
     .then(() => {
       automationShowLoading(false);
       console.log("Automation: Script salvo com sucesso");
+      window.addGlobalLog(
+        `✅ Script ${scriptName} salvo com sucesso em ${scriptPath}`
+      );
       showAlert(
         "success",
         `✅ Script ${scriptName} salvo com sucesso em ${scriptPath}!`
@@ -236,6 +239,7 @@ function automationDeleteScript(scriptName) {
     .then(() => {
       automationShowLoading(false);
       console.log("Automation: Script excluído com sucesso");
+      window.addGlobalLog(`🗑️ Script ${scriptName} excluído com sucesso`);
       showAlert("success", `✅ Script ${scriptName} excluído com sucesso!`);
       automationLoadScripts();
     })
@@ -279,6 +283,9 @@ function automationExecuteScript(scriptName, sudoPassword = null) {
   }
 
   automationShowLoading(true);
+  window.addGlobalLog(
+    `▶️ Executando script: ${scriptName}${sudoPassword ? " (com sudo)" : ""}`
+  );
 
   const args = ["bash", scriptPath];
 
@@ -296,6 +303,10 @@ function automationExecuteScript(scriptName, sudoPassword = null) {
       automationShowLoading(false);
       console.log("Automation: Script executado com sucesso");
 
+      window.addGlobalLog(`✅ Script ${scriptName} executado com sucesso!`);
+      if (output && output.trim()) {
+        window.addGlobalLog(`Saída: ${output.trim()}`);
+      }
       showAlert("success", `✅ Script ${scriptName} executado com sucesso!`);
 
       if (output && output.trim()) {
@@ -318,6 +329,7 @@ function automationExecuteScript(scriptName, sudoPassword = null) {
       console.error("Automation: Erro ao executar script:", error);
 
       const errorMsg = automationFormatCockpitError(error);
+      window.addGlobalLog(`❌ Erro ao executar ${scriptName}: ${errorMsg}`);
       showAlert("danger", `❌ Script ${scriptName} finalizou com erro`);
       alert(
         `${
@@ -441,6 +453,9 @@ function automationSaveScriptEnv() {
     .then(() => {
       automationShowLoading(false);
       console.log("Automation: Variáveis do script salvas com sucesso");
+      window.addGlobalLog(
+        `🔧 Variáveis do script ${scriptName} salvas com sucesso`
+      );
       showAlert(
         "success",
         `✅ Variáveis do script ${scriptName} salvas com sucesso!`
@@ -547,6 +562,7 @@ function automationSaveEnv() {
     .then(() => {
       automationShowLoading(false);
       console.log("Automation: Variáveis globais salvas com sucesso");
+      window.addGlobalLog("🌐 Variáveis globais (.env) salvas com sucesso");
       showAlert("success", "✅ Variáveis globais salvas com sucesso!");
     })
     .catch((error) => {
@@ -891,6 +907,9 @@ function automationSaveCron() {
     .then(() => {
       automationShowLoading(false);
       console.log("Automation: Agendamento salvo com sucesso");
+      window.addGlobalLog(
+        `⏰ Agendamento configurado para ${scriptName}: ${cronExpression}`
+      );
       showAlert("success", `✅ Agendamento configurado para ${scriptName}!`);
       automationLoadScripts();
     })
