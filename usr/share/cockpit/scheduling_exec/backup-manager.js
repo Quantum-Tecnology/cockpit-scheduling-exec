@@ -137,29 +137,9 @@ let userHome = null;
 let configFile = null;
 
 // VariÃ¡veis globais para VMs
-let allVMs = [];
-let selectedVMs = new Set();
-let vmBackupConfig = {
-  destDir: "/mnt/storage/backups/vm_backups",
-  retentionDays: 7,
-  verifyChecksum: false,
-};
-
-// VariÃ¡veis globais para AutomaÃ§Ã£o/Scripts
-let scriptDirectories = []; // DiretÃ³rios configurados pelo usuÃ¡rio
-let allScripts = [];
-let selectedScripts = new Set();
-let automationCurrentEditingScript = null;
-let automationImportCandidates = [];
-let automationCurrentSudoScript = null;
-let automationCurrentScriptEnv = null;
-let automationCronModalMode = "script";
-let automationOpenRowActionsMenuId = null;
-let automationCurrentLogScript = null;
-
-// VariÃ¡veis globais para Agendamentos
-let allSchedules = [];
-let editingScheduleId = null;
+// VariÃ¡veis globais para AutomaÃ§Ã£o/Scripts e Agendamentos
+// Estas variÃ¡veis sÃ£o definidas nos mÃ³dulos respectivos (js/automation.js, js/schedules.js, js/vm-backup.js)
+// e nÃ£o devem ser redeclaradas aqui para evitar SyntaxError.
 
 // Constantes
 const SCRIPTS_DIR = "/usr/share/cockpit/scheduling_exec/scripts/backup";

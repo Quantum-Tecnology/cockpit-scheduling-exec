@@ -23,16 +23,41 @@
 
     <!-- Função global switchTab disponível imediatamente para onclick inline -->
     <script>
-      function switchTab(tab) {
-        if (window.switchTab && window.switchTab !== switchTab) {
-          window.switchTab(tab);
-        } else {
-          console.warn("switchTab: Função ainda não carregada, aguardando...");
-          setTimeout(function () {
-            switchTab(tab);
-          }, 100);
-        }
-      }
+      (function () {
+        var attempts = 0;
+        var maxAttempts = 50; // 5 segundos
+
+        // Função temporária que será sobrescrita pelo backup-manager.js
+        window.switchTab = function (tab) {
+          // Se backup-manager.js carregou, ele sobrescreveu window.switchTab.
+          // Mas se esta função ainda está sendo chamada, significa que:
+          // 1. O script ainda não carregou
+          // 2. Ou o script carregou mas manteve esta referência (pouco provável se sobrescrever window.switchTab)
+
+          // Vamos verificar se existe uma implementação "real" diferente desta
+          // Como esta função é anônima atribuída a window.switchTab, é difícil comparar por referência
+          // Mas podemos confiar que backup-manager.js vai redefinir window.switchTab
+
+          console.warn(
+            "switchTab: Aguardando carregamento do módulo principal... Tentativa " +
+              (attempts + 1)
+          );
+
+          if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(function () {
+              // Tenta chamar novamente. Se o script carregou nesse meio tempo,
+              // window.switchTab apontará para a nova função.
+              if (window.switchTab) window.switchTab(tab);
+            }, 100);
+          } else {
+            console.error("switchTab: Falha ao carregar aplicação.");
+            alert(
+              "A aplicação não foi carregada corretamente. Verifique o console para erros."
+            );
+          }
+        };
+      })();
     </script>
 
     <!-- Módulos JavaScript -->
