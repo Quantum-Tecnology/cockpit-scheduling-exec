@@ -15,6 +15,11 @@ let automationCronModalMode = "script";
 let automationOpenRowActionsMenuId = null;
 let automationCurrentLogScript = null;
 
+// Exportar para window imediatamente
+window.allScripts = allScripts;
+window.scriptDirectories = scriptDirectories;
+window.automationCurrentSudoScript = automationCurrentSudoScript;
+
 // ============================================================================
 // FUNÇÕES AUXILIARES
 // ============================================================================
@@ -405,6 +410,7 @@ async function automationLoadScripts() {
   automationShowLoading(true);
 
   allScripts = [];
+  window.allScripts = allScripts;
 
   if (scriptDirectories.length === 0) {
     console.log("Automation: Nenhum diretório configurado");
@@ -485,6 +491,7 @@ async function automationLoadScripts() {
               scheduled: false,
               nextRun: null,
             });
+            window.allScripts = allScripts;
           } catch (error) {
             console.warn(
               `Automation: Erro ao obter info de ${filePath}:`,
