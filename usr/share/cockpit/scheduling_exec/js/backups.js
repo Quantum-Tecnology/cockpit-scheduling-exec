@@ -3,10 +3,15 @@
  * Carregamento, listagem, download, exclusão e exportação de backups
  */
 
-// Estado
+// Estado local do módulo
 let allBackups = [];
 let selectedBackups = new Set();
 let currentDeleteTarget = null;
+
+// Helper para obter backupDirectories de forma segura
+function getBackupDirectories() {
+  return window.backupDirectories || [];
+}
 
 // ============================================================================
 // CARREGAR BACKUPS
@@ -14,14 +19,17 @@ let currentDeleteTarget = null;
 
 async function loadBackups() {
   console.log("Backup Manager: loadBackups() chamado");
+
+  const directories = getBackupDirectories();
   console.log(
     "Backup Manager: Número de diretórios configurados:",
-    window.backupDirectories.length
+    directories.length
   );
 
   allBackups = [];
+  window.allBackups = allBackups;
 
-  if (window.backupDirectories.length === 0) {
+  if (directories.length === 0) {
     console.log(
       "Backup Manager: Nenhum diretório configurado, não há backups para carregar"
     );
@@ -33,11 +41,11 @@ async function loadBackups() {
   showAlert("info", "🔄 Carregando lista de backups...", 2000);
   console.log(
     "Backup Manager: Iniciando carregamento de backups de",
-    window.backupDirectories.length,
+    directories.length,
     "diretório(s)"
   );
 
-  for (const dir of window.backupDirectories) {
+  for (const dir of directories) {
     console.log(
       `Backup Manager: Carregando backups de ${dir.label} (${dir.path})`
     );
@@ -51,6 +59,9 @@ async function loadBackups() {
       );
     }
   }
+
+  // Atualizar window.allBackups
+  window.allBackups = allBackups;
 
   console.log(
     "Backup Manager: Total de backups encontrados:",
@@ -438,9 +449,10 @@ async function confirmDelete() {
   try {
     if (currentDeleteTarget.type === "directory") {
       // Remover diretório da configuração
-      window.backupDirectories = window.backupDirectories.filter(
+      const dirs = getBackupDirectories().filter(
         (d) => d.id !== currentDeleteTarget.id
       );
+      window.backupDirectories = dirs;
       await saveConfiguration();
       updateDirectoriesList();
       updateDirectoryFilter();
@@ -593,7 +605,7 @@ async function cleanOldBackups() {
 
 function updateStats() {
   const totalBackups = allBackups.length;
-  const totalDirectories = window.backupDirectories.length;
+  const totalDirectories = getBackupDirectories().length;
   const totalSize = allBackups.reduce((sum, b) => sum + b.size, 0);
   const lastBackup =
     allBackups.length > 0

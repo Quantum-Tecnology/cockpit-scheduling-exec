@@ -7,6 +7,19 @@
 let allSchedules = [];
 let editingScheduleId = null;
 
+// Helpers para obter dados de forma segura
+function getBackupDirs() {
+  return window.backupDirectories || [];
+}
+
+function getVMs() {
+  return window.allVMs || [];
+}
+
+function getScripts() {
+  return window.allScripts || [];
+}
+
 // ============================================================================
 // CARREGAR AGENDAMENTOS
 // ============================================================================
@@ -302,7 +315,7 @@ function updateScheduleOptions() {
 
   if (type === "backup") {
     targetLabel.textContent = "Diretório de Backup";
-    window.backupDirectories.forEach((dir) => {
+    getBackupDirs().forEach((dir) => {
       targetSelect.innerHTML += `<option value="${escapeHtml(
         dir.path
       )}">${escapeHtml(dir.label || dir.path)}</option>`;
@@ -310,14 +323,14 @@ function updateScheduleOptions() {
   } else if (type === "vm-backup") {
     targetLabel.textContent = "Máquina Virtual";
     targetSelect.innerHTML += '<option value="all">Todas as VMs</option>';
-    window.allVMs.forEach((vm) => {
+    getVMs().forEach((vm) => {
       targetSelect.innerHTML += `<option value="${escapeHtml(
         vm.name
       )}">${escapeHtml(vm.name)}</option>`;
     });
   } else if (type === "script") {
     targetLabel.textContent = "Script";
-    window.allScripts.forEach((script) => {
+    getScripts().forEach((script) => {
       targetSelect.innerHTML += `<option value="${escapeHtml(
         script.path
       )}">${escapeHtml(script.name)}</option>`;

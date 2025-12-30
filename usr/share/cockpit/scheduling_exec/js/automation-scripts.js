@@ -3,6 +3,15 @@
  * Funções de manipulação de scripts e cron
  */
 
+// Helpers para obter dados de forma segura
+function getScriptDirectories() {
+  return window.scriptDirectories || [];
+}
+
+function getAllScripts() {
+  return window.allScripts || [];
+}
+
 // ============================================================================
 // MODAIS - CRIAR/EDITAR SCRIPT
 // ============================================================================
@@ -46,7 +55,7 @@ function automationSaveScript() {
 
   // Se estiver editando, usar o caminho existente
   if (window.automationCurrentEditingScript) {
-    const script = window.allScripts.find(
+    const script = getAllScripts().find(
       (s) => s.name === window.automationCurrentEditingScript
     );
     if (script) {
@@ -59,10 +68,8 @@ function automationSaveScript() {
     }
   } else {
     // Se for novo, perguntar onde salvar
-    const defaultDir =
-      window.scriptDirectories.length > 0
-        ? window.scriptDirectories[0].path
-        : "~/scripts";
+    const dirs = getScriptDirectories();
+    const defaultDir = dirs.length > 0 ? dirs[0].path : "~/scripts";
     const dir = prompt(
       "Digite o diretório onde deseja salvar o script:",
       defaultDir
@@ -119,7 +126,7 @@ function automationSaveScript() {
 function automationEditScript(scriptName) {
   console.log("Automation: Editando script:", scriptName);
 
-  const script = window.allScripts.find((s) => s.name === scriptName);
+  const script = getAllScripts().find((s) => s.name === scriptName);
   if (!script) {
     console.error("Automation: Script não encontrado:", scriptName);
     automationShowError(
@@ -163,7 +170,7 @@ function automationEditScript(scriptName) {
 // ============================================================================
 
 function automationDeleteScript(scriptName) {
-  const script = window.allScripts.find((s) => s.name === scriptName);
+  const script = getAllScripts().find((s) => s.name === scriptName);
   if (!script) {
     console.error("Automation: Script não encontrado:", scriptName);
     automationShowError(
@@ -216,7 +223,7 @@ function automationExecuteScript(scriptName, sudoPassword = null) {
     sudoPassword ? "(com sudo)" : ""
   );
 
-  const script = window.allScripts.find((s) => s.name === scriptName);
+  const script = getAllScripts().find((s) => s.name === scriptName);
   if (!script) {
     console.error("Automation: Script não encontrado:", scriptName);
     automationShowError(
@@ -821,7 +828,7 @@ function automationSaveCron() {
   const cronExpression = `${minute} ${hour} ${day} ${month} ${weekday}`;
 
   // Buscar caminho completo do script
-  const script = window.allScripts.find((s) => s.name === scriptName);
+  const script = getAllScripts().find((s) => s.name === scriptName);
   const scriptPath = script ? script.path : scriptName;
 
   console.log(
@@ -870,7 +877,7 @@ function automationRemoveCron() {
   }
 
   // Buscar caminho completo do script
-  const script = window.allScripts.find((s) => s.name === scriptName);
+  const script = getAllScripts().find((s) => s.name === scriptName);
   const scriptPath = script ? script.path : scriptName;
 
   console.log("Automation: Removendo agendamentos de:", scriptName);
