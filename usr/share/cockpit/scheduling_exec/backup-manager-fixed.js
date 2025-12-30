@@ -1,9 +1,9 @@
-// ============================================================================
+﻿// ============================================================================
 // INÍCIO DO BACKUP-MANAGER.JS
 // ============================================================================
 console.log("🚀 BACKUP-MANAGER.JS: Carregando...");
 
-// Inicializar conexão com Cockpit
+// Inicializar conexÃ£o com Cockpit
 const cockpit = window.cockpit;
 
 // ============================================================================
@@ -13,7 +13,7 @@ console.log("🔧 BACKUP-MANAGER.JS: Definindo window.switchTab...");
 window.switchTab = function (tab) {
   console.log(`Backup Manager: Mudando para aba ${tab}`);
 
-  // Garantir que as abas estejam visíveis
+  // Garantir que as abas estejam visÃ­veis
   const tabsContainer = document.getElementById("backup-tabs");
   if (tabsContainer) {
     tabsContainer.style.display = "block";
@@ -21,7 +21,7 @@ window.switchTab = function (tab) {
     tabsContainer.style.opacity = "1";
   } else {
     console.error(
-      "Backup Manager: Elemento #backup-tabs não encontrado em switchTab!"
+      "Backup Manager: Elemento #backup-tabs nÃ£o encontrado em switchTab!"
     );
   }
 
@@ -35,10 +35,10 @@ window.switchTab = function (tab) {
     tabElement.parentElement.classList.add("pf-m-current");
     console.log(`Backup Manager: Aba ${tab} marcada como ativa`);
   } else {
-    console.error(`Backup Manager: Elemento #tab-${tab} não encontrado!`);
+    console.error(`Backup Manager: Elemento #tab-${tab} nÃ£o encontrado!`);
   }
 
-  // Atualizar conteúdo
+  // Atualizar conteÃºdo
   const backupsTab = document.getElementById("backups-tab-content");
   const configTab = document.getElementById("config-tab-content");
   const vmsTab = document.getElementById("vms-tab-content");
@@ -123,7 +123,7 @@ window.switchTab = function (tab) {
     }
   }
 
-  console.log(`Backup Manager: Conteúdo da aba ${tab} exibido`);
+  console.log(`Backup Manager: ConteÃºdo da aba ${tab} exibido`);
 
   // Adicionar log de mudança de aba
   if (window.addGlobalLog) {
@@ -165,7 +165,7 @@ let backupDirectories = [];
 let userHome = null;
 let configFile = null;
 
-// Exportar variáveis locais para window (apenas as declaradas neste arquivo)
+// Exportar variÃ¡veis locais para window (apenas as declaradas neste arquivo)
 function exportGlobals() {
   window.backupDirectories = backupDirectories;
   // window.currentDeleteTarget - exportado por js/backups.js
@@ -175,16 +175,16 @@ function exportGlobals() {
   // As outras variáveis são gerenciadas pelos respectivos módulos
 }
 
-// Inicialização
+// InicializaÃ§Ã£o
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("Backup Manager: Inicializando...");
 
-  // Exportar variáveis globais imediatamente
+  // Exportar variÃ¡veis globais imediatamente
   exportGlobals();
 
-  // Obter home do usuário usando getent ou whoami
+  // Obter home do usuÃ¡rio usando getent ou whoami
   try {
-    // Tentar obter usuário atual
+    // Tentar obter usuÃ¡rio atual
     const user = await cockpit.spawn(["whoami"], { err: "message" });
     const username = user.trim();
 
@@ -197,18 +197,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     userHome = homePath || `/home/${username}`;
     configFile = `${userHome}/.backup-manager/config.json`;
 
-    console.log("Backup Manager: Usuário:", username);
-    console.log("Backup Manager: Home do usuário:", userHome);
-    console.log("Backup Manager: Arquivo de configuração:", configFile);
+    console.log("Backup Manager: UsuÃ¡rio:", username);
+    console.log("Backup Manager: Home do usuÃ¡rio:", userHome);
+    console.log("Backup Manager: Arquivo de configuraÃ§Ã£o:", configFile);
   } catch (error) {
     console.error("Backup Manager: Erro ao obter home:", error);
-    // Fallback: usar /tmp para evitar problemas de permissão
+    // Fallback: usar /tmp para evitar problemas de permissÃ£o
     userHome = "/tmp";
     configFile = "/tmp/.backup-manager-config.json";
     console.log("Backup Manager: Usando /tmp como fallback");
   }
 
-  // Garantir que as abas estejam sempre visíveis
+  // Garantir que as abas estejam sempre visÃ­veis
   const tabsContainer = document.getElementById("backup-tabs");
   if (tabsContainer) {
     tabsContainer.style.display = "block";
@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     tabsContainer.style.opacity = "1";
     console.log("Backup Manager: Abas configuradas");
   } else {
-    console.error("Backup Manager: Elemento #backup-tabs não encontrado!");
+    console.error("Backup Manager: Elemento #backup-tabs nÃ£o encontrado!");
   }
 
   // Adicionar log de inicialização
@@ -224,15 +224,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.addGlobalLog("Sistema iniciado", "success");
   }
 
-  // Carregar configuração primeiro, depois os backups
+  // Carregar configuraÃ§Ã£o primeiro, depois os backups
   await loadConfiguration();
   await window.loadBackups();
   setupEventListeners();
 
-  // Garantir que a aba de backups esteja visível inicialmente
+  // Garantir que a aba de backups esteja visÃ­vel inicialmente
   window.switchTab("backups");
 
-  console.log("Backup Manager: Inicialização completa");
+  console.log("Backup Manager: InicializaÃ§Ã£o completa");
   if (window.addGlobalLog) {
     window.addGlobalLog("Inicialização completa", "success");
   }
@@ -246,7 +246,7 @@ async function loadConfiguration() {
   // Usar caminho do sistema
   const systemConfigFile = "/var/lib/cockpit/backup-manager/config.json";
 
-  console.log("Backup Manager: Carregando configuração de", systemConfigFile);
+  console.log("Backup Manager: Carregando configuraÃ§Ã£o de", systemConfigFile);
   try {
     const result = await cockpit.spawn(["cat", systemConfigFile], {
       err: "message",
@@ -263,16 +263,16 @@ async function loadConfiguration() {
       ...(config.vmBackupConfig || {}),
     };
 
-    // Atualizar referência global
+    // Atualizar referÃªncia global
     configFile = systemConfigFile;
 
-    // Exportar variáveis atualizadas para window
+    // Exportar variÃ¡veis atualizadas para window
     exportGlobals();
 
     console.log(
-      "Backup Manager: Configuração carregada com sucesso!",
+      "Backup Manager: ConfiguraÃ§Ã£o carregada com sucesso!",
       backupDirectories.length,
-      "diretório(s)"
+      "diretÃ³rio(s)"
     );
 
     if (window.addGlobalLog) {
@@ -289,12 +289,12 @@ async function loadConfiguration() {
     window.updateVMConfigForm();
   } catch (error) {
     console.log(
-      "Backup Manager: Arquivo de configuração não encontrado, criando novo..."
+      "Backup Manager: Arquivo de configuraÃ§Ã£o nÃ£o encontrado, criando novo..."
     );
-    // Se o arquivo não existir, criar configuração padrão
+    // Se o arquivo nÃ£o existir, criar configuraÃ§Ã£o padrÃ£o
     configFile = systemConfigFile;
     backupDirectories = [];
-    // Exportar variáveis para window
+    // Exportar variÃ¡veis para window
     exportGlobals();
     await saveConfiguration();
   }
@@ -311,37 +311,37 @@ async function saveConfiguration() {
   };
 
   console.log(
-    "Backup Manager: Salvando configuração...",
+    "Backup Manager: Salvando configuraÃ§Ã£o...",
     backupDirectories.length,
-    "diretório(s)"
+    "diretÃ³rio(s)"
   );
 
   try {
-    // Usar diretório do sistema acessível
+    // Usar diretÃ³rio do sistema acessÃ­vel
     const configDir = "/var/lib/cockpit/backup-manager";
     const targetFile = `${configDir}/config.json`;
 
-    console.log("Backup Manager: Diretório de configuração:", configDir);
+    console.log("Backup Manager: DiretÃ³rio de configuraÃ§Ã£o:", configDir);
 
-    // Criar diretório se não existir (com sudo)
+    // Criar diretÃ³rio se nÃ£o existir (com sudo)
     try {
       await cockpit.spawn(["test", "-d", configDir], { err: "ignore" });
-      console.log("Backup Manager: Diretório já existe");
+      console.log("Backup Manager: DiretÃ³rio jÃ¡ existe");
     } catch (e) {
       console.log(
-        "Backup Manager: Criando diretório (solicitando privilégios)..."
+        "Backup Manager: Criando diretÃ³rio (solicitando privilÃ©gios)..."
       );
       await cockpit.spawn(["mkdir", "-p", configDir], {
         err: "message",
         superuser: "require",
       });
-      console.log("Backup Manager: Diretório criado com sucesso");
+      console.log("Backup Manager: DiretÃ³rio criado com sucesso");
     }
 
     console.log("Backup Manager: Salvando arquivo em:", targetFile);
     const configJson = JSON.stringify(config, null, 2);
 
-    // Salvar com privilégios de root
+    // Salvar com privilÃ©gios de root
     const process = cockpit.spawn(["tee", targetFile], {
       err: "message",
       superuser: "require",
@@ -349,16 +349,16 @@ async function saveConfiguration() {
     process.input(configJson);
     await process;
 
-    // Garantir permissões corretas no arquivo
+    // Garantir permissÃµes corretas no arquivo
     await cockpit.spawn(["chmod", "644", targetFile], {
       err: "ignore",
       superuser: "require",
     });
 
-    console.log("Backup Manager: ✓ Configuração salva em", targetFile);
-    window.showAlert("success", "✅ Configuração salva com sucesso!");
+    console.log("Backup Manager: âœ“ ConfiguraÃ§Ã£o salva em", targetFile);
+    window.showAlert("success", "âœ… ConfiguraÃ§Ã£o salva com sucesso!");
 
-    // Atualizar referência global
+    // Atualizar referÃªncia global
     configFile = targetFile;
 
     // Verificar se foi salvo corretamente
@@ -367,17 +367,17 @@ async function saveConfiguration() {
       err: "message",
     });
     console.log(
-      "Backup Manager: ✓ Arquivo contém:",
+      "Backup Manager: âœ“ Arquivo contÃ©m:",
       verify.substring(0, 100) + "..."
     );
   } catch (error) {
-    console.error("Backup Manager: ✗ Erro ao salvar configuração:", error);
+    console.error("Backup Manager: âœ— Erro ao salvar configuraÃ§Ã£o:", error);
     const errorMsg =
       error?.message ||
       error?.toString() ||
       JSON.stringify(error) ||
       "Erro desconhecido";
-    window.showAlert("danger", `❌ Erro ao salvar configuração: ${errorMsg}`);
+    window.showAlert("danger", `âŒ Erro ao salvar configuraÃ§Ã£o: ${errorMsg}`);
     throw error; // Re-lanÃ§ar para debug
   }
 }
@@ -400,7 +400,7 @@ async function browseDirectory() {
   const pathInput = document.getElementById("directory-path");
   const currentPath = pathInput.value || userHome;
 
-  // Abrir modal de navegação de diretórios
+  // Abrir modal de navegaÃ§Ã£o de diretÃ³rios
   document.getElementById("directory-browser-modal").style.display = "block";
   await loadDirectoryContents(currentPath);
 }
@@ -419,7 +419,7 @@ async function loadDirectoryContents(path) {
     '<div style="text-align: center; padding: 2rem;">Carregando...</div>';
 
   try {
-    // Listar diretórios
+    // Listar diretÃ³rios
     const result = await cockpit.spawn(
       ["find", path, "-maxdepth", "1", "-type", "d"],
       { err: "message" }
@@ -433,7 +433,7 @@ async function loadDirectoryContents(path) {
 
     if (dirs.length === 0) {
       container.innerHTML =
-        '<div style="text-align: center; padding: 2rem; color: #999;">Nenhum subdiretório encontrado</div>';
+        '<div style="text-align: center; padding: 2rem; color: #999;">Nenhum subdiretÃ³rio encontrado</div>';
       return;
     }
 
@@ -445,7 +445,7 @@ async function loadDirectoryContents(path) {
             <div style="display: flex; align-items: center; flex: 1;" onclick="loadDirectoryContents('${escapeHtml(
               dir
             )}')">
-              <span style="font-size: 1.5rem; margin-right: 0.75rem;">📁</span>
+              <span style="font-size: 1.5rem; margin-right: 0.75rem;">ðŸ“</span>
               <span style="font-family: monospace;">${escapeHtml(name)}</span>
             </div>
             <button class="pf-c-button pf-m-primary pf-m-small" onclick="selectDirectory('${escapeHtml(
@@ -456,8 +456,8 @@ async function loadDirectoryContents(path) {
       })
       .join("");
   } catch (error) {
-    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #c9190b;">Erro ao listar diretórios: ${escapeHtml(
-      error?.message || "Caminho inválido"
+    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #c9190b;">Erro ao listar diretÃ³rios: ${escapeHtml(
+      error?.message || "Caminho invÃ¡lido"
     )}</div>`;
   }
 }
@@ -467,12 +467,12 @@ function selectDirectory(path) {
   if (window.scriptDirectoryCallback) {
     window.scriptDirectoryCallback(path);
     window.scriptDirectoryCallback = null; // Limpar o callback
-    window.showAlert("success", `✅ Diretório selecionado: ${path}`);
+    window.showAlert("success", `âœ… DiretÃ³rio selecionado: ${path}`);
   } else {
-    // Comportamento padrão (para backups)
+    // Comportamento padrÃ£o (para backups)
     document.getElementById("directory-path").value = path;
     closeDirectoryBrowser();
-    window.showAlert("success", `✅ Diretório selecionado: ${path}`);
+    window.showAlert("success", `âœ… DiretÃ³rio selecionado: ${path}`);
   }
 }
 
@@ -495,15 +495,15 @@ function navigateToRoot() {
 function showCommonDirectories() {
   const container = document.getElementById("directory-list");
   const commonDirs = [
-    { path: userHome, icon: "🏠", label: "Home" },
-    { path: "/var/backups", icon: "💾", label: "Sistema - /var/backups" },
-    { path: "/home", icon: "👥", label: "Usuários - /home" },
-    { path: "/tmp", icon: "📦", label: "Temporário - /tmp" },
-    { path: "/opt", icon: "📂", label: "Aplicações - /opt" },
-    { path: "/srv", icon: "🖥️", label: "Serviços - /srv" },
+    { path: userHome, icon: "ðŸ ", label: "Home" },
+    { path: "/var/backups", icon: "ðŸ’¾", label: "Sistema - /var/backups" },
+    { path: "/home", icon: "ðŸ‘¥", label: "UsuÃ¡rios - /home" },
+    { path: "/tmp", icon: "ðŸ“¦", label: "TemporÃ¡rio - /tmp" },
+    { path: "/opt", icon: "ðŸ“", label: "AplicaÃ§Ãµes - /opt" },
+    { path: "/srv", icon: "ðŸ–¥ï¸", label: "ServiÃ§os - /srv" },
   ];
 
-  document.getElementById("current-path").textContent = "Diretórios Comuns";
+  document.getElementById("current-path").textContent = "DiretÃ³rios Comuns";
   container.innerHTML = commonDirs
     .map(
       (dir) => `
@@ -532,25 +532,25 @@ async function addDirectory() {
   const maxDepth = document.getElementById("max-depth").value.trim() || "10";
 
   if (!path) {
-    window.showAlert("warning", "Por favor, informe o caminho do diretório.");
+    window.showAlert("warning", "Por favor, informe o caminho do diretÃ³rio.");
     return;
   }
 
-  // Verificar se o diretório existe
+  // Verificar se o diretÃ³rio existe
   try {
     await cockpit.spawn(["test", "-d", path]);
   } catch (error) {
-    window.showAlert("danger", `Diretório não encontrado: ${path}`);
+    window.showAlert("danger", `DiretÃ³rio nÃ£o encontrado: ${path}`);
     return;
   }
 
-  // Verificar se já existe
+  // Verificar se jÃ¡ existe
   if (backupDirectories.some((d) => d.path === path)) {
-    window.showAlert("warning", "Este diretório já está na lista.");
+    window.showAlert("warning", "Este diretÃ³rio jÃ¡ estÃ¡ na lista.");
     return;
   }
 
-  // Adicionar diretório
+  // Adicionar diretÃ³rio
   backupDirectories.push({
     id: Date.now().toString(),
     path: path,
@@ -589,7 +589,7 @@ function updateDirectoriesList() {
     container.innerHTML = `
       <div class="empty-state" style="padding: var(--pf-global--spacer--lg);">
         <p style="color: var(--pf-global--Color--200); text-align: center;">
-          Nenhum diretório configurado ainda.
+          Nenhum diretÃ³rio configurado ainda.
         </p>
       </div>
     `;
@@ -601,12 +601,12 @@ function updateDirectoriesList() {
       (dir) => `
     <div class="directory-item">
       <div style="display: flex; align-items: center; flex: 1;">
-        <span class="directory-icon">📁</span>
+        <span class="directory-icon">ðŸ“</span>
         <div>
           <div style="font-weight: bold;">${escapeHtml(dir.label)}</div>
           <div class="directory-path">${escapeHtml(dir.path)}</div>
           <small style="color: var(--pf-global--Color--200);">
-            Padrão: ${escapeHtml(dir.pattern)} |
+            PadrÃ£o: ${escapeHtml(dir.pattern)} |
             Profundidade: ${dir.maxDepth || 1} |
             Adicionado em: ${formatDate(dir.addedAt)}
           </small>
@@ -628,7 +628,7 @@ function updateDirectoryFilter() {
   const currentValue = select.value;
 
   select.innerHTML =
-    '<option value="">Todos os diretórios</option>' +
+    '<option value="">Todos os diretÃ³rios</option>' +
     backupDirectories
       .map(
         (dir) =>
@@ -668,13 +668,13 @@ function updateEmailForm() {
 
 async function testEmailConfiguration() {
   try {
-    window.showAlert("info", "📧 Testando configuração de email...", 0);
+    window.showAlert("info", "ðŸ”§ Testando configuraÃ§Ã£o de email...", 0);
 
     const script =
       "/usr/share/cockpit/scheduling_exec/scripts/backup/test-email.sh";
     const recipient = document.getElementById("email-recipient").value.trim();
 
-    console.log("Testando configuração de email...");
+    console.log("Testando configuraÃ§Ã£o de email...");
 
     const result = await cockpit.spawn([script, recipient || ""], {
       err: "message",
@@ -707,16 +707,16 @@ async function testEmailConfiguration() {
     } else {
       window.showAlert(
         "success",
-        `✅ Configuração OK!\n${successMessage}`,
+        `âœ… ConfiguraÃ§Ã£o OK!\n${successMessage}`,
         10000
       );
     }
   } catch (error) {
-    console.error("Erro ao testar configuração:", error);
+    console.error("Erro ao testar configuraÃ§Ã£o:", error);
     const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
     window.showAlert(
       "danger",
-      `❌ Erro ao testar configuração: ${errorMsg}`,
+      `âŒ Erro ao testar configuraÃ§Ã£o: ${errorMsg}`,
       10000
     );
   }
