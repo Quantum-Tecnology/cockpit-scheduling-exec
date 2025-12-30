@@ -2,7 +2,7 @@
   "version": 1,
   "name": "scheduling_exec",
   "label": "Gerenciador de Backups",
-  "x-plugin-version": "1.5.0",
+  "x-plugin-version": "1.6.30",
   "x-author": "Luis Gustavo Santarosa Pinto",
   "description": "Gerenciador de Backups, VMs e Automação de Scripts",
   "menu": {

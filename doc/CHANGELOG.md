@@ -5,6 +5,38 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.6.30] - 2025-12-30
+
+### 🐛 Correções
+
+#### Correção de Codificação UTF-8
+- **Problema**: Caracteres corrompidos em emojis e acentuação portuguesa no arquivo `backup-manager.js`
+  - Emojis exibidos como: `ðŸ"`, `ðŸ `, `ðŸ'¾`, etc.
+  - Acentos corrompidos: `Ã§`, `Ã£`, `Ã³`, etc.
+- **Solução**: Correção completa de ~75 ocorrências de caracteres corrompidos
+  - ✅ Emojis: 📁, 🏠, 💾, 👥, 📦, 📂, 🖥️, 📧, ✅, ❌, ⚠️, ✓, ✗
+  - ✅ Acentuação: ç, ã, ó, õ, á, í, é, ê, à
+  - ✅ Palavras corrigidas: configuração, diretório, não, usuário, execução, permissões, etc.
+
+#### Correção na Tabela de Automação
+- **Problema**: Colunas "Próxima Execução", "Última Execução", "Execuções" e "Sucessos" não exibiam valores
+  - Propriedades `undefined` ou `null` não tratadas adequadamente
+  - Mensagens de status não claras
+- **Solução**: 
+  - ✅ Adicionados valores default (0 para contadores, null para datas)
+  - ✅ Função `automationFormatDate()` melhorada: exibe "Nunca executado" em vez de "-"
+  - ✅ Função `automationGetNextCronExecution()` melhorada: exibe "Não agendado" ou badge com expressão cron
+  - ✅ Variáveis locais com fallback para garantir valores válidos nas células
+
+### 📦 Versões Atualizadas
+- `manifest.json`: 1.5.0 → 1.6.30
+- `DEBIAN/control`: 1.2.10 → 1.6.30
+- `README.md`: 1.3.3 → 1.6.30
+- `index.js`: fallbackVersion 1.5.0 → 1.6.30
+- `backup-manager.js`: version 1.0.0 → 1.6.30
+
+---
+
 ## [1.6.0] - 2025-01-15
 
 ### 🏗️ Refatoração - Modularização do JavaScript

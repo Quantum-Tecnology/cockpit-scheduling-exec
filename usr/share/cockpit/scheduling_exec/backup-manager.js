@@ -306,7 +306,7 @@ async function saveConfiguration() {
     scriptDirectories: window.scriptDirectories || [],
     email: window.emailConfig || {},
     vmBackupConfig: window.vmBackupConfig || {},
-    version: "1.0.0",
+    version: "1.6.30",
     lastUpdated: new Date().toISOString(),
   };
 
