@@ -361,7 +361,7 @@ async function addScriptDirectory() {
     maxDepth: maxDepth,
   });
 
-  await saveConfiguration();
+  await window.saveConfiguration();
   automationRenderScriptDirectoriesList();
   closeAddScriptDirectoryModal();
 
@@ -390,7 +390,7 @@ async function automationRemoveScriptDirectory(index) {
   scriptDirectories.splice(index, 1);
 
   try {
-    await saveConfiguration();
+    await window.saveConfiguration();
     automationRenderScriptDirectoriesList();
     window.addGlobalLog(`🗑️ Diretório removido: ${dir.path}`);
     showAlert("success", "✅ Diretório removido! Recarregando scripts...");

@@ -99,17 +99,19 @@ window.switchTab = function (tab) {
       `automation-tab-content display: ${automationTab.style.display}`
     );
     if (tab === "automation") {
+      // Renderizar lista de diretórios de scripts sempre que entrar na aba
+      if (typeof window.automationRenderScriptDirectoriesList === "function") {
+        window.automationRenderScriptDirectoriesList();
+      }
+
+      // Carregar scripts se ainda não foram carregados
       const allScriptsLocal = window.allScripts || [];
-      if (allScriptsLocal.length === 0) {
-        const scriptsLoaded = sessionStorage.getItem("scripts-loaded");
-        if (
-          !scriptsLoaded &&
-          typeof window.automationLoadScripts === "function"
-        ) {
-          console.log("Backup Manager: Carregando scripts automaticamente...");
-          setTimeout(() => window.automationLoadScripts(), 500);
-          sessionStorage.setItem("scripts-loaded", "true");
-        }
+      if (
+        allScriptsLocal.length === 0 &&
+        typeof window.automationLoadScripts === "function"
+      ) {
+        console.log("Backup Manager: Carregando scripts automaticamente...");
+        setTimeout(() => window.automationLoadScripts(), 500);
       }
     }
   }
