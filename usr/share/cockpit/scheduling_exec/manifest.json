@@ -14,7 +14,7 @@
     "backup-manager": {
       "label": "Gerenciador de Backups",
       "order": 51,
-      "path": "backup-manager.html"
+      "path": "backup-manager-modular.html"
     }
   },
   "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://unpkg.com; font-src 'self' data: https://unpkg.com; img-src 'self' data:; connect-src 'self'"
