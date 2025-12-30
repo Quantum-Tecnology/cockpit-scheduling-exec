@@ -71,94 +71,6 @@ async function automationExecuteScript(scriptName) {
 }
 
 // ============================================================================
-// MODAL SUDO
-// ============================================================================
-
-function automationOpenSudoModal(scriptName) {
-  console.log(`Automation: Abrindo modal sudo para ${scriptName}`);
-  automationCurrentSudoScript = scriptName;
-
-  const modal = document.getElementById("sudo-modal");
-  if (modal) {
-    document.getElementById("sudo-password").value = "";
-    modal.style.display = "block";
-  }
-}
-
-function automationCloseSudoModal() {
-  const modal = document.getElementById("sudo-modal");
-  if (modal) {
-    modal.style.display = "none";
-    document.getElementById("sudo-password").value = "";
-  }
-  automationCurrentSudoScript = null;
-}
-
-async function automationExecuteWithSudo() {
-  const password = document.getElementById("sudo-password").value;
-
-  if (!password) {
-    showAlert("warning", "⚠️ Por favor, informe a senha!");
-    return;
-  }
-
-  if (!automationCurrentSudoScript) {
-    showAlert("danger", "❌ Script não especificado!");
-    automationCloseSudoModal();
-    return;
-  }
-
-  const script = window.allScripts.find(
-    (s) => s.name === automationCurrentSudoScript
-  );
-  if (!script) {
-    showAlert(
-      "danger",
-      `❌ Script "${automationCurrentSudoScript}" não encontrado!`
-    );
-    automationCloseSudoModal();
-    return;
-  }
-
-  try {
-    showAlert(
-      "info",
-      `⏳ Executando "${automationCurrentSudoScript}" com privilégios...`
-    );
-    automationCloseSudoModal();
-
-    // Executar com sudo usando password via stdin
-    const result = await cockpit
-      .spawn(["sudo", "-S", "bash", script.path], {
-        err: "message",
-      })
-      .input(password + "\n");
-
-    console.log(`Automation: Script executado com sudo:`, result);
-    showAlert(
-      "success",
-      `✅ Script "${automationCurrentSudoScript}" executado com sucesso!`
-    );
-
-    script.total_executions = (script.total_executions || 0) + 1;
-    script.successful_executions = (script.successful_executions || 0) + 1;
-    script.last_execution = Math.floor(Date.now() / 1000);
-
-    automationRenderScripts(allScripts);
-    automationUpdateStatCards(allScripts);
-  } catch (error) {
-    console.error(`Automation: Erro ao executar com sudo:`, error);
-    showAlert("danger", `❌ Erro: ${automationFormatCockpitError(error)}`);
-
-    script.total_executions = (script.total_executions || 0) + 1;
-    script.last_execution = Math.floor(Date.now() / 1000);
-
-    automationRenderScripts(allScripts);
-    automationUpdateStatCards(allScripts);
-  }
-}
-
-// ============================================================================
 // VARIÁVEIS DE AMBIENTE (SCRIPT)
 // ============================================================================
 
@@ -442,10 +354,6 @@ async function automationDeleteScript(scriptName) {
 // ============================================================================
 
 window.automationOpenCreateModal = automationOpenCreateModal;
-window.automationExecuteScript = automationExecuteScript;
-window.automationOpenSudoModal = automationOpenSudoModal;
-window.automationCloseSudoModal = automationCloseSudoModal;
-window.automationExecuteWithSudo = automationExecuteWithSudo;
 window.automationOpenScriptEnvModal = automationOpenScriptEnvModal;
 window.automationCloseScriptEnvModal = automationCloseScriptEnvModal;
 window.automationSaveScriptEnv = automationSaveScriptEnv;
