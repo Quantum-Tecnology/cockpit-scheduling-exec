@@ -104,7 +104,7 @@ async function discoverVMs() {
     emptyState.style.display = "none";
     discoverBtn.disabled = true;
 
-    addVMLog("🔍 Procurando VMs no sistema...");
+    window.addGlobalLog("🔍 Procurando VMs no sistema...");
 
     try {
       await cockpit.spawn(["which", "virsh"], { err: "ignore" });
@@ -125,7 +125,7 @@ async function discoverVMs() {
     allVMs = JSON.parse(result);
 
     console.log("VM Backup: VMs descobertas:", allVMs.length);
-    addVMLog(`✅ ${allVMs.length} VM(s) encontrada(s)`);
+    window.addGlobalLog(`✅ ${allVMs.length} VM(s) encontrada(s)`);
 
     renderVMTable();
 
@@ -149,7 +149,7 @@ async function discoverVMs() {
     console.error("VM Backup: Erro ao descobrir VMs:", error);
     const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
     showAlert("danger", `Erro ao descobrir VMs: ${errorMsg}`);
-    addVMLog(`❌ Erro: ${errorMsg}`);
+    window.addGlobalLog(`❌ Erro: ${errorMsg}`);
 
     emptyState.innerHTML = `
       <div style="font-size: 4rem; margin-bottom: var(--pf-global--spacer--md); opacity: 0.5;">❌</div>
@@ -178,9 +178,9 @@ async function diagnoseVMs() {
   try {
     diagnoseBtn.disabled = true;
     showAlert("info", "🩺 Executando diagnóstico...", 0);
-    addVMLog("========================================");
-    addVMLog("🩺 INICIANDO DIAGNÓSTICO");
-    addVMLog("========================================");
+    window.addGlobalLog("========================================");
+    window.addGlobalLog("🩺 INICIANDO DIAGNÓSTICO");
+    window.addGlobalLog("========================================");
 
     const scriptPath = `${VM_SCRIPTS_DIR}/diagnose-vms.sh`;
 
@@ -192,20 +192,20 @@ async function diagnoseVMs() {
     const lines = result.split("\n");
     lines.forEach((line) => {
       if (line.trim()) {
-        addVMLog(line);
+        window.addGlobalLog(line);
       }
     });
 
-    addVMLog("========================================");
-    addVMLog("✅ DIAGNÓSTICO CONCLUÍDO");
-    addVMLog("========================================");
+    window.addGlobalLog("========================================");
+    window.addGlobalLog("✅ DIAGNÓSTICO CONCLUÍDO");
+    window.addGlobalLog("========================================");
 
     showAlert("success", "✅ Diagnóstico concluído! Veja o log abaixo.");
   } catch (error) {
     console.error("VM Backup: Erro no diagnóstico:", error);
     const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
     showAlert("danger", `❌ Erro no diagnóstico: ${errorMsg}`);
-    addVMLog(`❌ ERRO: ${errorMsg}`);
+    window.addGlobalLog(`❌ ERRO: ${errorMsg}`);
   } finally {
     diagnoseBtn.disabled = false;
   }
@@ -358,17 +358,17 @@ async function backupSelectedVMs() {
 
   try {
     clearVMLog();
-    addVMLog("========================================");
-    addVMLog("🚀 INICIANDO BACKUP DE VMs");
-    addVMLog("========================================");
-    addVMLog(`VMs selecionadas: ${selectedVMs.size}`);
-    addVMLog(`Destino: ${vmBackupConfig.destDir}`);
-    addVMLog(`Retenção: ${vmBackupConfig.retentionDays} dias`);
-    addVMLog(
+    window.addGlobalLog("========================================");
+    window.addGlobalLog("🚀 INICIANDO BACKUP DE VMs");
+    window.addGlobalLog("========================================");
+    window.addGlobalLog(`VMs selecionadas: ${selectedVMs.size}`);
+    window.addGlobalLog(`Destino: ${vmBackupConfig.destDir}`);
+    window.addGlobalLog(`Retenção: ${vmBackupConfig.retentionDays} dias`);
+    window.addGlobalLog(
       `Verificar checksum: ${vmBackupConfig.verifyChecksum ? "Sim" : "Não"}`
     );
-    addVMLog("========================================");
-    addVMLog("");
+    window.addGlobalLog("========================================");
+    window.addGlobalLog("");
 
     const selectedVMsList = Array.from(selectedVMs).join(",");
     const scriptPath = `${VM_SCRIPTS_DIR}/backup-all-vms.sh`;
@@ -392,7 +392,7 @@ async function backupSelectedVMs() {
       const lines = data.split("\n");
       lines.forEach((line) => {
         if (line.trim()) {
-          addVMLog(line);
+          window.addGlobalLog(line);
         }
       });
     });
@@ -407,17 +407,21 @@ async function backupSelectedVMs() {
     try {
       const summary = JSON.parse(jsonLine);
 
-      addVMLog("");
-      addVMLog("========================================");
-      addVMLog("✅ BACKUP CONCLUÍDO");
-      addVMLog("========================================");
-      addVMLog(`Total de VMs: ${summary.summary.total_vms}`);
-      addVMLog(`Sucesso: ${summary.summary.success_count}`);
-      addVMLog(`Falhas: ${summary.summary.failed_count}`);
-      addVMLog(`Tamanho total: ${formatSize(summary.summary.total_size)}`);
-      addVMLog(`Tempo total: ${summary.summary.total_duration}s`);
-      addVMLog(`Arquivos antigos removidos: ${summary.summary.deleted_count}`);
-      addVMLog("========================================");
+      window.addGlobalLog("");
+      window.addGlobalLog("========================================");
+      window.addGlobalLog("✅ BACKUP CONCLUÍDO");
+      window.addGlobalLog("========================================");
+      window.addGlobalLog(`Total de VMs: ${summary.summary.total_vms}`);
+      window.addGlobalLog(`Sucesso: ${summary.summary.success_count}`);
+      window.addGlobalLog(`Falhas: ${summary.summary.failed_count}`);
+      window.addGlobalLog(
+        `Tamanho total: ${formatSize(summary.summary.total_size)}`
+      );
+      window.addGlobalLog(`Tempo total: ${summary.summary.total_duration}s`);
+      window.addGlobalLog(
+        `Arquivos antigos removidos: ${summary.summary.deleted_count}`
+      );
+      window.addGlobalLog("========================================");
 
       if (summary.summary.failed_count === 0) {
         showAlert(
@@ -432,18 +436,18 @@ async function backupSelectedVMs() {
       }
     } catch (e) {
       console.warn("VM Backup: Não foi possível parsear JSON do resultado:", e);
-      addVMLog("");
-      addVMLog("✅ Backup concluído");
+      window.addGlobalLog("");
+      window.addGlobalLog("✅ Backup concluído");
       showAlert("success", "✅ Backup de VMs concluído!");
     }
   } catch (error) {
     console.error("VM Backup: Erro durante backup:", error);
     const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
-    addVMLog("");
-    addVMLog("========================================");
-    addVMLog("❌ ERRO NO BACKUP");
-    addVMLog("========================================");
-    addVMLog(errorMsg);
+    window.addGlobalLog("");
+    window.addGlobalLog("========================================");
+    window.addGlobalLog("❌ ERRO NO BACKUP");
+    window.addGlobalLog("========================================");
+    window.addGlobalLog(errorMsg);
     showAlert("danger", `Erro ao fazer backup: ${errorMsg}`);
   } finally {
     backupBtn.disabled = false;
@@ -472,7 +476,7 @@ async function cleanOldVMBackups() {
   }
 
   try {
-    addVMLog("🗑️ Procurando backups antigos...");
+    window.addGlobalLog("🗑️ Procurando backups antigos...");
 
     const result = await cockpit.spawn(
       [
@@ -491,7 +495,9 @@ async function cleanOldVMBackups() {
     const deletedCount = parseInt(fileCount) || 0;
 
     if (deletedCount === 0) {
-      addVMLog(`ℹ️ Nenhum backup encontrado com mais de ${days} dias`);
+      window.addGlobalLog(
+        `ℹ️ Nenhum backup encontrado com mais de ${days} dias`
+      );
       showAlert("info", `Não há backups de VMs com mais de ${days} dias.`);
       return;
     }
@@ -508,13 +514,13 @@ async function cleanOldVMBackups() {
       }
     );
 
-    addVMLog(
+    window.addGlobalLog(
       `✅ ${deletedCount} arquivo(s) removido(s) (${formatSize(deletedSize)})`
     );
     showAlert("success", `✅ ${deletedCount} backup(s) antigo(s) removido(s)`);
   } catch (error) {
     const errorMsg = error?.message || error?.toString() || "Erro desconhecido";
-    addVMLog(`❌ Erro: ${errorMsg}`);
+    window.addGlobalLog(`❌ Erro: ${errorMsg}`);
     showAlert("danger", `Erro ao limpar backups: ${errorMsg}`);
   }
 }
@@ -546,28 +552,10 @@ function updateVMConfigForm() {
 }
 
 // ============================================================================
-// LOG
+// LOG - Usando o log global do sistema
 // ============================================================================
-
-function addVMLog(message) {
-  const logContainer = document.getElementById("vm-log-container");
-  const timestamp = new Date().toLocaleTimeString("pt-BR");
-  const line = `[${timestamp}] ${message}\n`;
-
-  if (logContainer.textContent === "Aguardando ação...") {
-    logContainer.textContent = "";
-  }
-
-  logContainer.textContent += line;
-  logContainer.scrollTop = logContainer.scrollHeight;
-
-  console.log("VM Backup:", message);
-}
-
-function clearVMLog() {
-  const logContainer = document.getElementById("vm-log-container");
-  logContainer.textContent = "Aguardando ação...";
-}
+// NOTA: Todas as chamadas addVMLog foram substituídas por window.addGlobalLog
+// para usar o sistema de log global unificado
 
 // ============================================================================
 // EXPORTAR PARA USO GLOBAL
@@ -587,5 +575,4 @@ window.backupSelectedVMs = backupSelectedVMs;
 window.cleanOldVMBackups = cleanOldVMBackups;
 window.updateVMBackupConfig = updateVMBackupConfig;
 window.updateVMConfigForm = updateVMConfigForm;
-window.addVMLog = addVMLog;
-window.clearVMLog = clearVMLog;
+// addVMLog e clearVMLog removidos - usando window.addGlobalLog

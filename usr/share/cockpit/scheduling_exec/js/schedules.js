@@ -90,7 +90,7 @@ async function loadSchedules() {
       renderSchedulesTable();
       updateSchedulesStats();
     } else {
-      showAlert("danger", "Erro ao carregar agendamentos: " + error);
+      window.showAlert("danger", "Erro ao carregar agendamentos: " + error);
     }
   }
 }
@@ -350,7 +350,7 @@ async function saveSchedule() {
   const enabled = document.getElementById("schedule-enabled").checked;
 
   if (!type || !cronExpression) {
-    showAlert("warning", "⚠️ Preencha todos os campos obrigatórios");
+    window.showAlert("warning", "⚠️ Preencha todos os campos obrigatórios");
     return;
   }
 
@@ -402,12 +402,12 @@ async function saveSchedule() {
       .spawn(["crontab", "-"], { superuser: "require" })
       .input(newCrontab);
 
-    showAlert("success", "✅ Agendamento salvo com sucesso!");
+    window.showAlert("success", "✅ Agendamento salvo com sucesso!");
     closeScheduleModal();
     await loadSchedules();
   } catch (error) {
     console.error("Schedules: Erro ao salvar agendamento:", error);
-    showAlert("danger", "Erro ao salvar agendamento: " + error);
+    window.showAlert("danger", "Erro ao salvar agendamento: " + error);
   }
 }
 
@@ -450,11 +450,11 @@ async function deleteSchedule(scheduleId) {
       .spawn(["crontab", "-"], { superuser: "require" })
       .input(newCrontab);
 
-    showAlert("success", "✅ Agendamento excluído com sucesso!");
+    window.showAlert("success", "✅ Agendamento excluído com sucesso!");
     await loadSchedules();
   } catch (error) {
     console.error("Schedules: Erro ao excluir agendamento:", error);
-    showAlert("danger", "Erro ao excluir agendamento: " + error);
+    window.showAlert("danger", "Erro ao excluir agendamento: " + error);
   }
 }
 

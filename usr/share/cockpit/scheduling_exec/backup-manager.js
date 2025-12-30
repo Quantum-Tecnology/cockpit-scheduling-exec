@@ -872,6 +872,17 @@ window.toggleGlobalLog = function () {
   // Salvar preferência
   const isCollapsed = logColumn.classList.contains("collapsed");
   localStorage.setItem("globalLogCollapsed", isCollapsed);
+
+  // Remover estilo inline de largura quando colapsar para não interferir com CSS
+  if (isCollapsed) {
+    logColumn.style.width = "";
+  } else {
+    // Restaurar largura salva ao expandir
+    const savedWidth = localStorage.getItem("globalLogWidth");
+    if (savedWidth) {
+      logColumn.style.width = savedWidth + "px";
+    }
+  }
 };
 
 // Restaurar estado do log ao carregar
