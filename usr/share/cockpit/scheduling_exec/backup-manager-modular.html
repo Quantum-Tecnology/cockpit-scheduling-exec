@@ -24,8 +24,18 @@
     <!-- Template Loader -->
     <script src="js/template-loader.js"></script>
 
-    <!-- Main JS -->
-    <script src="backup-manager.js" defer></script>
+    <!-- Módulos JavaScript -->
+    <script src="js/utils.js" defer></script>
+    <script src="js/directory-browser.js" defer></script>
+    <script src="js/email.js" defer></script>
+    <script src="js/backups.js" defer></script>
+    <script src="js/vm-backup.js" defer></script>
+    <script src="js/automation.js" defer></script>
+    <script src="js/automation-scripts.js" defer></script>
+    <script src="js/schedules.js" defer></script>
+
+    <!-- Core do Backup Manager (sem defer para garantir que switchTab esteja disponível) -->
+    <script src="backup-manager.js"></script>
   </head>
 
   <body>
@@ -113,8 +123,66 @@
           </div>
 
           <!-- Container para templates das abas -->
-          <div id="tab-content-container" class="pf-l-grid__item pf-m-12-col">
-            <!-- Templates são carregados dinamicamente aqui -->
+          <div class="pf-l-grid__item pf-m-12-col">
+            <!-- Botão para toggle do log -->
+            <button
+              id="log-toggle-btn"
+              class="pf-c-button pf-m-secondary log-toggle-btn"
+              onclick="toggleGlobalLog()"
+              title="Mostrar/Ocultar Log"
+            >
+              📋
+            </button>
+
+            <!-- Layout de 2 colunas: Conteúdo Principal + Log Global -->
+            <div class="two-column-layout">
+              <!-- Coluna Principal: Conteúdo das Tabs -->
+              <div class="main-content-column">
+                <div id="tab-content-container">
+                  <!-- Templates das abas são carregados dinamicamente aqui -->
+                </div>
+              </div>
+
+              <!-- Redimensionador -->
+              <div class="resize-handle" id="resize-handle"></div>
+
+              <!-- Coluna do Log Global -->
+              <div class="log-column" id="log-column">
+                <div class="global-log-container">
+                  <div class="global-log-header">
+                    <h3>📋 Log de Atividades</h3>
+                    <div class="global-log-actions">
+                      <button
+                        class="pf-c-button pf-m-plain"
+                        onclick="clearGlobalLog()"
+                        title="Limpar Log"
+                      >
+                        🗑️
+                      </button>
+                      <button
+                        class="pf-c-button pf-m-plain"
+                        onclick="downloadGlobalLog()"
+                        title="Baixar Log"
+                      >
+                        💾
+                      </button>
+                      <button
+                        class="pf-c-button pf-m-plain"
+                        onclick="toggleGlobalLog()"
+                        title="Ocultar Log"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <div class="global-log-body" id="global-log-body">
+                    <div class="log-entry info">
+                      [${new Date().toLocaleTimeString()}] Sistema iniciado
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -133,7 +201,12 @@
     <script>
       // Inicialização: carrega templates ao iniciar
       document.addEventListener("DOMContentLoaded", async () => {
+        console.log(
+          "DOMContentLoaded - Iniciando carregamento de templates..."
+        );
+
         // Carregar templates das abas
+        console.log("Carregando templates de abas...");
         await TemplateLoader.loadMultiple([
           {
             name: "tab-backups",
@@ -162,7 +235,17 @@
           },
         ]);
 
+        console.log("Templates de abas carregados!");
+        console.log("Verificando elementos:", {
+          backups: !!document.getElementById("backups-tab-content"),
+          config: !!document.getElementById("config-tab-content"),
+          vms: !!document.getElementById("vms-tab-content"),
+          automation: !!document.getElementById("automation-tab-content"),
+          schedules: !!document.getElementById("schedules-tab-content"),
+        });
+
         // Carregar modais
+        console.log("Carregando modais...");
         await TemplateLoader.loadMultiple([
           {
             name: "modals/modal-add-directory",
@@ -201,10 +284,23 @@
           },
         ]);
 
+        console.log("Modais carregados!");
+
+        // Exibir aba inicial (backups)
+        console.log("Chamando switchTab('backups')...");
+        if (typeof switchTab === "function") {
+          switchTab("backups");
+        }
+
         // Inicializar a aplicação após carregar templates
         if (typeof init === "function") {
+          console.log("Chamando init()...");
           init();
+        } else {
+          console.warn("Função init() não encontrada!");
         }
+
+        console.log("Inicialização completa!");
       });
     </script>
   </body>

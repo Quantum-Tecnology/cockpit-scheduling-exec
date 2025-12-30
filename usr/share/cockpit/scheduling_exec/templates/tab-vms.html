@@ -1,0 +1,199 @@
+<div id="vms-tab-content" class="tab-content" style="display: none">
+  <div class="pf-l-grid pf-m-gutter">
+    <!-- Descobrir VMs -->
+    <div class="pf-l-grid__item pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">🔍 Descoberta de VMs</h2>
+          </div>
+          <div class="pf-c-card__header-actions">
+            <button
+              class="pf-c-button pf-m-primary"
+              id="discover-vms-btn"
+              onclick="discoverVMs()"
+            >
+              🔍 Descobrir VMs
+            </button>
+            <button
+              class="pf-c-button pf-m-secondary"
+              id="diagnose-vms-btn"
+              onclick="diagnoseVMs()"
+              style="margin-left: 10px"
+            >
+              🩺 Diagnóstico
+            </button>
+          </div>
+        </div>
+        <div class="pf-c-card__body">
+          <div
+            id="vm-discovery-loading"
+            style="
+              display: none;
+              text-align: center;
+              padding: var(--pf-global--spacer--lg);
+            "
+          >
+            <div
+              class="loading-spinner"
+              style="
+                width: 2rem;
+                height: 2rem;
+                margin: 0 auto var(--pf-global--spacer--md);
+              "
+            ></div>
+            <p>Descobrindo VMs e discos...</p>
+          </div>
+
+          <div id="vm-table-container" style="display: none">
+            <p
+              style="
+                color: var(--pf-global--Color--200);
+                margin-bottom: var(--pf-global--spacer--md);
+              "
+            >
+              Selecione as VMs que deseja fazer backup. O sistema irá fazer
+              backup de todos os discos de cada VM selecionada.
+            </p>
+
+            <div class="backup-table-wrapper">
+              <table class="pf-c-table pf-m-grid-md" role="grid" id="vms-table">
+                <thead>
+                  <tr>
+                    <th role="columnheader" style="width: 50px">
+                      <input
+                        type="checkbox"
+                        class="custom-checkbox"
+                        id="select-all-vms-checkbox"
+                        onchange="toggleSelectAllVMs(this)"
+                      />
+                    </th>
+                    <th role="columnheader">💿 Nome da VM</th>
+                    <th role="columnheader">📊 Status</th>
+                    <th role="columnheader">💾 Discos</th>
+                    <th role="columnheader">📦 Tamanho Total</th>
+                    <th role="columnheader">📁 Caminhos</th>
+                  </tr>
+                </thead>
+                <tbody id="vms-table-body">
+                  <!-- Será preenchido dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div
+            id="vm-empty-state"
+            style="text-align: center; padding: var(--pf-global--spacer--2xl)"
+          >
+            <div
+              style="
+                font-size: 4rem;
+                margin-bottom: var(--pf-global--spacer--md);
+                opacity: 0.5;
+              "
+            >
+              💿
+            </div>
+            <h3>Clique em "Descobrir VMs" para começar</h3>
+            <p style="color: var(--pf-global--Color--200)">
+              O sistema irá procurar por VMs e seus discos automaticamente.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações de Backup de VMs -->
+    <div class="pf-l-grid__item pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">🚀 Ações</h2>
+          </div>
+        </div>
+        <div class="pf-c-card__body">
+          <button
+            class="pf-c-button pf-m-primary pf-m-block"
+            id="backup-selected-vms-btn"
+            onclick="backupSelectedVMs()"
+            disabled
+            style="margin-bottom: var(--pf-global--spacer--md)"
+          >
+            📦 Fazer Backup das VMs Selecionadas
+          </button>
+
+          <button
+            class="pf-c-button pf-m-secondary pf-m-block"
+            onclick="cleanOldVMBackups()"
+            style="margin-bottom: var(--pf-global--spacer--md)"
+          >
+            🗑️ Limpar Backups Antigos
+          </button>
+
+          <div
+            style="
+              padding: var(--pf-global--spacer--md);
+              background-color: var(--pf-global--BackgroundColor--light-200);
+              border-radius: var(--pf-global--BorderRadius--sm);
+              margin-top: var(--pf-global--spacer--md);
+            "
+          >
+            <h4 style="margin: 0 0 var(--pf-global--spacer--sm) 0">
+              📊 Estatísticas
+            </h4>
+            <div style="display: grid; gap: var(--pf-global--spacer--xs)">
+              <div>
+                <strong>VMs Detectadas:</strong>
+                <span id="vm-stats-total">0</span>
+              </div>
+              <div>
+                <strong>VMs Selecionadas:</strong>
+                <span id="vm-stats-selected">0</span>
+              </div>
+              <div>
+                <strong>Tamanho Total:</strong>
+                <span id="vm-stats-size">0 B</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log de Progresso -->
+    <div class="pf-l-grid__item pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">📋 Log de Progresso</h2>
+          </div>
+          <div class="pf-c-card__header-actions">
+            <button class="pf-c-button pf-m-link" onclick="clearVMLog()">
+              🗑️ Limpar
+            </button>
+          </div>
+        </div>
+        <div class="pf-c-card__body">
+          <div
+            id="vm-log-container"
+            style="
+              background-color: #1a1a1a;
+              color: #00ff00;
+              font-family: 'Courier New', monospace;
+              font-size: 0.875rem;
+              padding: var(--pf-global--spacer--md);
+              border-radius: var(--pf-global--BorderRadius--sm);
+              max-height: 400px;
+              overflow-y: auto;
+              white-space: pre-wrap;
+              word-wrap: break-word;
+            "
+          >
+            Aguardando ação...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

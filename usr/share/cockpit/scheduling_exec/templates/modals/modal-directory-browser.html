@@ -1,0 +1,25 @@
+<!-- Modal Navegador de Diretórios - será expandido -->
+<div id="directory-browser-modal" class="modal">
+  <div class="modal-content" style="max-width: 900px">
+    <div class="pf-c-modal-box__header">
+      <h2 class="pf-c-modal-box__title">📂 Navegar Diretórios</h2>
+      <button class="close" onclick="closeDirectoryBrowser()">&times;</button>
+    </div>
+    <div class="pf-c-modal-box__body">
+      <div id="directory-browser-content">
+        <!-- Conteúdo será carregado dinamicamente -->
+      </div>
+    </div>
+    <div class="pf-c-modal-box__footer">
+      <button
+        class="pf-c-button pf-m-secondary"
+        onclick="closeDirectoryBrowser()"
+      >
+        Cancelar
+      </button>
+      <button class="pf-c-button pf-m-primary" onclick="selectDirectory()">
+        Selecionar
+      </button>
+    </div>
+  </div>
+</div>

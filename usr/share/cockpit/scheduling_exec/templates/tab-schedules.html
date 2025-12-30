@@ -1,0 +1,76 @@
+<div id="schedules-tab-content" class="tab-content" style="display: none">
+  <!-- Estatísticas da aba -->
+  <div
+    class="pf-l-grid pf-m-gutter"
+    style="margin-bottom: var(--pf-global--spacer--lg)"
+  >
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #0066cc 0%, #004999 100%)"
+      >
+        <h3 id="schedules-stat-total">0</h3>
+        <p>Total de Agendamentos</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%)"
+      >
+        <h3 id="schedules-stat-active">0</h3>
+        <p>Ativos</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%)"
+      >
+        <h3 id="schedules-stat-next">--</h3>
+        <p>Próxima Execução</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%)"
+      >
+        <h3 id="schedules-stat-inactive">0</h3>
+        <p>Inativos</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Agendamentos -->
+  <div class="pf-l-grid pf-m-gutter">
+    <div class="pf-l-grid__item pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">📋 Agendamentos Configurados</h2>
+          </div>
+          <div class="pf-c-card__header-actions">
+            <button
+              class="pf-c-button pf-m-primary"
+              onclick="openScheduleModal()"
+            >
+              ➕ Novo Agendamento
+            </button>
+            <button
+              class="pf-c-button pf-m-secondary"
+              onclick="loadSchedules()"
+            >
+              🔄 Atualizar
+            </button>
+          </div>
+        </div>
+        <div class="pf-c-card__body">
+          <div id="schedules-table-container">
+            <!-- Tabela será renderizada aqui -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

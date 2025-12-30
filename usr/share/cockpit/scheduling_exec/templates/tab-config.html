@@ -1,264 +1,258 @@
 <!-- Template: Tab Configurações -->
-<div class="pf-l-grid__item pf-m-12-col">
-  <div id="config-tab-content" class="tab-content" style="display: none">
-    <div class="pf-l-grid pf-m-gutter">
-      <!-- Diretórios configurados -->
-      <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-        <div class="pf-c-card">
-          <div class="pf-c-card__header">
-            <div class="pf-c-card__header-main">
-              <h2 class="pf-c-card__title">📁 Diretórios Monitorados</h2>
-            </div>
+<div id="config-tab-content" class="tab-content" style="display: none">
+  <div class="pf-l-grid pf-m-gutter">
+    <!-- Diretórios configurados -->
+    <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">📁 Diretórios Monitorados</h2>
           </div>
-          <div class="pf-c-card__body">
-            <p
-              style="
-                color: var(--pf-global--Color--200);
-                margin-bottom: var(--pf-global--spacer--md);
-              "
-            >
-              Adicione os diretórios onde seus backups estão armazenados.
-            </p>
-            <button
-              class="pf-c-button pf-m-primary pf-m-block"
-              onclick="openAddDirectoryModal()"
-            >
-              ➕ Adicionar Diretório
-            </button>
-            <div
-              id="directories-list"
-              style="margin-top: var(--pf-global--spacer--md)"
-            >
-              <!-- Lista de diretórios será preenchida aqui -->
-            </div>
+        </div>
+        <div class="pf-c-card__body">
+          <p
+            style="
+              color: var(--pf-global--Color--200);
+              margin-bottom: var(--pf-global--spacer--md);
+            "
+          >
+            Adicione os diretórios onde seus backups estão armazenados.
+          </p>
+          <button
+            class="pf-c-button pf-m-primary pf-m-block"
+            onclick="openAddDirectoryModal()"
+          >
+            ➕ Adicionar Diretório
+          </button>
+          <div
+            id="directories-list"
+            style="margin-top: var(--pf-global--spacer--md)"
+          >
+            <!-- Lista de diretórios será preenchida aqui -->
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Diretórios de Scripts -->
-      <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-        <div class="pf-c-card">
-          <div class="pf-c-card__header">
-            <div class="pf-c-card__header-main">
-              <h2 class="pf-c-card__title">📂 Diretórios de Scripts</h2>
-            </div>
+    <!-- Diretórios de Scripts -->
+    <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">📂 Diretórios de Scripts</h2>
           </div>
-          <div class="pf-c-card__body">
-            <p
-              style="
-                color: var(--pf-global--Color--200);
-                margin-bottom: var(--pf-global--spacer--md);
-              "
-            >
-              Configure os diretórios onde seus scripts estão localizados.
-            </p>
-            <button
-              class="pf-c-button pf-m-primary pf-m-block"
-              onclick="automationAddScriptDirectory()"
-            >
-              ➕ Adicionar Diretório
-            </button>
-            <div
-              id="automation-script-directories-list"
-              style="margin-top: var(--pf-global--spacer--md)"
-            >
-              <!-- Lista será renderizada aqui -->
-            </div>
+        </div>
+        <div class="pf-c-card__body">
+          <p
+            style="
+              color: var(--pf-global--Color--200);
+              margin-bottom: var(--pf-global--spacer--md);
+            "
+          >
+            Configure os diretórios onde seus scripts estão localizados.
+          </p>
+          <button
+            class="pf-c-button pf-m-primary pf-m-block"
+            onclick="automationAddScriptDirectory()"
+          >
+            ➕ Adicionar Diretório
+          </button>
+          <div
+            id="automation-script-directories-list"
+            style="margin-top: var(--pf-global--spacer--md)"
+          >
+            <!-- Lista será renderizada aqui -->
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Configurações de email -->
-      <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-        <div class="pf-c-card">
-          <div class="pf-c-card__header">
-            <div class="pf-c-card__header-main">
-              <h2 class="pf-c-card__title">📧 Configurações de Email</h2>
-            </div>
-          </div>
-          <div class="pf-c-card__body">
-            <form id="email-config-form">
-              <div class="pf-c-form__group">
-                <label class="pf-c-form__label" for="email-recipient">
-                  <span class="pf-c-form__label-text"
-                    >Email do Destinatário</span
-                  >
-                  <span class="pf-c-form__label-required" aria-hidden="true"
-                    >*</span
-                  >
-                </label>
-                <input
-                  class="pf-c-form-control"
-                  type="email"
-                  id="email-recipient"
-                  placeholder="exemplo@dominio.com"
-                  required
-                />
-                <p class="pf-c-form__helper-text">
-                  Email para onde os backups serão enviados
-                </p>
-              </div>
-
-              <div class="pf-c-form__group">
-                <label class="pf-c-form__label" for="email-subject">
-                  <span class="pf-c-form__label-text">Assunto do Email</span>
-                </label>
-                <input
-                  class="pf-c-form-control"
-                  type="text"
-                  id="email-subject"
-                  value="Backup do Sistema - {{date}}"
-                />
-                <p class="pf-c-form__helper-text">
-                  Use {{date}} para incluir a data atual
-                </p>
-              </div>
-
-              <div class="pf-c-form__group">
-                <label class="pf-c-form__label" for="max-email-size">
-                  <span class="pf-c-form__label-text">Tamanho Máximo (MB)</span>
-                </label>
-                <input
-                  class="pf-c-form-control"
-                  type="number"
-                  id="max-email-size"
-                  value="25"
-                  min="1"
-                  max="100"
-                />
-                <p class="pf-c-form__helper-text">
-                  Tamanho máximo de anexo permitido para envio por email
-                </p>
-              </div>
-
-              <button class="pf-c-button pf-m-primary pf-m-block" type="submit">
-                💾 Salvar Configurações
-              </button>
-              <button
-                class="pf-c-button pf-m-secondary pf-m-block"
-                type="button"
-                id="test-email-config-btn"
-                style="margin-top: 10px"
-              >
-                🔧 Testar Configuração de Email
-              </button>
-            </form>
+    <!-- Configurações de email -->
+    <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">📧 Configurações de Email</h2>
           </div>
         </div>
-      </div>
-
-      <!-- Configurações de Backup de VMs -->
-      <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-        <div class="pf-c-card">
-          <div class="pf-c-card__header">
-            <div class="pf-c-card__header-main">
-              <h2 class="pf-c-card__title">💿 Backup de VMs</h2>
-            </div>
-          </div>
-          <div class="pf-c-card__body">
+        <div class="pf-c-card__body">
+          <form id="email-config-form">
             <div class="pf-c-form__group">
-              <label class="pf-c-form__label" for="vm-dest-dir">
-                <span class="pf-c-form__label-text"
-                  >📁 Diretório de Destino</span
-                >
+              <label class="pf-c-form__label" for="email-recipient">
+                <span class="pf-c-form__label-text">Email do Destinatário</span>
                 <span class="pf-c-form__label-required" aria-hidden="true"
                   >*</span
                 >
               </label>
               <input
                 class="pf-c-form-control"
-                type="text"
-                id="vm-dest-dir"
-                value="/mnt/storage/backups/vm_backups"
-                onchange="updateVMBackupConfig()"
+                type="email"
+                id="email-recipient"
+                placeholder="exemplo@dominio.com"
+                required
               />
               <p class="pf-c-form__helper-text">
-                Onde os backups das VMs serão armazenados
+                Email para onde os backups serão enviados
               </p>
             </div>
 
             <div class="pf-c-form__group">
-              <label class="pf-c-form__label" for="vm-retention-days">
-                <span class="pf-c-form__label-text">🗓️ Dias de Retenção</span>
+              <label class="pf-c-form__label" for="email-subject">
+                <span class="pf-c-form__label-text">Assunto do Email</span>
+              </label>
+              <input
+                class="pf-c-form-control"
+                type="text"
+                id="email-subject"
+                value="Backup do Sistema - {{date}}"
+              />
+              <p class="pf-c-form__helper-text">
+                Use {{date}} para incluir a data atual
+              </p>
+            </div>
+
+            <div class="pf-c-form__group">
+              <label class="pf-c-form__label" for="max-email-size">
+                <span class="pf-c-form__label-text">Tamanho Máximo (MB)</span>
               </label>
               <input
                 class="pf-c-form-control"
                 type="number"
-                id="vm-retention-days"
-                value="7"
-                min="0"
-                max="365"
-                onchange="updateVMBackupConfig()"
+                id="max-email-size"
+                value="25"
+                min="1"
+                max="100"
               />
               <p class="pf-c-form__helper-text">
-                Backups mais antigos que este período serão removidos
-                automaticamente
+                Tamanho máximo de anexo permitido para envio por email
               </p>
             </div>
 
-            <div class="pf-c-form__group">
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: var(--pf-global--spacer--sm);
-                "
+            <button class="pf-c-button pf-m-primary pf-m-block" type="submit">
+              💾 Salvar Configurações
+            </button>
+            <button
+              class="pf-c-button pf-m-secondary pf-m-block"
+              type="button"
+              id="test-email-config-btn"
+              style="margin-top: 10px"
+            >
+              🔧 Testar Configuração de Email
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configurações de Backup de VMs -->
+    <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">💿 Backup de VMs</h2>
+          </div>
+        </div>
+        <div class="pf-c-card__body">
+          <div class="pf-c-form__group">
+            <label class="pf-c-form__label" for="vm-dest-dir">
+              <span class="pf-c-form__label-text">📁 Diretório de Destino</span>
+              <span class="pf-c-form__label-required" aria-hidden="true"
+                >*</span
               >
-                <input
-                  type="checkbox"
-                  id="vm-verify-checksum"
-                  class="custom-checkbox"
-                  onchange="updateVMBackupConfig()"
-                />
-                <label
-                  for="vm-verify-checksum"
-                  style="margin: 0; cursor: pointer"
-                >
-                  <strong>🔐 Verificar Checksum (SHA256)</strong>
-                </label>
-              </div>
-              <p class="pf-c-form__helper-text" style="margin-left: 26px">
-                Verifica integridade do backup (aumenta o tempo de backup)
-              </p>
+            </label>
+            <input
+              class="pf-c-form-control"
+              type="text"
+              id="vm-dest-dir"
+              value="/mnt/storage/backups/vm_backups"
+              onchange="updateVMBackupConfig()"
+            />
+            <p class="pf-c-form__helper-text">
+              Onde os backups das VMs serão armazenados
+            </p>
+          </div>
+
+          <div class="pf-c-form__group">
+            <label class="pf-c-form__label" for="vm-retention-days">
+              <span class="pf-c-form__label-text">🗓️ Dias de Retenção</span>
+            </label>
+            <input
+              class="pf-c-form-control"
+              type="number"
+              id="vm-retention-days"
+              value="7"
+              min="0"
+              max="365"
+              onchange="updateVMBackupConfig()"
+            />
+            <p class="pf-c-form__helper-text">
+              Backups mais antigos que este período serão removidos
+              automaticamente
+            </p>
+          </div>
+
+          <div class="pf-c-form__group">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: var(--pf-global--spacer--sm);
+              "
+            >
+              <input
+                type="checkbox"
+                id="vm-verify-checksum"
+                class="custom-checkbox"
+                onchange="updateVMBackupConfig()"
+              />
+              <label
+                for="vm-verify-checksum"
+                style="margin: 0; cursor: pointer"
+              >
+                <strong>🔐 Verificar Checksum (SHA256)</strong>
+              </label>
             </div>
+            <p class="pf-c-form__helper-text" style="margin-left: 26px">
+              Verifica integridade do backup (aumenta o tempo de backup)
+            </p>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Ações em lote -->
-      <div class="pf-l-grid__item pf-m-12-col">
-        <div class="pf-c-card">
-          <div class="pf-c-card__header">
-            <div class="pf-c-card__header-main">
-              <h2 class="pf-c-card__title">🛠️ Ações em Lote</h2>
-            </div>
+    <!-- Ações em lote -->
+    <div class="pf-l-grid__item pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">🛠️ Ações em Lote</h2>
           </div>
-          <div class="pf-c-card__body">
-            <div class="pf-l-grid pf-m-gutter">
-              <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
-                <button
-                  class="pf-c-button pf-m-secondary pf-m-block"
-                  onclick="refreshBackupList()"
-                >
-                  🔄 Atualizar Lista de Backups
-                </button>
-              </div>
-              <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
-                <button
-                  class="pf-c-button pf-m-secondary pf-m-block"
-                  onclick="exportAllBackups()"
-                >
-                  📦 Exportar Todos os Backups
-                </button>
-              </div>
-              <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
-                <button
-                  class="pf-c-button pf-m-danger pf-m-block"
-                  onclick="cleanOldBackups()"
-                >
-                  🗑️ Limpar Backups Antigos
-                </button>
-              </div>
+        </div>
+        <div class="pf-c-card__body">
+          <div class="pf-l-grid pf-m-gutter">
+            <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+              <button
+                class="pf-c-button pf-m-secondary pf-m-block"
+                onclick="refreshBackupList()"
+              >
+                🔄 Atualizar Lista de Backups
+              </button>
+            </div>
+            <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+              <button
+                class="pf-c-button pf-m-secondary pf-m-block"
+                onclick="exportAllBackups()"
+              >
+                📦 Exportar Todos os Backups
+              </button>
+            </div>
+            <div class="pf-l-grid__item pf-m-4-col-on-lg pf-m-12-col">
+              <button
+                class="pf-c-button pf-m-danger pf-m-block"
+                onclick="cleanOldBackups()"
+              >
+                🗑️ Limpar Backups Antigos
+              </button>
             </div>
           </div>
         </div>

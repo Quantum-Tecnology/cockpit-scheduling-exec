@@ -1,0 +1,198 @@
+<div id="automation-tab-content" class="tab-content" style="display: none">
+  <!-- Estatísticas da aba -->
+  <div
+    class="pf-l-grid pf-m-gutter"
+    style="margin-bottom: var(--pf-global--spacer--lg)"
+  >
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #0066cc 0%, #004999 100%)"
+      >
+        <h3 id="automation-stat-total-scripts">0</h3>
+        <p>Total de Scripts</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%)"
+      >
+        <h3 id="automation-stat-scheduled">0</h3>
+        <p>Agendados</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%)"
+      >
+        <h3 id="automation-stat-running">0</h3>
+        <p>Executando</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%)"
+      >
+        <h3 id="automation-stat-failures">0</h3>
+        <p>Falhas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Scripts -->
+  <div class="pf-l-grid pf-m-gutter">
+    <div class="pf-l-grid__item pf-m-12-col">
+      <div class="pf-c-card">
+        <div class="pf-c-card__header">
+          <div class="pf-c-card__header-main">
+            <h2 class="pf-c-card__title">⚡ Scripts Disponíveis</h2>
+          </div>
+          <div class="pf-c-card__header-actions">
+            <button
+              class="pf-c-button pf-m-primary"
+              onclick="automationOpenCreateModal()"
+            >
+              ➕ Novo Script
+            </button>
+            <button
+              class="pf-c-button pf-m-secondary"
+              onclick="automationLoadScripts()"
+            >
+              🔄 Atualizar
+            </button>
+          </div>
+        </div>
+        <div
+          class="pf-c-card__body"
+          style="border-bottom: 1px solid var(--pf-global--BorderColor--100)"
+        >
+          <div class="pf-l-grid pf-m-gutter">
+            <div class="pf-l-grid__item pf-m-6-col-on-md pf-m-12-col">
+              <div class="pf-c-form__group" style="margin-bottom: 0">
+                <input
+                  class="pf-c-form-control"
+                  type="text"
+                  id="automation-filter-search"
+                  placeholder="🔍 Buscar por nome do script..."
+                  onkeyup="automationApplyFilters()"
+                />
+              </div>
+            </div>
+
+            <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+              <select
+                class="pf-c-form-control"
+                id="automation-filter-sort"
+                onchange="automationApplyFilters()"
+              >
+                <option value="name-asc">Nome (A-Z)</option>
+                <option value="name-desc">Nome (Z-A)</option>
+                <option value="created-desc">Mais Recente</option>
+                <option value="created-asc">Mais Antigo</option>
+                <option value="executions-desc">Mais Executado</option>
+              </select>
+            </div>
+
+            <div class="pf-l-grid__item pf-m-3-col-on-md pf-m-6-col">
+              <select
+                class="pf-c-form-control"
+                id="automation-filter-status"
+                onchange="automationApplyFilters()"
+              >
+                <option value="all">Todos</option>
+                <option value="scheduled">Agendados</option>
+                <option value="not-scheduled">Sem Agendamento</option>
+                <option value="running">Em Execução</option>
+                <option value="failed">Com Falhas</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela de Scripts -->
+        <div class="pf-c-card__body">
+          <!-- Loading -->
+          <div
+            id="automation-loading"
+            class="pf-c-empty-state"
+            style="display: none"
+          >
+            <div class="pf-c-empty-state__content">
+              <div class="pf-c-spinner pf-m-xl" role="progressbar">
+                <span class="pf-c-spinner__clipper"></span>
+                <span class="pf-c-spinner__lead-ball"></span>
+                <span class="pf-c-spinner__tail-ball"></span>
+              </div>
+              <h2 class="pf-c-title pf-m-lg">Carregando scripts...</h2>
+            </div>
+          </div>
+
+          <!-- Erro -->
+          <div
+            id="automation-error-message"
+            class="pf-c-alert pf-m-danger pf-m-inline"
+            style="display: none; margin-bottom: var(--pf-global--spacer--md)"
+          >
+            <p class="pf-c-alert__title">
+              <span class="pf-screen-reader">Erro: </span>
+              <span id="automation-error-text"></span>
+            </p>
+          </div>
+
+          <!-- Tabela -->
+          <div class="backup-table-wrapper">
+            <table
+              class="pf-c-table pf-m-grid-md"
+              role="grid"
+              id="automation-scripts-table"
+            >
+              <thead>
+                <tr role="row">
+                  <th role="columnheader" scope="col">Nome do Script</th>
+                  <th role="columnheader" scope="col">Diretório</th>
+                  <th role="columnheader" scope="col">Próxima Execução</th>
+                  <th role="columnheader" scope="col">Última Execução</th>
+                  <th role="columnheader" scope="col" class="pf-m-center">
+                    Execuções
+                  </th>
+                  <th role="columnheader" scope="col" class="pf-m-center">
+                    Sucessos
+                  </th>
+                  <th role="columnheader" scope="col" class="pf-m-center">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody role="rowgroup" id="automation-scripts-body">
+                <!-- Scripts serão carregados aqui -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div
+            id="automation-empty-state"
+            class="pf-c-empty-state"
+            style="display: none"
+          >
+            <div class="pf-c-empty-state__content">
+              <h2 class="pf-c-title pf-m-lg">Nenhum script encontrado</h2>
+              <div class="pf-c-empty-state__body">
+                Crie seu primeiro script personalizado para começar!
+              </div>
+              <button
+                class="pf-c-button pf-m-primary"
+                onclick="automationOpenCreateModal()"
+              >
+                ➕ Criar Primeiro Script
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div id="add-directory-modal" class="modal">
+  <div class="modal-content">
+    <div class="pf-c-modal-box__header">
+      <h2 class="pf-c-modal-box__title">📁 Adicionar Diretório de Backup</h2>
+      <button class="close" onclick="closeAddDirectoryModal()">&times;</button>
+    </div>
+    <div class="pf-c-modal-box__body">
+      <form id="add-directory-form">
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="directory-path">
+            <span class="pf-c-form__label-text">Caminho do Diretório</span>
+            <span class="pf-c-form__label-required" aria-hidden="true">*</span>
+          </label>
+          <div style="display: flex; gap: var(--pf-global--spacer--sm)">
+            <input
+              class="pf-c-form-control"
+              type="text"
+              id="directory-path"
+              placeholder="/home/user/backups ou /var/backups"
+              required
+              style="flex: 1"
+            />
+            <button
+              class="pf-c-button pf-m-secondary"
+              type="button"
+              onclick="browseDirectory()"
+              title="Navegar pelos diretórios do sistema"
+            >
+              📂 Navegar
+            </button>
+          </div>
+          <p class="pf-c-form__helper-text">
+            Caminho completo do diretório onde os backups estão armazenados
+          </p>
+        </div>
+
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="directory-label">
+            <span class="pf-c-form__label-text">Rótulo (opcional)</span>
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="text"
+            id="directory-label"
+            placeholder="Ex: Backups do Banco de Dados"
+          />
+          <p class="pf-c-form__helper-text">
+            Nome amigável para identificar este diretório
+          </p>
+        </div>
+
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="file-pattern">
+            <span class="pf-c-form__label-text"
+              >Padrão de Arquivo (opcional)</span
+            >
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="text"
+            id="file-pattern"
+            placeholder="*.zip, *.tar.gz, *.sql"
+            value="*"
+          />
+          <p class="pf-c-form__helper-text">
+            Use * para todos os arquivos ou especifique extensões separadas por
+            vírgula
+          </p>
+        </div>
+
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="max-depth">
+            <span class="pf-c-form__label-text"
+              >Profundidade Máxima de Busca</span
+            >
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="number"
+            id="max-depth"
+            placeholder="10"
+            value="10"
+            min="1"
+            max="50"
+          />
+          <p class="pf-c-form__helper-text">
+            Número de níveis de subdiretórios a serem pesquisados (1 = apenas
+            diretório raiz, 10 = até 10 níveis de profundidade)
+          </p>
+        </div>
+      </form>
+    </div>
+    <div class="pf-c-modal-box__footer">
+      <button
+        class="pf-c-button pf-m-secondary"
+        onclick="closeAddDirectoryModal()"
+      >
+        Cancelar
+      </button>
+      <button class="pf-c-button pf-m-primary" onclick="addDirectory()">
+        ➕ Adicionar
+      </button>
+    </div>
+  </div>
+</div>

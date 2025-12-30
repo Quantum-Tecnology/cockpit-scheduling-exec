@@ -39,11 +39,23 @@ window.switchTab = function (tab) {
   const automationTab = document.getElementById("automation-tab-content");
   const schedulesTab = document.getElementById("schedules-tab-content");
 
+  console.log("Elementos encontrados:", {
+    backupsTab: !!backupsTab,
+    configTab: !!configTab,
+    vmsTab: !!vmsTab,
+    automationTab: !!automationTab,
+    schedulesTab: !!schedulesTab,
+  });
+
   if (backupsTab) {
     backupsTab.style.display = tab === "backups" ? "block" : "none";
+    console.log(`backups-tab-content display: ${backupsTab.style.display}`);
+  } else {
+    console.error("Elemento backups-tab-content não encontrado!");
   }
   if (configTab) {
     configTab.style.display = tab === "config" ? "block" : "none";
+    console.log(`config-tab-content display: ${configTab.style.display}`);
     if (
       tab === "config" &&
       typeof window.automationRenderScriptDirectoriesList === "function"
@@ -53,6 +65,7 @@ window.switchTab = function (tab) {
   }
   if (vmsTab) {
     vmsTab.style.display = tab === "vms" ? "block" : "none";
+    console.log(`vms-tab-content display: ${vmsTab.style.display}`);
     if (tab === "vms") {
       const permissionsChecked = sessionStorage.getItem(
         "vm-permissions-checked"
@@ -76,6 +89,9 @@ window.switchTab = function (tab) {
   }
   if (automationTab) {
     automationTab.style.display = tab === "automation" ? "block" : "none";
+    console.log(
+      `automation-tab-content display: ${automationTab.style.display}`
+    );
     if (tab === "automation") {
       const allScriptsLocal = window.allScripts || [];
       if (allScriptsLocal.length === 0) {
@@ -93,12 +109,25 @@ window.switchTab = function (tab) {
   }
   if (schedulesTab) {
     schedulesTab.style.display = tab === "schedules" ? "block" : "none";
+    console.log(`schedules-tab-content display: ${schedulesTab.style.display}`);
     if (tab === "schedules" && typeof window.loadSchedules === "function") {
       window.loadSchedules();
     }
   }
 
   console.log(`Backup Manager: ConteÃºdo da aba ${tab} exibido`);
+
+  // Adicionar log de mudança de aba
+  if (window.addGlobalLog) {
+    const tabNames = {
+      backups: "Lista de Backups",
+      vms: "Backup de VMs",
+      automation: "Automação & Scripts",
+      schedules: "Agendamentos",
+      config: "Configurações",
+    };
+    window.addGlobalLog(`Navegou para: ${tabNames[tab] || tab}`, "info");
+  }
 };
 
 // Alias local para switchTab
@@ -197,6 +226,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Backup Manager: Elemento #backup-tabs nÃ£o encontrado!");
   }
 
+  // Adicionar log de inicialização
+  if (window.addGlobalLog) {
+    window.addGlobalLog("Sistema iniciado", "success");
+  }
+
   // Carregar configuraÃ§Ã£o primeiro, depois os backups
   await loadConfiguration();
   await loadBackups();
@@ -206,6 +240,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   switchTab("backups");
 
   console.log("Backup Manager: InicializaÃ§Ã£o completa");
+  if (window.addGlobalLog) {
+    window.addGlobalLog("Inicialização completa", "success");
+  }
 });
 
 // ============================================================================
@@ -241,6 +278,13 @@ async function loadConfiguration() {
       backupDirectories.length,
       "diretÃ³rio(s)"
     );
+
+    if (window.addGlobalLog) {
+      window.addGlobalLog(
+        `Configuração carregada: ${backupDirectories.length} diretório(s)`,
+        "info"
+      );
+    }
 
     updateUI();
     updateDirectoriesList();
@@ -757,4 +801,132 @@ window.closeAddDirectoryModal = closeAddDirectoryModal;
 window.addDirectory = addDirectory;
 window.removeDirectory = removeDirectory;
 window.exportGlobals = exportGlobals;
-window.syncFromWindow = syncFromWindow;
+
+// ============================================================================
+// LOG GLOBAL
+// ============================================================================
+
+// Função para adicionar log global
+window.addGlobalLog = function (message, type = "info") {
+  const logBody = document.getElementById("global-log-body");
+  if (!logBody) return;
+
+  const timestamp = new Date().toLocaleTimeString();
+  const logEntry = document.createElement("div");
+  logEntry.className = `log-entry ${type}`;
+  logEntry.textContent = `[${timestamp}] ${message}`;
+
+  logBody.appendChild(logEntry);
+
+  // Auto-scroll para o final
+  logBody.scrollTop = logBody.scrollHeight;
+
+  // Limitar número de entradas (manter últimas 500)
+  const entries = logBody.querySelectorAll(".log-entry");
+  if (entries.length > 500) {
+    entries[0].remove();
+  }
+};
+
+// Limpar log
+window.clearGlobalLog = function () {
+  const logBody = document.getElementById("global-log-body");
+  if (!logBody) return;
+
+  logBody.innerHTML =
+    '<div class="log-entry info">[' +
+    new Date().toLocaleTimeString() +
+    "] Log limpo</div>";
+};
+
+// Baixar log
+window.downloadGlobalLog = function () {
+  const logBody = document.getElementById("global-log-body");
+  if (!logBody) return;
+
+  const logText = Array.from(logBody.querySelectorAll(".log-entry"))
+    .map((entry) => entry.textContent)
+    .join("\n");
+
+  const blob = new Blob([logText], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `backup-manager-log-${
+    new Date().toISOString().split("T")[0]
+  }.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+// Toggle log
+window.toggleGlobalLog = function () {
+  const logColumn = document.getElementById("log-column");
+  if (!logColumn) return;
+
+  logColumn.classList.toggle("collapsed");
+
+  // Salvar preferência
+  const isCollapsed = logColumn.classList.contains("collapsed");
+  localStorage.setItem("globalLogCollapsed", isCollapsed);
+};
+
+// Restaurar estado do log ao carregar
+document.addEventListener("DOMContentLoaded", () => {
+  const isCollapsed = localStorage.getItem("globalLogCollapsed") === "true";
+  const logColumn = document.getElementById("log-column");
+  if (isCollapsed && logColumn) {
+    logColumn.classList.add("collapsed");
+  }
+});
+
+// ============================================================================
+// REDIMENSIONAMENTO DO LOG
+// ============================================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  const resizeHandle = document.getElementById("resize-handle");
+  const logColumn = document.getElementById("log-column");
+
+  if (!resizeHandle || !logColumn) return;
+
+  let isResizing = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  resizeHandle.addEventListener("mousedown", (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    startWidth = logColumn.offsetWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!isResizing) return;
+
+    const diff = startX - e.clientX;
+    const newWidth = startWidth + diff;
+
+    // Limitar tamanho
+    if (newWidth >= 250 && newWidth <= 800) {
+      logColumn.style.width = newWidth + "px";
+      localStorage.setItem("globalLogWidth", newWidth);
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+  });
+
+  // Restaurar largura salva
+  const savedWidth = localStorage.getItem("globalLogWidth");
+  if (savedWidth) {
+    logColumn.style.width = savedWidth + "px";
+  }
+});

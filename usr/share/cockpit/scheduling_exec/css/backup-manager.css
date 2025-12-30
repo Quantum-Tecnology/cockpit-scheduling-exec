@@ -388,6 +388,19 @@ body {
 
 .tab-content {
   padding: var(--pf-global--spacer--md) 0;
+  width: 100%;
+}
+
+.tab-content[style*="display: block"],
+.tab-content:not([style*="display: none"]) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#tab-content-container {
+  width: 100%;
+  min-height: 400px;
 }
 
 /* ===== Footer ===== */
@@ -420,4 +433,143 @@ body {
   .directory-path {
     margin-bottom: var(--pf-global--spacer--sm);
   }
+}
+
+/* ===== Layout de 2 Colunas com Redimensionamento ===== */
+.two-column-layout {
+  display: flex;
+  gap: 0;
+  height: calc(100vh - 180px);
+  position: relative;
+}
+
+.main-content-column {
+  flex: 1;
+  min-width: 300px;
+  overflow-y: auto;
+  padding-right: var(--pf-global--spacer--md);
+}
+
+.log-column {
+  width: 400px;
+  min-width: 250px;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--pf-global--BackgroundColor--light-100);
+  border-left: 1px solid var(--pf-global--BorderColor--100);
+  box-shadow: var(--pf-global--BoxShadow--lg);
+}
+
+.log-column.collapsed {
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  border-left: none;
+}
+
+.resize-handle {
+  width: 8px;
+  cursor: col-resize;
+  background-color: var(--pf-global--BorderColor--100);
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+}
+
+.resize-handle:hover {
+  background-color: var(--pf-global--primary-color--100);
+}
+
+.resize-handle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 40px;
+  background-color: var(--pf-global--Color--200);
+  border-radius: 2px;
+}
+
+/* ===== Log Global ===== */
+.global-log-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.global-log-header {
+  padding: var(--pf-global--spacer--md);
+  border-bottom: 1px solid var(--pf-global--BorderColor--100);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--pf-global--BackgroundColor--light-100);
+}
+
+.global-log-header h3 {
+  margin: 0;
+  font-size: var(--pf-global--FontSize--lg);
+  font-weight: var(--pf-global--FontWeight--bold);
+  color: var(--pf-global--Color--100);
+}
+
+.global-log-actions {
+  display: flex;
+  gap: var(--pf-global--spacer--sm);
+}
+
+.global-log-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--pf-global--spacer--md);
+  background-color: #1a1a1a;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.global-log-body .log-entry {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.global-log-body .log-entry.info {
+  color: #00ff00;
+}
+
+.global-log-body .log-entry.success {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.global-log-body .log-entry.warning {
+  color: #ffaa00;
+}
+
+.global-log-body .log-entry.error {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.global-log-body .log-entry.debug {
+  color: #888888;
+}
+
+.log-toggle-btn {
+  position: fixed;
+  right: 20px;
+  top: 80px;
+  z-index: 100;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--pf-global--BoxShadow--lg);
 }

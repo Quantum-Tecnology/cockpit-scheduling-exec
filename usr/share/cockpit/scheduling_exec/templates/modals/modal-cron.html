@@ -1,0 +1,27 @@
+<!-- Modal Cron - será expandido -->
+<div id="automation-cronModal" class="modal">
+  <div class="modal-content">
+    <div class="pf-c-modal-box__header">
+      <h2 class="pf-c-modal-box__title">⏰ Configurar Agendamento</h2>
+      <button class="close" onclick="automationCloseCronModal()">
+        &times;
+      </button>
+    </div>
+    <div class="pf-c-modal-box__body">
+      <form id="automation-cron-form">
+        <!-- Formulário de agendamento cron -->
+      </form>
+    </div>
+    <div class="pf-c-modal-box__footer">
+      <button
+        class="pf-c-button pf-m-secondary"
+        onclick="automationCloseCronModal()"
+      >
+        Cancelar
+      </button>
+      <button class="pf-c-button pf-m-primary" onclick="automationSaveCron()">
+        💾 Salvar
+      </button>
+    </div>
+  </div>
+</div>

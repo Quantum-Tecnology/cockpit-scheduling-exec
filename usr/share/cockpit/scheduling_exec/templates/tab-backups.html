@@ -1,184 +1,174 @@
 <!-- Template: Tab Lista de Backups -->
-<div class="pf-l-grid__item pf-m-12-col">
-  <div id="backups-tab-content" class="tab-content">
-    <!-- Estatísticas da aba -->
+<div id="backups-tab-content" class="tab-content">
+  <!-- Estatísticas da aba -->
+  <div
+    class="pf-l-grid pf-m-gutter"
+    style="margin-bottom: var(--pf-global--spacer--lg)"
+  >
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #0066cc 0%, #004999 100%)"
+      >
+        <h3 id="total-backups">0</h3>
+        <p>Total de Backups</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%)"
+      >
+        <h3 id="total-directories">0</h3>
+        <p>Diretórios Monitorados</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%)"
+      >
+        <h3 id="total-size">0 MB</h3>
+        <p>Tamanho Total</p>
+      </div>
+    </div>
+    <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col">
+      <div
+        class="stats-card"
+        style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)"
+      >
+        <h3 id="last-backup">Nunca</h3>
+        <p>Último Backup</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros e busca -->
+  <div class="filters-section">
+    <div class="pf-l-grid pf-m-gutter">
+      <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="search-input">
+            <span class="pf-c-form__label-text">🔍 Buscar backup</span>
+          </label>
+          <input
+            class="pf-c-form-control"
+            type="text"
+            id="search-input"
+            placeholder="Digite o nome ou caminho do arquivo..."
+            onkeyup="filterBackups()"
+          />
+        </div>
+      </div>
+      <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="directory-filter">
+            <span class="pf-c-form__label-text">📁 Diretório</span>
+          </label>
+          <select
+            class="pf-c-form-control"
+            id="directory-filter"
+            onchange="filterBackups()"
+          >
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+      <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
+        <div class="pf-c-form__group">
+          <label class="pf-c-form__label" for="sort-by">
+            <span class="pf-c-form__label-text">🔄 Ordenar por</span>
+          </label>
+          <select
+            class="pf-c-form-control"
+            id="sort-by"
+            onchange="filterBackups()"
+          >
+            <option value="date-desc">Mais recentes</option>
+            <option value="date-asc">Mais antigos</option>
+            <option value="size-desc">Maior tamanho</option>
+            <option value="size-asc">Menor tamanho</option>
+            <option value="name-asc">Nome (A-Z)</option>
+            <option value="name-desc">Nome (Z-A)</option>
+            <option value="path-asc">Caminho (A-Z)</option>
+            <option value="path-desc">Caminho (Z-A)</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <div
-      class="pf-l-grid pf-m-gutter"
-      style="margin-bottom: var(--pf-global--spacer--lg)"
+      style="
+        margin-top: var(--pf-global--spacer--md);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      "
     >
-      <div
-        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-      >
-        <div
-          class="stats-card"
-          style="background: linear-gradient(135deg, #0066cc 0%, #004999 100%)"
-        >
-          <h3 id="total-backups">0</h3>
-          <p>Total de Backups</p>
-        </div>
+      <div>
+        <button class="pf-c-button pf-m-link" onclick="selectAllBackups()">
+          ☑️ Selecionar todos
+        </button>
+        <button class="pf-c-button pf-m-link" onclick="deselectAllBackups()">
+          ☐ Desmarcar todos
+        </button>
       </div>
-      <div
-        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-      >
-        <div
-          class="stats-card"
-          style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%)"
+      <div>
+        <button
+          class="pf-c-button pf-m-secondary"
+          onclick="exportSelectedBackups()"
+          id="export-selected-btn"
+          disabled
         >
-          <h3 id="total-directories">0</h3>
-          <p>Diretórios Monitorados</p>
-        </div>
-      </div>
-      <div
-        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-      >
-        <div
-          class="stats-card"
-          style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%)"
+          📤 Exportar selecionados
+        </button>
+        <button
+          class="pf-c-button pf-m-danger"
+          onclick="deleteSelectedBackups()"
+          id="delete-selected-btn"
+          disabled
         >
-          <h3 id="total-size">0 MB</h3>
-          <p>Tamanho Total</p>
-        </div>
-      </div>
-      <div
-        class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col-on-md pf-m-12-col"
-      >
-        <div
-          class="stats-card"
-          style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)"
-        >
-          <h3 id="last-backup">Nunca</h3>
-          <p>Último Backup</p>
-        </div>
+          🗑️ Deletar selecionados
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Filtros e busca -->
-    <div class="filters-section">
-      <div class="pf-l-grid pf-m-gutter">
-        <div class="pf-l-grid__item pf-m-6-col-on-lg pf-m-12-col">
-          <div class="pf-c-form__group">
-            <label class="pf-c-form__label" for="search-input">
-              <span class="pf-c-form__label-text">🔍 Buscar backup</span>
-            </label>
+  <!-- Tabela de backups -->
+  <div class="backup-table-wrapper">
+    <table class="pf-c-table pf-m-grid-md" role="grid" id="backups-table">
+      <thead>
+        <tr>
+          <th role="columnheader" style="width: 50px">
             <input
-              class="pf-c-form-control"
-              type="text"
-              id="search-input"
-              placeholder="Digite o nome ou caminho do arquivo..."
-              onkeyup="filterBackups()"
+              type="checkbox"
+              class="custom-checkbox"
+              id="select-all-checkbox"
+              onchange="toggleSelectAll(this)"
             />
-          </div>
-        </div>
-        <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
-          <div class="pf-c-form__group">
-            <label class="pf-c-form__label" for="directory-filter">
-              <span class="pf-c-form__label-text">📁 Diretório</span>
-            </label>
-            <select
-              class="pf-c-form-control"
-              id="directory-filter"
-              onchange="filterBackups()"
-            >
-              <option value="">Todos</option>
-            </select>
-          </div>
-        </div>
-        <div class="pf-l-grid__item pf-m-3-col-on-lg pf-m-6-col">
-          <div class="pf-c-form__group">
-            <label class="pf-c-form__label" for="sort-by">
-              <span class="pf-c-form__label-text">🔄 Ordenar por</span>
-            </label>
-            <select
-              class="pf-c-form-control"
-              id="sort-by"
-              onchange="filterBackups()"
-            >
-              <option value="date-desc">Mais recentes</option>
-              <option value="date-asc">Mais antigos</option>
-              <option value="size-desc">Maior tamanho</option>
-              <option value="size-asc">Menor tamanho</option>
-              <option value="name-asc">Nome (A-Z)</option>
-              <option value="name-desc">Nome (Z-A)</option>
-              <option value="path-asc">Caminho (A-Z)</option>
-              <option value="path-desc">Caminho (Z-A)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div
-        style="
-          margin-top: var(--pf-global--spacer--md);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        "
-      >
-        <div>
-          <button class="pf-c-button pf-m-link" onclick="selectAllBackups()">
-            ☑️ Selecionar todos
-          </button>
-          <button class="pf-c-button pf-m-link" onclick="deselectAllBackups()">
-            ☐ Desmarcar todos
-          </button>
-        </div>
-        <div>
-          <button
-            class="pf-c-button pf-m-secondary"
-            onclick="exportSelectedBackups()"
-            id="export-selected-btn"
-            disabled
-          >
-            📤 Exportar selecionados
-          </button>
-          <button
-            class="pf-c-button pf-m-danger"
-            onclick="deleteSelectedBackups()"
-            id="delete-selected-btn"
-            disabled
-          >
-            🗑️ Deletar selecionados
-          </button>
-        </div>
-      </div>
-    </div>
+          </th>
+          <th role="columnheader">📄 Nome do Arquivo</th>
+          <th role="columnheader">📅 Data de Criação</th>
+          <th role="columnheader">📁 Diretório</th>
+          <th role="columnheader">💾 Tamanho</th>
+          <th role="columnheader" style="text-align: right">⚡ Ações</th>
+        </tr>
+      </thead>
+      <tbody id="backups-table-body">
+        <!-- Será preenchido dinamicamente -->
+      </tbody>
+    </table>
+  </div>
 
-    <!-- Tabela de backups -->
-    <div class="backup-table-wrapper">
-      <table class="pf-c-table pf-m-grid-md" role="grid" id="backups-table">
-        <thead>
-          <tr>
-            <th role="columnheader" style="width: 50px">
-              <input
-                type="checkbox"
-                class="custom-checkbox"
-                id="select-all-checkbox"
-                onchange="toggleSelectAll(this)"
-              />
-            </th>
-            <th role="columnheader">📄 Nome do Arquivo</th>
-            <th role="columnheader">📅 Data de Criação</th>
-            <th role="columnheader">📁 Diretório</th>
-            <th role="columnheader">💾 Tamanho</th>
-            <th role="columnheader" style="text-align: right">⚡ Ações</th>
-          </tr>
-        </thead>
-        <tbody id="backups-table-body">
-          <!-- Será preenchido dinamicamente -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Empty state -->
-    <div id="empty-state" class="empty-state" style="display: none">
-      <div class="empty-state-icon">📦</div>
-      <h2>Nenhum backup encontrado</h2>
-      <p>
-        Configure os diretórios na aba "Configurações" para começar a monitorar
-        seus backups.
-      </p>
-      <button class="pf-c-button pf-m-primary" onclick="switchTab('config')">
-        Ir para Configurações
-      </button>
-    </div>
+  <!-- Empty state -->
+  <div id="empty-state" class="empty-state" style="display: none">
+    <div class="empty-state-icon">📦</div>
+    <h2>Nenhum backup encontrado</h2>
+    <p>
+      Configure os diretórios na aba "Configurações" para começar a monitorar
+      seus backups.
+    </p>
+    <button class="pf-c-button pf-m-primary" onclick="switchTab('config')">
+      Ir para Configurações
+    </button>
   </div>
 </div>
