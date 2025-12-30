@@ -24,7 +24,7 @@
     <!-- Template Loader -->
     <script src="js/template-loader.js"></script>
 
-    <!-- Módulos JavaScript (sem defer para exportar funções imediatamente) -->
+    <!-- Módulos JavaScript (sem defer - funções exportadas imediatamente para onclick) -->
     <script src="js/utils.js"></script>
     <script src="js/directory-browser.js"></script>
     <script src="js/email.js"></script>
@@ -34,7 +34,7 @@
     <script src="js/automation-scripts.js"></script>
     <script src="js/schedules.js"></script>
 
-    <!-- Core do Backup Manager (sem defer para garantir que switchTab esteja disponível) -->
+    <!-- Core do Backup Manager -->
     <script src="backup-manager.js"></script>
   </head>
 
@@ -316,21 +316,35 @@
 
         console.log("Modais carregados!");
 
+        // Aguardar um momento para garantir que tudo foi renderizado
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Verificar disponibilidade de funções
+        console.log("Verificando funções disponíveis:", {
+          switchTab: typeof window.switchTab,
+          init: typeof window.init,
+        });
+
         // Exibir aba inicial (backups)
-        console.log("Chamando switchTab('backups')...");
-        if (typeof switchTab === "function") {
-          switchTab("backups");
+        console.log("Chamando window.switchTab('backups')...");
+        if (typeof window.switchTab === "function") {
+          window.switchTab("backups");
+        } else {
+          console.error(
+            "window.switchTab não está definida! Tipo:",
+            typeof window.switchTab
+          );
         }
 
         // Inicializar a aplicação após carregar templates
-        if (typeof init === "function") {
+        if (typeof window.init === "function") {
           console.log("Chamando init()...");
-          init();
+          window.init();
         } else {
-          console.warn("Função init() não encontrada!");
+          console.log("Função init() não encontrada - OK, pode não existir");
         }
 
-        console.log("Inicialização completa!");
+        console.log("✅ Inicialização completa!");
       });
     </script>
   </body>
