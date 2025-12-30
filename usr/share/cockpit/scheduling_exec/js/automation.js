@@ -24,6 +24,14 @@ window.automationCurrentSudoScript = automationCurrentSudoScript;
 // FUNÇÕES AUXILIARES
 // ============================================================================
 
+// Getter para sempre usar window.scriptDirectories se disponível
+function getScriptDirectories() {
+  if (window.scriptDirectories && window.scriptDirectories.length > 0) {
+    scriptDirectories = window.scriptDirectories;
+  }
+  return scriptDirectories;
+}
+
 function automationShowLoading(show) {
   const el = document.getElementById("automation-loading");
   if (el) el.style.display = show ? "block" : "none";
@@ -229,6 +237,9 @@ function automationApplyFilters() {
 // ============================================================================
 
 function automationRenderScriptDirectoriesList() {
+  // Usar window.scriptDirectories se disponível (sincronizado com backup-manager.js)
+  const directories = window.scriptDirectories || scriptDirectories;
+
   const container = document.getElementById(
     "automation-script-directories-list"
   );
@@ -240,7 +251,7 @@ function automationRenderScriptDirectoriesList() {
     return;
   }
 
-  if (scriptDirectories.length === 0) {
+  if (directories.length === 0) {
     container.innerHTML = `
       <div class="pf-c-empty-state pf-m-sm">
         <div class="pf-c-empty-state__content">
@@ -266,7 +277,7 @@ function automationRenderScriptDirectoriesList() {
         </tr>
       </thead>
       <tbody role="rowgroup">
-        ${scriptDirectories
+        ${directories
           .map(
             (dir, index) => `
           <tr role="row">
@@ -343,12 +354,13 @@ async function addScriptDirectory() {
     return;
   }
 
-  const exists = scriptDirectories.some((d) => d.path === path);
+  const exists = getScriptDirectories().some((d) => d.path === path);
   if (exists) {
     showAlert("warning", "⚠️ Este diretório já está configurado!");
     return;
   }
 
+  scriptDirectories = getScriptDirectories();
   scriptDirectories.push({
     path: path,
     label:
@@ -360,6 +372,7 @@ async function addScriptDirectory() {
       path,
     maxDepth: maxDepth,
   });
+  window.scriptDirectories = scriptDirectories;
 
   await window.saveConfiguration();
   automationRenderScriptDirectoriesList();
@@ -371,6 +384,8 @@ async function addScriptDirectory() {
 }
 
 async function automationRemoveScriptDirectory(index) {
+  scriptDirectories = getScriptDirectories();
+
   if (index < 0 || index >= scriptDirectories.length) {
     console.error("Automation: Índice inválido:", index);
     return;
@@ -388,6 +403,7 @@ async function automationRemoveScriptDirectory(index) {
 
   console.log("Automation: Removendo diretório:", dir);
   scriptDirectories.splice(index, 1);
+  window.scriptDirectories = scriptDirectories;
 
   try {
     await window.saveConfiguration();
@@ -399,6 +415,7 @@ async function automationRemoveScriptDirectory(index) {
     console.error("Automation: Erro ao salvar configuração:", error);
     showAlert("danger", "❌ Erro ao salvar: " + (error.message || error));
     scriptDirectories.splice(index, 0, dir);
+    window.scriptDirectories = scriptDirectories;
     automationRenderScriptDirectoriesList();
   }
 }
@@ -414,7 +431,8 @@ async function automationLoadScripts() {
   allScripts = [];
   window.allScripts = allScripts;
 
-  if (scriptDirectories.length === 0) {
+  const directories = getScriptDirectories();
+  if (directories.length === 0) {
     console.log("Automation: Nenhum diretório configurado");
     automationShowLoading(false);
     automationRenderScripts([]);
@@ -428,7 +446,7 @@ async function automationLoadScripts() {
   }
 
   try {
-    for (const dir of scriptDirectories) {
+    for (const dir of directories) {
       console.log(
         `Automation: Buscando scripts em: ${dir.path} (maxDepth: ${dir.maxDepth})`
       );
