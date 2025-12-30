@@ -52,14 +52,20 @@ function automationShowError(message) {
 }
 
 function automationFormatDate(timestamp) {
-  if (!timestamp || timestamp === "-") return "-";
+  if (!timestamp || timestamp === "-") {
+    return '<span style="color: #999;">Nunca executado</span>';
+  }
   const date = new Date(timestamp * 1000);
   return date.toLocaleString("pt-BR");
 }
 
 function automationGetNextCronExecution(cronExpression) {
-  if (!cronExpression || cronExpression === "-") return "-";
-  return "Agendado: " + cronExpression;
+  if (!cronExpression || cronExpression === "-" || cronExpression === "") {
+    return '<span style="color: #999;">Não agendado</span>';
+  }
+  return (
+    '<span class="pf-c-badge pf-m-read">Agendado: ' + cronExpression + "</span>"
+  );
 }
 
 function automationEscapeHtml(value) {
@@ -631,13 +637,13 @@ function automationRenderScripts(scripts) {
     const menuId = `automation-row-actions-${safeId}`;
     const scriptPath = script.path || `~/scripts/${scriptName}`;
 
+    // Garantir valores default para estatísticas
+    const totalExecs = script.total_executions || 0;
+    const successExecs = script.successful_executions || 0;
+    const lastExec = script.last_execution || null;
+
     const successRate =
-      script.total_executions > 0
-        ? (
-            (script.successful_executions / script.total_executions) *
-            100
-          ).toFixed(1)
-        : "-";
+      totalExecs > 0 ? ((successExecs / totalExecs) * 100).toFixed(1) : "-";
 
     row.innerHTML = `
       <td role="cell" data-label="Nome do Script">
@@ -655,17 +661,15 @@ function automationRenderScripts(scripts) {
         ${automationGetNextCronExecution(script.cron_expression)}
       </td>
       <td role="cell" data-label="Última Execução">
-        ${automationFormatDate(script.last_execution)}
+        ${automationFormatDate(lastExec)}
       </td>
       <td role="cell" data-label="Execuções" class="pf-m-center">
-        <span class="pf-c-badge pf-m-read">${script.total_executions}</span>
+        <span class="pf-c-badge pf-m-read">${totalExecs}</span>
       </td>
       <td role="cell" data-label="Sucessos" class="pf-m-center">
-        <span class="pf-c-badge pf-m-read pf-m-success">${
-          script.successful_executions
-        }</span>
+        <span class="pf-c-badge pf-m-read pf-m-success">${successExecs}</span>
         ${
-          script.total_executions > 0
+          totalExecs > 0
             ? `<small style="display: block; margin-top: 4px;">${successRate}%</small>`
             : ""
         }
