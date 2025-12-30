@@ -23,41 +23,38 @@
 
     <!-- Função global switchTab disponível imediatamente para onclick inline -->
     <script>
-      (function () {
+      // Salvar referência da função wrapper original
+      var switchTabWrapper = function (tab) {
+        // Verifica se o backup-manager.js já carregou (setando a flag)
+        if (window.switchTabLoaded && window.switchTabReal) {
+          // Chama diretamente a função real
+          window.switchTabReal(tab);
+          return;
+        }
+
+        // Script ainda não carregou, vamos tentar novamente
         var attempts = 0;
-        var maxAttempts = 50; // 5 segundos
+        var maxAttempts = 50;
 
-        // Função temporária que será sobrescrita pelo backup-manager.js
-        window.switchTab = function (tab) {
-          // Se backup-manager.js carregou, ele sobrescreveu window.switchTab.
-          // Mas se esta função ainda está sendo chamada, significa que:
-          // 1. O script ainda não carregou
-          // 2. Ou o script carregou mas manteve esta referência (pouco provável se sobrescrever window.switchTab)
-
-          // Vamos verificar se existe uma implementação "real" diferente desta
-          // Como esta função é anônima atribuída a window.switchTab, é difícil comparar por referência
-          // Mas podemos confiar que backup-manager.js vai redefinir window.switchTab
-
-          console.warn(
-            "switchTab: Aguardando carregamento do módulo principal... Tentativa " +
-              (attempts + 1)
-          );
-
-          if (attempts < maxAttempts) {
+        function trySwitch() {
+          if (window.switchTabLoaded && window.switchTabReal) {
+            // Agora sim, chamar a função real
+            window.switchTabReal(tab);
+          } else if (attempts < maxAttempts) {
             attempts++;
-            setTimeout(function () {
-              // Tenta chamar novamente. Se o script carregou nesse meio tempo,
-              // window.switchTab apontará para a nova função.
-              if (window.switchTab) window.switchTab(tab);
-            }, 100);
+            console.warn("switchTab: Aguardando... Tentativa " + attempts);
+            setTimeout(trySwitch, 100);
           } else {
-            console.error("switchTab: Falha ao carregar aplicação.");
-            alert(
-              "A aplicação não foi carregada corretamente. Verifique o console para erros."
-            );
+            console.error("switchTab: Timeout ao carregar aplicação.");
+            alert("A aplicação não carregou. Verifique o console para erros.");
           }
-        };
-      })();
+        }
+
+        trySwitch();
+      };
+
+      // Exportar como window.switchTab
+      window.switchTab = switchTabWrapper;
     </script>
 
     <!-- Módulos JavaScript -->

@@ -4,7 +4,7 @@ const cockpit = window.cockpit;
 // ============================================================================
 // EXPORTAR switchTab IMEDIATAMENTE para evitar erros de onclick no HTML
 // ============================================================================
-window.switchTab = function (tab) {
+window.switchTabReal = function (tab) {
   console.log(`Backup Manager: Mudando para aba ${tab}`);
 
   // Garantir que as abas estejam visÃ­veis
@@ -101,8 +101,11 @@ window.switchTab = function (tab) {
   console.log(`Backup Manager: ConteÃºdo da aba ${tab} exibido`);
 };
 
+// Sinalizar que a função real foi carregada
+window.switchTabLoaded = true;
+
 // Alias local para switchTab
-const switchTab = window.switchTab;
+const switchTab = window.switchTabReal;
 
 // Aliases para funções dos módulos (carregados via js/utils.js, js/backups.js, etc.)
 // Estas funções são definidas nos módulos e exportadas para window.*
@@ -764,7 +767,8 @@ function updateUI() {
 // Nota: loadBackups, updateStats, updateBackupsTable estão em js/backups.js
 // ============================================================================
 
-window.switchTab = switchTab;
+// window.switchTab - já exportado no topo do arquivo como wrapper no HTML
+// A função real está em window.switchTabReal
 window.loadConfiguration = loadConfiguration;
 window.saveConfiguration = saveConfiguration;
 // window.loadBackups - exportado por js/backups.js
